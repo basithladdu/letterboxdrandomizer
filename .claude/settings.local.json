@@ -1,0 +1,14 @@
+{
+  "permissions": {
+    "allow": [
+      "WebFetch(domain:github.com)",
+      "Bash(npm install:*)",
+      "Bash(rm -f src/main.ts src/counter.ts src/style.css tsconfig.json)",
+      "Bash(rm -rf src/assets)",
+      "mcp__Claude_Preview__preview_start",
+      "Bash(command -v npm)",
+      "Bash(where npm:*)",
+      "WebFetch(domain:letterboxd.com)"
+    ]
+  }
+}

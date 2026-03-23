@@ -1,0 +1,235 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: light;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  background-color: #C0C0C0;
+  background-image:
+    linear-gradient(45deg, #b8b8b8 25%, transparent 25%),
+    linear-gradient(-45deg, #b8b8b8 25%, transparent 25%),
+    linear-gradient(45deg, transparent 75%, #b8b8b8 75%),
+    linear-gradient(-45deg, transparent 75%, #b8b8b8 75%);
+  background-size: 4px 4px;
+  background-position: 0 0, 0 2px, 2px -2px, -2px 0px;
+  color: #000000;
+  font-family: "MS Sans Serif", "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  min-height: 100vh;
+  margin: 0;
+}
+
+html, body, #root {
+  min-height: 100vh;
+}
+
+/* ===== RETRO BEVELS & EFFECTS ===== */
+
+/* Outset Button/Surface (raised) */
+.retro-outset {
+  border: 2px solid;
+  border-color: #FFFFFF #808080 #808080 #FFFFFF;
+  box-shadow: inset -1px -1px 0 #404040, inset 1px 1px 0 #DFDFDF;
+}
+
+/* Outset Enhanced (deeper bevel) */
+.retro-outset-deep {
+  border: 2px solid;
+  border-color: #FFFFFF #808080 #808080 #FFFFFF;
+  box-shadow:
+    inset -2px -2px 0 #808080,
+    inset 2px 2px 0 #FFF,
+    inset -4px -4px 0 #404040,
+    inset 4px 4px 0 #DFDFDF;
+}
+
+/* Inset Input/Sunken (pressed in) */
+.retro-inset {
+  border: 2px solid;
+  border-color: #808080 #FFFFFF #FFFFFF #808080;
+  box-shadow: inset 1px 1px 0 #404040, inset -1px -1px 0 #DFDFDF;
+}
+
+/* Active/Pressed Button State */
+.retro-active {
+  border-color: #808080 #FFFFFF #FFFFFF #808080;
+  box-shadow: inset 1px 1px 0 #404040, inset -1px -1px 0 #DFDFDF;
+  transform: translate(1px, 1px);
+}
+
+/* Title Bar Gradient */
+.retro-titlebar {
+  background: linear-gradient(to right, #000080, #1084D0);
+  color: #FFFFFF;
+  font-weight: bold;
+  padding: 2px 2px;
+}
+
+/* Horizontal Rule Groove Effect */
+.retro-hr {
+  border: none;
+  height: 4px;
+  background: linear-gradient(
+    to bottom,
+    #808080 0%, #808080 50%,
+    #FFFFFF 50%, #FFFFFF 100%
+  );
+  margin: 16px 0;
+}
+
+/* Construction Warning Stripes */
+.construction-stripes {
+  background: repeating-linear-gradient(
+    45deg,
+    #FFFF00,
+    #FFFF00 10px,
+    #000000 10px,
+    #000000 20px
+  );
+}
+
+/* Slot machine window */
+.spin-window {
+  height: 72px;
+  overflow: hidden;
+  -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 25%, black 75%, transparent 100%);
+  mask-image: linear-gradient(to bottom, transparent 0%, black 25%, black 75%, transparent 100%);
+}
+
+/* Custom scrollbar - 90s style */
+::-webkit-scrollbar {
+  width: 16px;
+}
+::-webkit-scrollbar-track {
+  background: #C0C0C0;
+  border: 2px solid;
+  border-color: #FFFFFF #808080 #808080 #FFFFFF;
+}
+::-webkit-scrollbar-thumb {
+  background: #C0C0C0;
+  border: 2px solid;
+  border-color: #FFFFFF #808080 #808080 #FFFFFF;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #E0E0E0;
+}
+
+/* Text Selection */
+::selection {
+  background-color: #000080;
+  color: #FFFFFF;
+}
+
+/* Links */
+a {
+  color: #0000FF;
+  text-decoration: underline;
+}
+
+a:visited {
+  color: #800080;
+}
+
+a:hover {
+  color: #FF0000;
+}
+
+a:active {
+  color: #FF0000;
+}
+
+/* Focus Ring */
+:focus-visible {
+  outline: 2px dotted #000000;
+  outline-offset: 2px;
+}
+
+/* Drag-and-drop zone */
+.drop-zone-active {
+  border-color: #FF0000 !important;
+  background-color: #FFFF00 !important;
+}
+
+/* Star rating */
+.star-full { color: #FFD700; }
+.star-empty { color: #808080; }
+
+/* Marquee */
+.marquee-container {
+  overflow: hidden;
+  white-space: nowrap;
+  background: #C0C0C0;
+}
+
+.marquee-text {
+  display: inline-block;
+  animation: marquee 30s linear infinite;
+}
+
+@keyframes marquee {
+  0% { transform: translateX(100%); }
+  100% { transform: translateX(-100%); }
+}
+
+.marquee-text:hover {
+  animation-play-state: paused;
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+
+  .text-rainbow {
+    animation: none !important;
+    color: #FF0000;
+  }
+
+  .animate-pulse-glow {
+    animation: none !important;
+  }
+}
+
+/* Monospace font for hit counter and stats */
+.hit-counter {
+  font-family: "Courier New", Courier, monospace;
+  color: #00FF00;
+  background: #000000;
+  padding: 8px 12px;
+  border: 2px solid;
+  border-color: #808080 #FFFFFF #FFFFFF #808080;
+  box-shadow: inset 1px 1px 0 #404040, inset -1px -1px 0 #DFDFDF;
+}
+
+/* Blinking badge */
+.badge-new {
+  animation: blink 1s steps(2, start) infinite;
+  background: #FF0000;
+  color: #FFFFFF;
+  font-weight: bold;
+  padding: 2px 6px;
+  border: 1px solid #000000;
+}
+
+/* Hero heading rainbow */
+.text-rainbow {
+  animation: rainbow 4s linear infinite;
+  font-weight: black;
+}
+
+/* Reduce motion for rainbow text */
+@media (prefers-reduced-motion: reduce) {
+  .text-rainbow {
+    animation: none;
+    color: #FF0000;
+  }
+}
