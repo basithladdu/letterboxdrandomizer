@@ -4,6 +4,22 @@ import { buildSpinSequence } from '../../utils/randomPicker.js'
 
 const ITEM_HEIGHT = 72
 
+// Confetti effect for celebration
+function createConfetti() {
+  const colors = ['#FF0000', '#0000FF', '#FFFF00', '#FF00FF', '#00FFFF', '#00FF00']
+  for (let i = 0; i < 30; i++) {
+    const confetti = document.createElement('div')
+    confetti.className = 'confetti'
+    confetti.style.left = Math.random() * 100 + '%'
+    confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)]
+    confetti.style.width = (Math.random() * 10 + 5) + 'px'
+    confetti.style.height = (Math.random() * 10 + 5) + 'px'
+    confetti.style.animationDelay = Math.random() * 0.5 + 's'
+    document.body.appendChild(confetti)
+    setTimeout(() => confetti.remove(), 3500)
+  }
+}
+
 export default function SpinWheel({ films, chosen, onComplete, spinning }) {
   const controls = useAnimation()
   const [sequence, setSequence] = useState([])
@@ -26,11 +42,13 @@ export default function SpinWheel({ films, chosen, onComplete, spinning }) {
     controls.start({
       y: -totalDistance,
       transition: {
-        duration: 2.8,
-        ease: [0.12, 0.8, 0.25, 1.0],
+        duration: 3.2,
+        ease: [0.25, 0.46, 0.45, 0.94],
       },
     }).then(() => {
       hasAnimated.current = true
+      // Add celebration effect
+      createConfetti()
       onComplete?.()
     })
   }, [spinning, chosen])

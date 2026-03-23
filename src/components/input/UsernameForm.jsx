@@ -10,6 +10,13 @@ export default function UsernameForm({ onSubmit, loading }) {
     if (trimmed) onSubmit(trimmed)
   }
 
+  // Allow Enter key to submit even when focus is on input
+  function handleKeyDown(e) {
+    if (e.key === 'Enter' && username.trim() && !loading) {
+      handleSubmit(e)
+    }
+  }
+
   return (
     <div className="space-y-4">
       <form onSubmit={handleSubmit} className="space-y-2 sm:space-y-3">
@@ -27,6 +34,7 @@ export default function UsernameForm({ onSubmit, loading }) {
                 type="text"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
+                onKeyDown={handleKeyDown}
                 placeholder="username"
                 disabled={loading}
                 autoComplete="off"
@@ -36,7 +44,7 @@ export default function UsernameForm({ onSubmit, loading }) {
                   text-retro-black placeholder:text-retro-muted
                   font-mono text-xs sm:text-sm uppercase tracking-widest
                   focus-visible:outline-dotted focus-visible:outline-2 focus-visible:outline-retro-black
-                  disabled:opacity-50 min-w-[100px]
+                  disabled:opacity-50 min-w-[100px] transition-all
                 "
               />
             </div>

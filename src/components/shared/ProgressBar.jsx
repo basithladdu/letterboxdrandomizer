@@ -4,16 +4,16 @@ export default function ProgressBar({ loaded, total, label }) {
   return (
     <div className="w-full space-y-2">
       {label && (
-        <p className="text-center text-sm text-lb-text-dim">{label}</p>
+        <p className="text-center text-xs sm:text-sm font-bold text-retro-black uppercase tracking-widest">{label}</p>
       )}
-      <div className="h-1.5 w-full overflow-hidden rounded-full bg-lb-surface">
+      <div className="retro-inset bg-retro-white border-2 overflow-hidden" style={{height: '20px'}}>
         <div
-          className="h-full rounded-full bg-lb-green transition-all duration-300"
+          className="h-full bg-retro-green transition-all duration-300"
           style={{ width: `${pct}%` }}
         />
       </div>
-      <p className="text-center text-xs text-lb-text-dim">
-        {loaded} film{loaded !== 1 ? 's' : ''} loaded
+      <p className="text-center text-xs font-mono text-retro-black font-bold">
+        {loaded}/{total} • {pct}%
       </p>
     </div>
   )

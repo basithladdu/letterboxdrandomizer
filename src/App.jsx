@@ -67,7 +67,11 @@ export default function App() {
               className="mx-auto max-w-2xl space-y-3 sm:space-y-6"
             >
               {/* Hero Section with Rainbow Text */}
-              <div className="retro-outset-deep bg-retro-panelYellow p-4 sm:p-8 text-center space-y-2 sm:space-y-4 border-4">
+              <div className="relative retro-outset-deep bg-retro-panelYellow p-4 sm:p-8 text-center space-y-2 sm:space-y-4 border-4">
+                {/* NEW Badge */}
+                <div className="absolute -top-3 right-4 badge-new px-2 py-1 text-[10px]">
+                  NOW LIVE
+                </div>
                 <h1 className="text-3xl sm:text-6xl font-black text-rainbow uppercase tracking-tight" style={{textShadow: '2px 2px 0 #808080'}}>
                   WHAT SHOULD I WATCH?
                 </h1>

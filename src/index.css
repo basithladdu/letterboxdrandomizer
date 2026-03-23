@@ -181,6 +181,48 @@ a:active {
   animation-play-state: paused;
 }
 
+/* Enhanced button hover effect */
+button:not(:disabled):hover {
+  filter: brightness(1.08) drop-shadow(0 0 4px rgba(0,0,0,0.2));
+}
+
+button:not(:disabled):active {
+  transform: scale(0.98);
+}
+
+/* Better window shadow */
+.shadow-lg {
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1) !important;
+}
+
+/* Better link hover */
+a:not([class*="hover"]):hover {
+  filter: brightness(0.9);
+}
+
+/* Confetti animation */
+@keyframes confetti-fall {
+  0% {
+    transform: translateY(0) rotateZ(0deg);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(100vh) rotateZ(720deg);
+    opacity: 0;
+  }
+}
+
+.confetti {
+  position: fixed;
+  pointer-events: none;
+  animation: confetti-fall 3s ease-in forwards;
+}
+
+/* Enhanced bevel shadow */
+.shadow-3d {
+  text-shadow: 3px 3px 0 rgba(0,0,0,0.3), -1px -1px 0 rgba(255,255,255,0.3);
+}
+
 /* Reduced motion support */
 @media (prefers-reduced-motion: reduce) {
   * {

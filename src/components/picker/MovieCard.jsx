@@ -43,11 +43,11 @@ export default function MovieCard({ film }) {
     <motion.div
       initial={{ opacity: 0, y: 30, scale: 0.95 }}
       animate={{ opacity: 1, y: 0, scale: 1 }}
-      transition={{ duration: 0.5, ease: 'easeOut' }}
+      transition={{ duration: 0.6, ease: [0.25, 0.46, 0.45, 0.94] }}
       className="w-full max-w-2xl mx-auto"
     >
       {/* Windows 95 Window Style */}
-      <div className="retro-outset-deep bg-retro-gray border-4 overflow-hidden">
+      <div className="retro-outset-deep bg-retro-gray border-4 overflow-hidden transition-all hover:shadow-lg">
         {/* Title Bar */}
         <div className="retro-titlebar px-3 py-2 flex justify-between items-center">
           <span className="font-bold text-sm">{film.title.toUpperCase().substring(0, 30)}…</span>

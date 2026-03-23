@@ -20,9 +20,9 @@ export default function Header() {
       </div>
 
       {/* Marquee Sub-header */}
-      <div className="marquee-container bg-retro-yellow text-retro-black border-t-2 border-b-2 border-retro-black">
-        <p className="marquee-text font-bold tracking-wide">
-          SPIN THE WHEEL AND GET YOUR NEXT FILM • FULLY RANDOM • DISCOVER YOUR NEXT WATCH
+      <div className="marquee-container bg-retro-yellow text-retro-black border-t-4 border-b-4 border-retro-black shadow-md">
+        <p className="marquee-text font-bold tracking-wide text-sm">
+          ★ SPIN THE WHEEL AND GET YOUR NEXT FILM ★ FULLY RANDOM ★ DISCOVER YOUR NEXT WATCH ★
         </p>
       </div>
     </header>
