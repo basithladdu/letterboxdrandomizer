@@ -15,14 +15,13 @@ export default function Footer() {
 
       {/* Creator Info */}
       <p className="text-center text-xs font-mono text-retro-black">
-        By{' '}
         <a
           href="https://letterboxd.com/basithladdu"
           target="_blank"
           rel="noopener noreferrer"
           className="font-bold hover:bg-retro-yellow"
         >
-          basithladdu
+          Letterboxd
         </a>
         {' '}|{' '}
         <a
