@@ -1,5 +1,3 @@
-import { BiCinemax, BiSpinner } from 'react-icons/bi'
-
 export default function Header() {
   return (
     <header className="retro-outset sticky top-0 z-10 bg-retro-gray border-b-4 border-retro-muted">

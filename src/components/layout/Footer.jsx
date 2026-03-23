@@ -1,4 +1,4 @@
-import { BiCinemax, BiMask, BiVideo } from 'react-icons/bi'
+import { BiBullseye, BiSmile, BiVolumeFull } from 'react-icons/bi'
 
 export default function Footer() {
   return (
@@ -37,9 +37,9 @@ export default function Footer() {
 
       {/* Decorative Footer Elements */}
       <div className="flex justify-center gap-3 text-base font-bold">
-        <span className="retro-outset p-2 bg-retro-yellow text-retro-black"><BiCinemax size={16} /></span>
-        <span className="retro-outset p-2 bg-retro-red text-retro-white"><BiMask size={16} /></span>
-        <span className="retro-outset p-2 bg-retro-blue text-retro-white"><BiVideo size={16} /></span>
+        <span className="retro-outset p-2 bg-retro-yellow text-retro-black"><BiBullseye size={16} /></span>
+        <span className="retro-outset p-2 bg-retro-red text-retro-white"><BiSmile size={16} /></span>
+        <span className="retro-outset p-2 bg-retro-blue text-retro-white"><BiVolumeFull size={16} /></span>
       </div>
     </footer>
   )

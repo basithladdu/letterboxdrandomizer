@@ -8,7 +8,8 @@
       "mcp__Claude_Preview__preview_start",
       "Bash(command -v npm)",
       "Bash(where npm:*)",
-      "WebFetch(domain:letterboxd.com)"
+      "WebFetch(domain:letterboxd.com)",
+      "Bash(npm run:*)"
     ]
   }
 }

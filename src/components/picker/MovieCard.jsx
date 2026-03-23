@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion'
-import { BiCinemax } from 'react-icons/bi'
+import { BiMoviePlay } from 'react-icons/bi'
 import { usePoster } from '../../hooks/usePoster.js'
 
 function StarRating({ rating }) {
@@ -29,7 +29,7 @@ function PosterPlaceholder({ title }) {
   return (
     <div className="w-full h-full flex items-center justify-center bg-retro-gray p-4 retro-inset" style={{backgroundColor: '#C0C0C0'}}>
       <div className="text-center">
-        <div className="text-5xl mb-2 text-retro-black"><BiCinemax /></div>
+        <div className="text-5xl mb-2 text-retro-black"><BiMoviePlay /></div>
         <p className="text-xs text-retro-black line-clamp-3 font-bold">{title}</p>
       </div>
     </div>
