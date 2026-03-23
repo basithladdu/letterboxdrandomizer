@@ -26,6 +26,24 @@ export default function Footer() {
         </a>
         {' '}|{' '}
         <a
+          href="https://twitter.com/basithladoo"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="font-bold hover:bg-retro-yellow"
+        >
+          Twitter
+        </a>
+        {' '}|{' '}
+        <a
+          href="https://instagram.com/basithladdu"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="font-bold hover:bg-retro-yellow"
+        >
+          Instagram
+        </a>
+        {' '}|{' '}
+        <a
           href="https://github.com/basithladdu/letterboxdrandomizer"
           target="_blank"
           rel="noopener noreferrer"
