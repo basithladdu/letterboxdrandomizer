@@ -12,14 +12,14 @@ export default function UsernameForm({ onSubmit, loading }) {
 
   return (
     <div className="space-y-4">
-      <form onSubmit={handleSubmit} className="space-y-3">
+      <form onSubmit={handleSubmit} className="space-y-2 sm:space-y-3">
         {/* Input Container Window */}
         <div className="retro-outset-deep bg-retro-gray border-4">
-          <div className="retro-titlebar px-3 py-1">
-            <span className="font-bold text-sm">LETTERBOXD USERNAME INPUT</span>
+          <div className="retro-titlebar px-2 sm:px-3 py-1">
+            <span className="font-bold text-xs sm:text-sm">LETTERBOXD USERNAME</span>
           </div>
-          <div className="p-4 retro-inset bg-retro-white">
-            <div className="relative flex items-center gap-2">
+          <div className="p-2 sm:p-4 retro-inset bg-retro-white">
+            <div className="relative flex items-center gap-2 flex-wrap">
               <label className="font-bold text-xs whitespace-nowrap text-retro-black">
                 letterboxd.com/
               </label>
@@ -32,11 +32,11 @@ export default function UsernameForm({ onSubmit, loading }) {
                 autoComplete="off"
                 spellCheck={false}
                 className="
-                  flex-1 border-2 border-retro-muted bg-retro-white px-3 py-2
+                  flex-1 border-2 border-retro-muted bg-retro-white px-2 sm:px-3 py-1.5 sm:py-2
                   text-retro-black placeholder:text-retro-muted
-                  font-mono text-sm uppercase tracking-widest
+                  font-mono text-xs sm:text-sm uppercase tracking-widest
                   focus-visible:outline-dotted focus-visible:outline-2 focus-visible:outline-retro-black
-                  disabled:opacity-50
+                  disabled:opacity-50 min-w-[100px]
                 "
               />
             </div>
@@ -48,7 +48,7 @@ export default function UsernameForm({ onSubmit, loading }) {
           type="submit"
           disabled={loading || !username.trim()}
           className={`
-            w-full py-3 font-black text-sm uppercase tracking-widest
+            w-full py-2 sm:py-3 font-black text-xs sm:text-sm uppercase tracking-widest
             border-4 border-retro-black
             flex items-center justify-center gap-2 transition-none
             ${loading || !username.trim() ? 'opacity-50 cursor-not-allowed' : ''}
@@ -89,17 +89,17 @@ export default function UsernameForm({ onSubmit, loading }) {
 
       {/* Info Box Window Style */}
       <div className="retro-outset-deep bg-retro-gray border-4">
-        <div className="retro-titlebar px-3 py-1">
+        <div className="retro-titlebar px-2 sm:px-3 py-1">
           <span className="font-bold text-xs">IMPORTANT INFO</span>
         </div>
-        <div className="p-4 retro-inset bg-retro-panelYellow">
-          <p className="text-xs font-bold text-retro-black mb-2">
+        <div className="p-2 sm:p-4 retro-inset bg-retro-panelYellow space-y-1 sm:space-y-2">
+          <p className="text-[10px] sm:text-xs font-bold text-retro-black">
             Your watchlist must be set to <span className="badge-new">PUBLIC</span>
           </p>
-          <p className="text-xs text-retro-black font-mono">
+          <p className="text-[10px] sm:text-xs text-retro-black font-mono">
             This tool scrapes your public Letterboxd watchlist via CORS proxy.
           </p>
-          <p className="text-xs text-retro-black font-mono mt-1">
+          <p className="text-[10px] sm:text-xs text-retro-black font-mono">
             Your privacy is important! We don't store any personal data.
           </p>
         </div>

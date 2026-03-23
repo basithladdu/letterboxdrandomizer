@@ -55,7 +55,7 @@ export default function App() {
     <div className="flex min-h-screen flex-col bg-retro-gray">
       <Header />
 
-      <main className="flex-1 px-4 py-8">
+      <main className="flex-1 px-3 py-4 sm:px-4 sm:py-8">
         <AnimatePresence mode="wait">
           {view === 'input' ? (
             <motion.div
@@ -64,14 +64,14 @@ export default function App() {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -16 }}
               transition={{ duration: 0.25 }}
-              className="mx-auto max-w-2xl space-y-6"
+              className="mx-auto max-w-2xl space-y-3 sm:space-y-6"
             >
               {/* Hero Section with Rainbow Text */}
-              <div className="retro-outset-deep bg-retro-panelYellow p-8 text-center space-y-4 border-4">
-                <h1 className="text-6xl font-black text-rainbow uppercase tracking-tight" style={{textShadow: '3px 3px 0 #808080'}}>
+              <div className="retro-outset-deep bg-retro-panelYellow p-4 sm:p-8 text-center space-y-2 sm:space-y-4 border-4">
+                <h1 className="text-3xl sm:text-6xl font-black text-rainbow uppercase tracking-tight" style={{textShadow: '2px 2px 0 #808080'}}>
                   WHAT SHOULD I WATCH?
                 </h1>
-                <p className="text-lg font-bold text-retro-black">
+                <p className="text-sm sm:text-lg font-bold text-retro-black">
                   SPIN THE WHEEL &amp; DISCOVER YOUR NEXT FILM!
                 </p>
                 <div className="text-xs font-mono text-retro-muted">
@@ -87,7 +87,7 @@ export default function App() {
               />
 
               {/* Decorative Color Squares */}
-              <div className="grid grid-cols-6 gap-2 mt-6">
+              <div className="grid grid-cols-3 sm:grid-cols-6 gap-1 sm:gap-2 mt-4 sm:mt-6">
                 {['#FF0000', '#00FF00', '#0000FF', '#FFFF00', '#FF00FF', '#00FFFF'].map((color, i) => (
                   <div
                     key={i}
@@ -104,7 +104,7 @@ export default function App() {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -16 }}
               transition={{ duration: 0.25 }}
-              className="mx-auto max-w-2xl space-y-6"
+              className="mx-auto max-w-2xl space-y-3 sm:space-y-6"
             >
               {/* Film Count Hit Counter Style */}
               <div className="text-center">

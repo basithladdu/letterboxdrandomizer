@@ -1,20 +1,20 @@
 export default function PickerControls({ onSpin, onReset, spinning, filmsCount }) {
   return (
-    <div className="space-y-3 w-full mx-auto">
+    <div className="space-y-2 sm:space-y-3 w-full mx-auto">
       {/* Construction Stripe Section */}
-      <div className="construction-stripes border-4 border-retro-black p-4 text-center">
-        <p className="font-black text-retro-black text-sm uppercase tracking-widest animate-pulse">
+      <div className="construction-stripes border-4 border-retro-black p-2 sm:p-4 text-center">
+        <p className="font-black text-retro-black text-xs sm:text-sm uppercase tracking-widest animate-pulse">
           SPIN THE WHEEL AGAIN
         </p>
       </div>
 
-      <div className="grid grid-cols-2 gap-3 max-w-2xl mx-auto">
+      <div className="grid grid-cols-2 gap-2 sm:gap-3 max-w-2xl mx-auto">
         {/* SPIN Button */}
         <button
           onClick={onSpin}
           disabled={spinning}
           className={`
-            py-4 font-black text-base uppercase tracking-widest
+            py-2 sm:py-4 font-black text-xs sm:text-base uppercase tracking-widest
             border-4 transition-none
             flex items-center justify-center gap-2
             ${spinning ? 'opacity-50 cursor-not-allowed' : ''}
@@ -59,7 +59,7 @@ export default function PickerControls({ onSpin, onReset, spinning, filmsCount }
           onClick={onReset}
           disabled={spinning}
           className={`
-            py-4 font-black text-base uppercase tracking-widest
+            py-2 sm:py-4 font-black text-xs sm:text-base uppercase tracking-widest
             border-4 transition-none
             ${spinning ? 'opacity-50 cursor-not-allowed' : ''}
           `}

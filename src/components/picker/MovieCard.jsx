@@ -58,10 +58,10 @@ export default function MovieCard({ film }) {
           </div>
         </div>
 
-        <div className="p-4 space-y-4 retro-inset bg-retro-white">
-          <div className="grid grid-cols-3 gap-4">
+        <div className="p-2 sm:p-4 space-y-3 sm:space-y-4 retro-inset bg-retro-white">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-4">
             {/* Poster */}
-            <div className="col-span-1 retro-inset bg-retro-gray overflow-hidden" style={{aspectRatio: '2/3'}}>
+            <div className="col-span-1 retro-inset bg-retro-gray overflow-hidden mx-auto w-full sm:w-auto" style={{aspectRatio: '2/3', maxWidth: '150px'}}>
               {posterLoading && !posterUrl && (
                 <div className="w-full h-full flex items-center justify-center">
                   <div className="h-8 w-8 border-2 border-retro-black border-t-transparent animate-spin-retro" />
@@ -80,19 +80,19 @@ export default function MovieCard({ film }) {
             </div>
 
             {/* Film Info */}
-            <div className="col-span-2 space-y-4 retro-inset bg-retro-panelYellow p-4">
-              <div className="border-b-2 border-retro-black pb-3">
-                <h2 className="text-2xl font-black text-retro-black leading-tight uppercase">
+            <div className="col-span-1 sm:col-span-2 space-y-2 sm:space-y-4 retro-inset bg-retro-panelYellow p-3 sm:p-4">
+              <div className="border-b-2 border-retro-black pb-2 sm:pb-3">
+                <h2 className="text-lg sm:text-2xl font-black text-retro-black leading-tight uppercase">
                   {film.title}
                 </h2>
                 {film.year && (
-                  <p className="text-sm font-mono text-retro-muted">YEAR: {film.year}</p>
+                  <p className="text-xs sm:text-sm font-mono text-retro-muted">YEAR: {film.year}</p>
                 )}
               </div>
 
               {/* Rating */}
               {film.rating && (
-                <div className="border-b-2 border-retro-black pb-3">
+                <div className="border-b-2 border-retro-black pb-2 sm:pb-3">
                   <p className="text-xs font-bold text-retro-black mb-1">YOUR RATING:</p>
                   <StarRating rating={film.rating} />
                 </div>
@@ -104,14 +104,14 @@ export default function MovieCard({ film }) {
                 target="_blank"
                 rel="noopener noreferrer"
                 className="
-                  block w-full py-2 text-sm font-black text-retro-white text-center uppercase tracking-widest
+                  block w-full py-1.5 sm:py-2 text-xs sm:text-sm font-black text-retro-black text-center uppercase tracking-widest
                   border-4 border-retro-black transition-none
                 "
                 style={{
-                  backgroundColor: '#0000FF',
+                  backgroundColor: '#FFFF00',
                   borderColor: '#FFFFFF #808080 #808080 #FFFFFF',
                   boxShadow: 'inset -1px -1px 0 #404040, inset 1px 1px 0 #DFDFDF',
-                  textShadow: '2px 2px 0 #000080'
+                  textShadow: '2px 2px 0 #808080'
                 }}
                 onMouseDown={(e) => {
                   e.currentTarget.style.borderColor = '#808080 #FFFFFF #FFFFFF #808080'
@@ -124,7 +124,7 @@ export default function MovieCard({ film }) {
                   e.currentTarget.style.transform = 'translate(0, 0)'
                 }}
               >
-                → VIEW ON LETTERBOXD →
+                VIEW ON LETTERBOXD
               </a>
             </div>
           </div>
