@@ -7,8 +7,8 @@ export const PROXY_ROUTER = 'https://api.codetabs.com/v1/proxy?quest='
 
 export const OMDB_BASE = 'https://www.omdbapi.com'
 
-// Films per page on Letterboxd watchlist
-export const LB_PAGE_SIZE = 72
+// Films per page on Letterboxd watchlist (7x4 grid = 28)
+export const LB_PAGE_SIZE = 28
 
 export const COLORS = {
   bg: '#14181c',
