@@ -1,6 +1,5 @@
 import { motion } from 'framer-motion'
 import { BiMoviePlay } from 'react-icons/bi'
-import { usePoster } from '../../hooks/usePoster.js'
 
 function StarRating({ rating }) {
   if (!rating) return null
@@ -46,66 +45,54 @@ export default function MovieCard({ film }) {
           </div>
         </div>
 
-        <div className="p-2 sm:p-4 space-y-3 sm:space-y-4 retro-inset bg-retro-white">
-          <div className={`grid grid-cols-1 ${posterUrl ? 'sm:grid-cols-3' : ''} gap-2 sm:gap-4`}>
-            {posterUrl && (
-              <div className="col-span-1 retro-inset bg-retro-gray overflow-hidden mx-auto w-full sm:w-auto" style={{aspectRatio: '2/3', maxWidth: '150px'}}>
-                <img
-                  src={posterUrl}
-                  alt={film.title}
-                  className="w-full h-full object-cover"
-                  onError={(e) => { e.target.style.display = 'none' }}
-                />
+        <div className="p-2 sm:p-4 retro-inset bg-retro-white">
+          <div className="space-y-2 sm:space-y-4 retro-inset bg-retro-panelYellow p-4 sm:p-6">
+            <div className="border-b-4 border-retro-black pb-3 sm:pb-4">
+              <h2 className="text-xl sm:text-4xl font-black text-retro-black leading-tight uppercase">
+                {film.title}
+              </h2>
+              {film.year && (
+                <p className="text-xs sm:text-base font-mono text-retro-muted mt-1">YEAR: {film.year}</p>
+              )}
+              {film.dateAdded && (
+                <p className="text-[10px] sm:text-sm font-mono text-retro-muted">ADDED: {film.dateAdded}</p>
+              )}
+            </div>
+
+            {film.rating && (
+              <div className="border-b-4 border-retro-black pb-3 sm:pb-4">
+                <p className="text-xs font-bold text-retro-black mb-1 uppercase">YOUR RATING:</p>
+                <StarRating rating={film.rating} />
               </div>
             )}
 
-            <div className={`col-span-1 ${posterUrl ? 'sm:col-span-2' : ''} space-y-2 sm:space-y-4 retro-inset bg-retro-panelYellow p-3 sm:p-4`}>
-              <div className="border-b-2 border-retro-black pb-2 sm:pb-3">
-                <h2 className="text-lg sm:text-2xl font-black text-retro-black leading-tight uppercase">
-                  {film.title}
-                </h2>
-                {film.year && (
-                  <p className="text-xs sm:text-sm font-mono text-retro-muted">YEAR: {film.year}</p>
-                )}
-                {film.dateAdded && (
-                  <p className="text-[10px] sm:text-xs font-mono text-retro-muted">ADDED: {film.dateAdded}</p>
-                )}
-              </div>
-
-              {film.rating && (
-                <div className="border-b-2 border-retro-black pb-2 sm:pb-3">
-                  <p className="text-xs font-bold text-retro-black mb-1">YOUR RATING:</p>
-                  <StarRating rating={film.rating} />
-                </div>
-              )}
-              <a
-                href={film.letterboxdUri}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="
-                  block w-full py-1.5 sm:py-2 text-xs sm:text-sm font-black text-retro-black text-center uppercase tracking-widest
-                  border-4 border-retro-black transition-none
-                "
-                style={{
-                  backgroundColor: '#FFFF00',
-                  borderColor: '#FFFFFF #808080 #808080 #FFFFFF',
-                  boxShadow: 'inset -1px -1px 0 #404040, inset 1px 1px 0 #DFDFDF',
-                  textShadow: '2px 2px 0 #808080'
-                }}
-                onMouseDown={(e) => {
-                  e.currentTarget.style.borderColor = '#808080 #FFFFFF #FFFFFF #808080'
-                  e.currentTarget.style.boxShadow = 'inset 1px 1px 0 #404040, inset -1px -1px 0 #DFDFDF'
-                  e.currentTarget.style.transform = 'translate(1px, 1px)'
-                }}
-                onMouseUp={(e) => {
-                  e.currentTarget.style.borderColor = '#FFFFFF #808080 #808080 #FFFFFF'
-                  e.currentTarget.style.boxShadow = 'inset -1px -1px 0 #404040, inset 1px 1px 0 #DFDFDF'
-                  e.currentTarget.style.transform = 'translate(0, 0)'
-                }}
-              >
-                VIEW ON LETTERBOXD
-              </a>
-            </div>
+            <a
+              href={film.letterboxdUri}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="
+                block w-full py-2 sm:py-4 text-sm sm:text-lg font-black text-retro-black text-center uppercase tracking-widest
+                border-4 border-retro-black transition-none mt-4
+              "
+              style={{
+                backgroundColor: '#FFFF00',
+                borderColor: '#FFFFFF #808080 #808080 #FFFFFF',
+                boxShadow: 'inset -1px -1px 0 #404040, inset 1px 1px 0 #DFDFDF',
+                textShadow: '2px 2px 0 #808080'
+              }}
+              onMouseDown={(e) => {
+                e.currentTarget.style.borderColor = '#808080 #FFFFFF #FFFFFF #808080'
+                e.currentTarget.style.boxShadow = 'inset 1px 1px 0 #404040, inset -1px -1px 0 #DFDFDF'
+                e.currentTarget.style.transform = 'translate(1px, 1px)'
+              }}
+              onMouseUp={(e) => {
+                e.currentTarget.style.borderColor = '#FFFFFF #808080 #808080 #FFFFFF'
+                e.currentTarget.style.boxShadow = 'inset -1px -1px 0 #404040, inset 1px 1px 0 #DFDFDF'
+                e.currentTarget.style.transform = 'translate(0, 0)'
+              }}
+            >
+              VIEW ON LETTERBOXD
+            </a>
           </div>
         </div>
       </div>
