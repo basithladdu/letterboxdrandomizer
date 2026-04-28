@@ -123,11 +123,13 @@ export default function App() {
               transition={{ duration: 0.25 }}
               className="mx-auto max-w-2xl space-y-3 sm:space-y-6"
             >
+              {/* 
               <div className="text-center">
                 <div className="inline-block hit-counter">
                   FILMS IN WATCHLIST: {String(films.length).padStart(4, '0')}
                 </div>
               </div>
+              */}
 
               <div className="retro-hr" />
 
