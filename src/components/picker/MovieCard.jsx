@@ -26,7 +26,6 @@ function StarRating({ rating }) {
 
 
 export default function MovieCard({ film }) {
-  const { posterUrl, loading: posterLoading } = usePoster(film)
 
   return (
     <motion.div
