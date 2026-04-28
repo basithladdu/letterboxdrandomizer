@@ -5,6 +5,11 @@ import { BiFile } from 'react-icons/bi'
 export default function CSVUploadForm({ onUpload }) {
   const [file, setFile] = useState(null)
   const [error, setError] = useState(null)
+  const [username, setUsername] = useState('')
+
+  const exportUrl = username.trim() 
+    ? `https://letterboxd.com/${username.trim().toLowerCase()}/watchlist/export/`
+    : null
 
   async function handleFileChange(e) {
     const selected = e.target.files[0]
@@ -33,10 +38,50 @@ export default function CSVUploadForm({ onUpload }) {
 
   return (
     <div className="space-y-4">
+      {/* Step 1: Get Link */}
+      <div className="retro-outset-deep bg-retro-gray border-4">
+        <div className="retro-titlebar px-2 sm:px-3 py-1">
+          <span className="font-bold text-xs sm:text-sm">STEP 1: GET YOUR CSV</span>
+        </div>
+        <div className="p-2 sm:p-4 retro-inset bg-retro-panelYellow space-y-3">
+          <div className="flex flex-col gap-2">
+            <label className="font-bold text-xs uppercase text-retro-black">
+              ENTER USERNAME TO GENERATE LINK:
+            </label>
+            <input
+              type="text"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              placeholder="username"
+              className="border-2 border-retro-muted bg-retro-white px-2 py-1 text-xs font-mono uppercase focus:outline-none"
+            />
+          </div>
+          
+          {exportUrl ? (
+            <div className="p-3 bg-retro-white border-2 border-retro-black space-y-2">
+              <p className="text-[10px] font-bold text-retro-black">CLICK LINK TO DOWNLOAD:</p>
+              <a 
+                href={exportUrl} 
+                target="_blank" 
+                rel="noreferrer"
+                className="block text-[10px] font-mono text-blue-700 underline break-all hover:bg-retro-yellow"
+              >
+                {exportUrl}
+              </a>
+            </div>
+          ) : (
+            <p className="text-[10px] text-retro-muted italic font-mono">
+              (Link will appear once you enter your username)
+            </p>
+          )}
+        </div>
+      </div>
+
       <form onSubmit={handleSubmit} className="space-y-2 sm:space-y-3">
+        {/* Step 2: Upload */}
         <div className="retro-outset-deep bg-retro-gray border-4">
           <div className="retro-titlebar px-2 sm:px-3 py-1">
-            <span className="font-bold text-xs sm:text-sm">WATCHLIST CSV UPLOAD</span>
+            <span className="font-bold text-xs sm:text-sm">STEP 2: UPLOAD CSV</span>
           </div>
           <div className="p-2 sm:p-4 retro-inset bg-retro-white">
             <div className="space-y-4">
@@ -51,9 +96,6 @@ export default function CSVUploadForm({ onUpload }) {
                   <BiFile size={32} className="text-retro-muted" />
                   <span className="font-bold text-xs sm:text-sm text-retro-black">
                     {file ? file.name.toUpperCase() : 'CLICK TO BROWSE WATCHLIST.CSV'}
-                  </span>
-                  <span className="text-[10px] text-retro-muted font-mono">
-                    (MAX 10MB)
                   </span>
                 </div>
               </label>
@@ -102,23 +144,6 @@ export default function CSVUploadForm({ onUpload }) {
           ▶ UPLOAD &amp; SPIN
         </button>
       </form>
-
-      <div className="retro-outset-deep bg-retro-gray border-4">
-        <div className="retro-titlebar px-2 sm:px-3 py-1">
-          <span className="font-bold text-xs">HOW TO GET YOUR CSV</span>
-        </div>
-        <div className="p-2 sm:p-4 retro-inset bg-retro-panelYellow space-y-1 sm:space-y-2">
-          <p className="text-[10px] sm:text-xs text-retro-black font-mono">
-            1. GO TO YOUR WATCHLIST AND CLICK <span className="font-bold uppercase">"EXPORT"</span> AT THE BOTTOM
-          </p>
-          <p className="text-[10px] sm:text-xs text-retro-black font-mono italic">
-            (OR DIRECTLY: letterboxd.com/USERNAME/watchlist/export/)
-          </p>
-          <p className="text-[10px] sm:text-xs text-retro-black font-mono">
-            2. UPLOAD THE "WATCHLIST.CSV" FILE HERE
-          </p>
-        </div>
-      </div>
     </div>
   )
 }
