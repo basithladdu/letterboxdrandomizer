@@ -25,16 +25,6 @@ function StarRating({ rating }) {
   )
 }
 
-function PosterPlaceholder({ title }) {
-  return (
-    <div className="w-full h-full flex items-center justify-center bg-retro-gray p-4 retro-inset" style={{backgroundColor: '#C0C0C0'}}>
-      <div className="text-center">
-        <div className="text-5xl mb-2 text-retro-black"><BiMoviePlay /></div>
-        <p className="text-xs text-retro-black line-clamp-3 font-bold">{title}</p>
-      </div>
-    </div>
-  )
-}
 
 export default function MovieCard({ film }) {
   const { posterUrl, loading: posterLoading } = usePoster(film)
@@ -57,26 +47,19 @@ export default function MovieCard({ film }) {
         </div>
 
         <div className="p-2 sm:p-4 space-y-3 sm:space-y-4 retro-inset bg-retro-white">
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-4">
-            <div className="col-span-1 retro-inset bg-retro-gray overflow-hidden mx-auto w-full sm:w-auto" style={{aspectRatio: '2/3', maxWidth: '150px'}}>
-              {posterLoading && !posterUrl && (
-                <div className="w-full h-full flex items-center justify-center">
-                  <div className="h-8 w-8 border-2 border-retro-black border-t-transparent animate-spin-retro" />
-                </div>
-              )}
-              {posterUrl ? (
+          <div className={`grid grid-cols-1 ${posterUrl ? 'sm:grid-cols-3' : ''} gap-2 sm:gap-4`}>
+            {posterUrl && (
+              <div className="col-span-1 retro-inset bg-retro-gray overflow-hidden mx-auto w-full sm:w-auto" style={{aspectRatio: '2/3', maxWidth: '150px'}}>
                 <img
                   src={posterUrl}
                   alt={film.title}
                   className="w-full h-full object-cover"
                   onError={(e) => { e.target.style.display = 'none' }}
                 />
-              ) : (
-                !posterLoading && <PosterPlaceholder title={film.title} />
-              )}
-            </div>
+              </div>
+            )}
 
-            <div className="col-span-1 sm:col-span-2 space-y-2 sm:space-y-4 retro-inset bg-retro-panelYellow p-3 sm:p-4">
+            <div className={`col-span-1 ${posterUrl ? 'sm:col-span-2' : ''} space-y-2 sm:space-y-4 retro-inset bg-retro-panelYellow p-3 sm:p-4`}>
               <div className="border-b-2 border-retro-black pb-2 sm:pb-3">
                 <h2 className="text-lg sm:text-2xl font-black text-retro-black leading-tight uppercase">
                   {film.title}

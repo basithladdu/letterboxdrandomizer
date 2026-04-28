@@ -1,13 +1,7 @@
 export default function PickerControls({ onSpin, onReset, spinning, filmsCount }) {
   return (
     <div className="space-y-2 sm:space-y-3 w-full mx-auto">
-      {/* Construction Stripe Section */}
-      <div className="construction-stripes border-4 border-retro-black p-2 sm:p-4 text-center">
-        <p className="font-black text-retro-black text-xs sm:text-sm uppercase tracking-widest animate-pulse">
-          SPIN THE WHEEL AGAIN
-        </p>
-      </div>
-
+      {/* Buttons Section */}
       <div className="grid grid-cols-2 gap-2 sm:gap-3 max-w-2xl mx-auto">
         {/* SPIN Button */}
         <button
