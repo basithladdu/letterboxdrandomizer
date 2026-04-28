@@ -8,6 +8,7 @@ import PickerControls from './components/picker/PickerControls.jsx'
 import { useWatchlistScraper } from './hooks/useWatchlistScraper.js'
 import { pickRandom } from './utils/randomPicker.js'
 import { motion, AnimatePresence } from 'framer-motion'
+import { getSavedWatchlist, saveWatchlist } from './services/firebase.js'
 
 export default function App() {
   const [view, setView] = useState('input') // 'input' | 'picker'
@@ -19,7 +20,16 @@ export default function App() {
 
   async function handleScrape(username) {
     try {
-      const result = await scrape(username)
+      // 1. Try to load from Firebase first
+      let result = await getSavedWatchlist(username)
+      
+      if (!result) {
+        // 2. If not in Firebase, scrape it
+        result = await scrape(username)
+        // 3. Save to Firebase for next time
+        await saveWatchlist(username, result)
+      }
+      
       setFilms(result)
       startPicker(result)
     } catch {
@@ -44,6 +54,11 @@ export default function App() {
     setSpinning(false)
   }
 
+  function handleUpload(filmList) {
+    setFilms(filmList)
+    startPicker(filmList)
+  }
+
   function handleReset() {
     setView('input')
     setFilms([])
@@ -66,9 +81,7 @@ export default function App() {
               transition={{ duration: 0.25 }}
               className="mx-auto max-w-2xl space-y-3 sm:space-y-6"
             >
-              {/* Hero Section with Rainbow Text */}
               <div className="relative retro-outset-deep bg-retro-panelYellow p-4 sm:p-8 text-center space-y-2 sm:space-y-4 border-4">
-                {/* NEW Badge */}
                 <div className="absolute -top-3 right-4 badge-new px-2 py-1 text-[10px]">
                   NOW LIVE
                 </div>
@@ -85,12 +98,12 @@ export default function App() {
 
               <InputTabs
                 onScrape={handleScrape}
+                onUpload={handleUpload}
                 scrapeLoading={scrapeLoading}
                 scrapeProgress={scrapeProgress}
                 scrapeError={scrapeError}
               />
 
-              {/* Decorative Color Squares */}
               <div className="grid grid-cols-3 sm:grid-cols-6 gap-1 sm:gap-2 mt-4 sm:mt-6">
                 {['#FF0000', '#00FF00', '#0000FF', '#FFFF00', '#FF00FF', '#00FFFF'].map((color, i) => (
                   <div
@@ -110,7 +123,6 @@ export default function App() {
               transition={{ duration: 0.25 }}
               className="mx-auto max-w-2xl space-y-3 sm:space-y-6"
             >
-              {/* Film Count Hit Counter Style */}
               <div className="text-center">
                 <div className="inline-block hit-counter">
                   FILMS IN WATCHLIST: {String(films.length).padStart(4, '0')}
@@ -119,7 +131,6 @@ export default function App() {
 
               <div className="retro-hr" />
 
-              {/* Slot machine with Window styling */}
               <div className="retro-outset-deep bg-retro-gray border-4 overflow-hidden">
                 <div className="retro-titlebar px-3 py-2 flex justify-between items-center">
                   <span className="font-bold">SPIN_WHEEL.EXE</span>
@@ -146,7 +157,6 @@ export default function App() {
                 )}
               </AnimatePresence>
 
-              {/* Controls */}
               <PickerControls
                 onSpin={handleSpinAgain}
                 onReset={handleReset}

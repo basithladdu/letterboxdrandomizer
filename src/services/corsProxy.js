@@ -1,4 +1,4 @@
-import { PROXY_PRIMARY, PROXY_FALLBACK } from '../utils/constants.js'
+import { PROXY_PRIMARY, PROXY_FALLBACK, PROXY_ALT, PROXY_ROUTER } from '../utils/constants.js'
 
 let workingProxy = null
 
@@ -8,7 +8,7 @@ function getProdUrl(url, proxyBase) {
 
 export async function proxyFetch(url, timeoutMs = 15000) {
   // Always use allorigins for reliability (works in dev and prod)
-  const proxies = [PROXY_PRIMARY, PROXY_FALLBACK]
+  const proxies = [PROXY_PRIMARY, PROXY_FALLBACK, PROXY_ALT, PROXY_ROUTER]
 
   // If we already know a working proxy, try it first
   if (workingProxy) {

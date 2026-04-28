@@ -16,7 +16,7 @@ export default function Footer() {
       {/* Creator Info */}
       <p className="text-center text-[10px] sm:text-xs font-mono text-retro-black break-words">
         <a
-          href="https://letterboxd.com/basithladdu"
+          href="https://letterboxd.com/basithladoo"
           target="_blank"
           rel="noopener noreferrer"
           className="font-bold hover:bg-retro-yellow"
@@ -46,7 +46,7 @@ export default function Footer() {
         <span className="hidden sm:inline">{' '}|{' '}</span>
         <span className="sm:hidden block">|</span>
         <a
-          href="https://github.com/basithladdu/letterboxdrandomizer"
+          href="https://github.com/basithladoo/letterboxdrandomizer"
           target="_blank"
           rel="noopener noreferrer"
           className="font-bold hover:bg-retro-yellow"

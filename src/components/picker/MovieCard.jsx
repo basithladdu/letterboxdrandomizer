@@ -46,9 +46,7 @@ export default function MovieCard({ film }) {
       transition={{ duration: 0.6, ease: [0.25, 0.46, 0.45, 0.94] }}
       className="w-full max-w-2xl mx-auto"
     >
-      {/* Windows 95 Window Style */}
       <div className="retro-outset-deep bg-retro-gray border-4 overflow-hidden transition-all hover:shadow-lg">
-        {/* Title Bar */}
         <div className="retro-titlebar px-3 py-2 flex justify-between items-center">
           <span className="font-bold text-sm">{film.title.toUpperCase().substring(0, 30)}…</span>
           <div className="flex gap-2">
@@ -60,7 +58,6 @@ export default function MovieCard({ film }) {
 
         <div className="p-2 sm:p-4 space-y-3 sm:space-y-4 retro-inset bg-retro-white">
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-4">
-            {/* Poster */}
             <div className="col-span-1 retro-inset bg-retro-gray overflow-hidden mx-auto w-full sm:w-auto" style={{aspectRatio: '2/3', maxWidth: '150px'}}>
               {posterLoading && !posterUrl && (
                 <div className="w-full h-full flex items-center justify-center">
@@ -79,7 +76,6 @@ export default function MovieCard({ film }) {
               )}
             </div>
 
-            {/* Film Info */}
             <div className="col-span-1 sm:col-span-2 space-y-2 sm:space-y-4 retro-inset bg-retro-panelYellow p-3 sm:p-4">
               <div className="border-b-2 border-retro-black pb-2 sm:pb-3">
                 <h2 className="text-lg sm:text-2xl font-black text-retro-black leading-tight uppercase">
@@ -88,17 +84,17 @@ export default function MovieCard({ film }) {
                 {film.year && (
                   <p className="text-xs sm:text-sm font-mono text-retro-muted">YEAR: {film.year}</p>
                 )}
+                {film.dateAdded && (
+                  <p className="text-[10px] sm:text-xs font-mono text-retro-muted">ADDED: {film.dateAdded}</p>
+                )}
               </div>
 
-              {/* Rating */}
               {film.rating && (
                 <div className="border-b-2 border-retro-black pb-2 sm:pb-3">
                   <p className="text-xs font-bold text-retro-black mb-1">YOUR RATING:</p>
                   <StarRating rating={film.rating} />
                 </div>
               )}
-
-              {/* Letterboxd Link Button */}
               <a
                 href={film.letterboxdUri}
                 target="_blank"

@@ -4,7 +4,6 @@ import { buildSpinSequence } from '../../utils/randomPicker.js'
 
 const ITEM_HEIGHT = 72
 
-// Confetti effect for celebration
 function createConfetti() {
   const colors = ['#FF0000', '#0000FF', '#FFFF00', '#FF00FF', '#00FFFF', '#00FF00']
   for (let i = 0; i < 30; i++) {
@@ -34,7 +33,6 @@ export default function SpinWheel({ films, chosen, onComplete, spinning }) {
     const seq = buildSpinSequence(films, chosen, 25)
     setSequence(seq)
 
-    // Reset to top, then animate
     controls.set({ y: 0 })
 
     const totalDistance = (seq.length - 1) * ITEM_HEIGHT
@@ -47,7 +45,6 @@ export default function SpinWheel({ films, chosen, onComplete, spinning }) {
       },
     }).then(() => {
       hasAnimated.current = true
-      // Add celebration effect
       createConfetti()
       onComplete?.()
     })
@@ -59,7 +56,6 @@ export default function SpinWheel({ films, chosen, onComplete, spinning }) {
 
   return (
     <div className="relative w-full mx-auto">
-      {/* Highlight bar with 3D effect */}
       <div
         className="absolute inset-x-0 top-1/2 -translate-y-1/2 h-[72px] pointer-events-none z-10 border-y-4 border-retro-yellow"
         style={{
@@ -68,7 +64,6 @@ export default function SpinWheel({ films, chosen, onComplete, spinning }) {
         }}
       />
 
-      {/* Spin window with beveled frame */}
       <div
         className="spin-window retro-inset border-4"
         style={{
@@ -87,7 +82,7 @@ export default function SpinWheel({ films, chosen, onComplete, spinning }) {
                 backgroundColor: i % 2 === 0 ? '#FFFFFF' : '#E8E8E8'
               }}
             >
-              <p className="text-center font-black text-retro-black leading-tight line-clamp-2 text-lg uppercase tracking-tight">
+              <p className="text-center font-black text-retro-black leading-tight line-clamp-2 text-base sm:text-lg uppercase tracking-tight">
                 {film.title}
                 {film.year && (
                   <span className="block text-sm font-mono text-retro-muted">
