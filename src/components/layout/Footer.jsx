@@ -32,7 +32,7 @@ export default function Footer() {
             <span>LETTERBOXD</span>
           </a>
           <a
-            href="https://github.com/basithladoo"
+            href="https://github.com/basithladdu/letterboxdrandomizer"
             target="_blank"
             rel="noopener noreferrer"
             className="flex items-center gap-2 text-[10px] sm:text-xs font-bold text-retro-black hover:bg-retro-yellow px-1 transition-colors"
