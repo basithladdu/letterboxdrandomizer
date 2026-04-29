@@ -1,5 +1,7 @@
 import { useState } from 'react'
 import LoadingSpinner from '../shared/LoadingSpinner.jsx'
+import { SiLetterboxd, SiGithub, SiX, SiInstagram } from 'react-icons/si'
+import { BiEnvelope } from 'react-icons/bi'
 
 export default function UsernameForm({ onSubmit, loading }) {
   const [username, setUsername] = useState('')
@@ -98,18 +100,46 @@ export default function UsernameForm({ onSubmit, loading }) {
       {/* Info Box Window Style */}
       <div className="retro-outset-deep bg-retro-gray border-4">
         <div className="retro-titlebar px-2 sm:px-3 py-1">
-          <span className="font-bold text-xs">IMPORTANT INFO</span>
+          <span className="font-bold text-xs uppercase">Important Information</span>
         </div>
-        <div className="p-2 sm:p-4 retro-inset bg-retro-panelYellow space-y-1 sm:space-y-2">
-          <p className="text-[10px] sm:text-xs font-bold text-retro-black">
+        <div className="p-2 sm:p-4 retro-inset bg-retro-panelYellow">
+          <p className="text-[10px] sm:text-xs font-bold text-retro-black uppercase">
             Your watchlist must be set to <span className="badge-new">PUBLIC</span>
           </p>
-          <p className="text-[10px] sm:text-xs text-retro-black font-mono">
-            This tool scrapes your public Letterboxd watchlist via CORS proxy.
-          </p>
-          <p className="text-[10px] sm:text-xs text-retro-black font-mono">
-            Your privacy is important! We don't store any personal data.
-          </p>
+        </div>
+      </div>
+
+      {/* Social Handles - Styled like Header elements */}
+      <div className="retro-outset bg-retro-gray border-2">
+        <div className="retro-titlebar px-2 py-0.5 flex justify-between items-center">
+          <span className="text-[9px] font-bold uppercase">These are my social handles</span>
+          <div className="flex gap-1">
+            <div className="w-2 h-2 bg-retro-red border border-retro-black" />
+            <div className="w-2 h-2 bg-retro-yellow border border-retro-black" />
+            <div className="w-2 h-2 bg-retro-green border border-retro-black" />
+          </div>
+        </div>
+        <div className="p-2 bg-retro-white flex flex-wrap justify-center gap-x-6 gap-y-2">
+          <a href="https://letterboxd.com/basithladoo" target="_blank" rel="noreferrer" className="flex items-center gap-1.5 text-[10px] font-black text-retro-black hover:bg-retro-yellow px-1 transition-colors">
+            <SiLetterboxd size={14} />
+            <span className="underline decoration-2">LETTERBOXD</span>
+          </a>
+          <a href="https://github.com/basithladoo" target="_blank" rel="noreferrer" className="flex items-center gap-1.5 text-[10px] font-black text-retro-black hover:bg-retro-yellow px-1 transition-colors">
+            <SiGithub size={14} />
+            <span className="underline decoration-2">GITHUB</span>
+          </a>
+          <a href="https://twitter.com/basithladoo" target="_blank" rel="noreferrer" className="flex items-center gap-1.5 text-[10px] font-black text-retro-black hover:bg-retro-yellow px-1 transition-colors">
+            <SiX size={14} />
+            <span className="underline decoration-2">TWITTER / X</span>
+          </a>
+          <a href="https://instagram.com/basithladdu" target="_blank" rel="noreferrer" className="flex items-center gap-1.5 text-[10px] font-black text-retro-black hover:bg-retro-yellow px-1 transition-colors">
+            <SiInstagram size={14} />
+            <span className="underline decoration-2">INSTAGRAM</span>
+          </a>
+          <a href="mailto:basithladoo@gmail.com" className="flex items-center gap-1.5 text-[10px] font-black text-retro-black hover:bg-retro-yellow px-1 transition-colors">
+            <BiEnvelope size={14} />
+            <span className="underline decoration-2">EMAIL</span>
+          </a>
         </div>
       </div>
     </div>
