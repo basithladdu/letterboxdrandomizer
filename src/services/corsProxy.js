@@ -1,16 +1,32 @@
-import { PROXY_PRIMARY, PROXY_FALLBACK, PROXY_ALT, PROXY_ROUTER } from '../utils/constants.js'
+import { PROXY_PRIMARY, PROXY_FALLBACK, PROXY_ALT, PROXY_ROUTER, LB_BASE } from '../utils/constants.js'
 
 let workingProxy = null
 
-function getProdUrl(url, proxyBase) {
-  return `${proxyBase}${encodeURIComponent(url)}`
+// In dev, vite proxies /lb-proxy -> letterboxd.com (see vite.config.js).
+// In prod, our own serverless function at /api/lb does the same thing.
+// Public CORS proxies are only a last resort: they are heavily rate-limited and
+// often answer HTTP 200 with an error page, which used to silently truncate
+// large watchlists.
+function ownEndpoint(url) {
+  if (import.meta.env.DEV) {
+    return url.replace(LB_BASE, '/lb-proxy')
+  }
+  return `/api/lb?url=${encodeURIComponent(url)}`
 }
 
-export async function proxyFetch(url, timeoutMs = 15000) {
-  // Always use allorigins for reliability (works in dev and prod)
-  const proxies = [PROXY_PRIMARY, PROXY_FALLBACK, PROXY_ALT, PROXY_ROUTER]
+export async function proxyFetch(url, timeoutMs = 20000) {
+  // 1. Our own proxy first — no quota, no rate limit.
+  try {
+    const res = await fetchWithTimeout(ownEndpoint(url), timeoutMs)
+    if (res.ok) return res
+    // 404/403 from Letterboxd itself is a real answer, not a proxy failure.
+    if (res.status === 404 || res.status === 403) return res
+  } catch {
+    // fall through to public proxies
+  }
 
-  // If we already know a working proxy, try it first
+  // 2. Public proxies as a safety net.
+  const proxies = [PROXY_PRIMARY, PROXY_FALLBACK, PROXY_ALT, PROXY_ROUTER]
   if (workingProxy) {
     proxies.sort((a) => (a === workingProxy ? -1 : 1))
   }
@@ -18,26 +34,23 @@ export async function proxyFetch(url, timeoutMs = 15000) {
   let lastError
   for (const proxy of proxies) {
     try {
-      const proxyUrl = getProdUrl(url, proxy)
-      const res = await fetchWithTimeout(proxyUrl, timeoutMs)
+      const res = await fetchWithTimeout(`${proxy}${encodeURIComponent(url)}`, timeoutMs)
       if (!res.ok) throw new Error(`HTTP ${res.status}`)
       workingProxy = proxy
       return res
     } catch (err) {
       lastError = err
-      // Try next proxy
     }
   }
 
-  throw lastError || new Error('All CORS proxies failed. Check your connection and that the watchlist is public.')
+  throw lastError || new Error('Could not reach Letterboxd. Check your connection and that the watchlist is public.')
 }
 
 async function fetchWithTimeout(url, ms) {
   const controller = new AbortController()
   const timer = setTimeout(() => controller.abort(), ms)
   try {
-    const res = await fetch(url, { signal: controller.signal })
-    return res
+    return await fetch(url, { signal: controller.signal })
   } finally {
     clearTimeout(timer)
   }

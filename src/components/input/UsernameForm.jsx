@@ -124,7 +124,7 @@ export default function UsernameForm({ onSubmit, loading }) {
             <SiLetterboxd size={14} />
             <span className="underline decoration-2">LETTERBOXD</span>
           </a>
-          <a href="https://github.com/basithladoo" target="_blank" rel="noreferrer" className="flex items-center gap-1.5 text-[10px] font-black text-retro-black hover:bg-retro-yellow px-1 transition-colors">
+          <a href="https://github.com/basithladdu" target="_blank" rel="noreferrer" className="flex items-center gap-1.5 text-[10px] font-black text-retro-black hover:bg-retro-yellow px-1 transition-colors">
             <SiGithub size={14} />
             <span className="underline decoration-2">GITHUB</span>
           </a>

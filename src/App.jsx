@@ -5,10 +5,12 @@ import InputTabs from './components/input/InputTabs.jsx'
 import SpinWheel from './components/picker/SpinWheel.jsx'
 import MovieCard from './components/picker/MovieCard.jsx'
 import PickerControls from './components/picker/PickerControls.jsx'
+import ShareBar from './components/picker/ShareBar.jsx'
 import { useWatchlistScraper } from './hooks/useWatchlistScraper.js'
 import { pickRandom } from './utils/randomPicker.js'
 import { motion, AnimatePresence } from 'framer-motion'
-import { getSavedWatchlist, saveWatchlist } from './services/firebase.js'
+import { getSavedWatchlist, saveWatchlist, logUserSearch } from './services/firebase.js'
+import AdminView from './components/admin/AdminView.jsx'
 
 export default function App() {
   const [view, setView] = useState('input') // 'input' | 'picker'
@@ -26,10 +28,15 @@ export default function App() {
       if (!result) {
         // 2. If not in Firebase, scrape it
         result = await scrape(username)
-        // 3. Save to Firebase for next time
-        await saveWatchlist(username, result)
+        // 3. Cache it for next time — fire and forget. Firestore is often
+        //    blocked by ad blockers, and an unacknowledged write never
+        //    settles, so awaiting this could strand the user forever.
+        saveWatchlist(username, result, result.meta)
       }
-      
+
+      // 4. Log the search for analytics (also fire and forget)
+      logUserSearch(username)
+
       setFilms(result)
       startPicker(result)
     } catch {
@@ -72,7 +79,16 @@ export default function App() {
 
       <main className="flex-1 px-3 py-4 sm:px-4 sm:py-8">
         <AnimatePresence mode="wait">
-          {view === 'input' ? (
+          {window.location.pathname === '/admin' ? (
+            <motion.div
+              key="admin"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+            >
+              <AdminView />
+            </motion.div>
+          ) : view === 'input' ? (
             <motion.div
               key="input"
               initial={{ opacity: 0, y: 16 }}
@@ -113,6 +129,8 @@ export default function App() {
                   />
                 ))}
               </div>
+
+              <ShareBar />
             </motion.div>
           ) : (
             <motion.div
@@ -167,6 +185,8 @@ export default function App() {
                 spinning={spinning}
                 filmsCount={films.length}
               />
+
+              {!spinning && chosen && <ShareBar film={chosen} />}
             </motion.div>
           )}
         </AnimatePresence>

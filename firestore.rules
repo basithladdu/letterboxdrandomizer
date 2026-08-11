@@ -4,5 +4,8 @@ service cloud.firestore {
     match /watchlists/{username} {
       allow read, write: if true;
     }
+    match /searches/{username} {
+      allow read, write: if true;
+    }
   }
 }

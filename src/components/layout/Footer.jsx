@@ -1,5 +1,5 @@
 import { BiBullseye, BiSmile, BiVolumeFull } from 'react-icons/bi'
-import { SiLetterboxd, SiGithub, SiX } from 'react-icons/si'
+import { SiLetterboxd, SiGithub, SiX, SiInstagram } from 'react-icons/si'
 
 export default function Footer() {
   return (
@@ -21,7 +21,25 @@ export default function Footer() {
         <p className="text-[10px] sm:text-xs font-black text-retro-black uppercase tracking-widest border-b-2 border-retro-black">
           Those my social handles:
         </p>
-        <div className="flex gap-6 sm:gap-12">
+        <div className="flex flex-wrap justify-center gap-4 sm:gap-10">
+          <a
+            href="https://instagram.com/basithladdu"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-2 text-[10px] sm:text-xs font-bold text-retro-black hover:bg-retro-yellow px-1 transition-colors"
+          >
+            <SiInstagram size={14} />
+            <span>INSTAGRAM</span>
+          </a>
+          <a
+            href="https://twitter.com/basithladoo"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-2 text-[10px] sm:text-xs font-bold text-retro-black hover:bg-retro-yellow px-1 transition-colors"
+          >
+            <SiX size={14} />
+            <span>TWITTER</span>
+          </a>
           <a
             href="https://letterboxd.com/basithladoo"
             target="_blank"
@@ -32,22 +50,13 @@ export default function Footer() {
             <span>LETTERBOXD</span>
           </a>
           <a
-            href="https://github.com/basithladoo"
+            href="https://github.com/basithladdu"
             target="_blank"
             rel="noopener noreferrer"
             className="flex items-center gap-2 text-[10px] sm:text-xs font-bold text-retro-black hover:bg-retro-yellow px-1 transition-colors"
           >
             <SiGithub size={14} />
             <span>GITHUB</span>
-          </a>
-          <a
-            href="https://twitter.com/basithladoo"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex items-center gap-2 text-[10px] sm:text-xs font-bold text-retro-black hover:bg-retro-yellow px-1 transition-colors"
-          >
-            <SiX size={14} />
-            <span>TWITTER</span>
           </a>
         </div>
       </div>
