@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { motion, useAnimation } from 'framer-motion'
 import { buildSpinSequence } from '../../utils/randomPicker.js'
+import { playSpinSound } from '../../utils/spinSound.js'
 
 const ITEM_HEIGHT = 72
 
@@ -36,6 +37,8 @@ export default function SpinWheel({ films, chosen, onComplete, spinning }) {
     controls.set({ y: 0 })
 
     const totalDistance = (seq.length - 1) * ITEM_HEIGHT
+
+    playSpinSound()
 
     controls.start({
       y: -totalDistance,

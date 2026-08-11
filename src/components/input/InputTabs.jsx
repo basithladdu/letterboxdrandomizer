@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import UsernameForm from './UsernameForm.jsx'
 import CSVUploadForm from './CSVUploadForm.jsx'
+import ShareBar from '../picker/ShareBar.jsx'
 import ProgressBar from '../shared/ProgressBar.jsx'
 import ErrorBanner from '../shared/ErrorBanner.jsx'
 
@@ -19,14 +20,14 @@ export default function InputTabs({ scrapeLoading, scrapeProgress, scrapeError, 
   return (
     <div className="w-full max-w-lg mx-auto space-y-5">
       {/* Tabs */}
-      <div className="flex gap-1 px-1">
+      <div className="flex gap-1 px-1 flex-wrap">
         <button
           onClick={() => setActiveTab('username')}
           className={`
             px-4 py-2 text-[10px] sm:text-xs font-bold uppercase tracking-widest
             transition-none border-t-2 border-x-2
-            ${activeTab === 'username' 
-              ? 'bg-retro-gray border-retro-white shadow-[0_-2px_0_#FFF] translate-y-[2px] z-10' 
+            ${activeTab === 'username'
+              ? 'bg-retro-gray border-retro-white shadow-[0_-2px_0_#FFF] translate-y-[2px] z-10'
               : 'bg-retro-muted border-retro-muted opacity-60'}
           `}
           style={{
@@ -40,8 +41,8 @@ export default function InputTabs({ scrapeLoading, scrapeProgress, scrapeError, 
           className={`
             px-4 py-2 text-[10px] sm:text-xs font-bold uppercase tracking-widest
             transition-none border-t-2 border-x-2
-            ${activeTab === 'csv' 
-              ? 'bg-retro-gray border-retro-white shadow-[0_-2px_0_#FFF] translate-y-[2px] z-10' 
+            ${activeTab === 'csv'
+              ? 'bg-retro-gray border-retro-white shadow-[0_-2px_0_#FFF] translate-y-[2px] z-10'
               : 'bg-retro-muted border-retro-muted opacity-60'}
           `}
           style={{
@@ -50,13 +51,30 @@ export default function InputTabs({ scrapeLoading, scrapeProgress, scrapeError, 
         >
           CSV Upload
         </button>
+        <button
+          onClick={() => setActiveTab('share')}
+          className={`
+            px-4 py-2 text-[10px] sm:text-xs font-bold uppercase tracking-widest
+            transition-none border-t-2 border-x-2
+            ${activeTab === 'share'
+              ? 'bg-retro-gray border-retro-white shadow-[0_-2px_0_#FFF] translate-y-[2px] z-10'
+              : 'bg-retro-muted border-retro-muted opacity-60'}
+          `}
+          style={{
+            borderColor: activeTab === 'share' ? '#FFFFFF #808080 transparent #FFFFFF' : '#808080'
+          }}
+        >
+          Share
+        </button>
       </div>
 
       <div className="relative">
         {activeTab === 'username' ? (
           <UsernameForm onSubmit={onScrape} loading={scrapeLoading} />
-        ) : (
+        ) : activeTab === 'csv' ? (
           <CSVUploadForm onUpload={onUpload} />
+        ) : (
+          <ShareBar />
         )}
       </div>
 
