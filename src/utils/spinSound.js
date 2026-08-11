@@ -1,6 +1,4 @@
-// Retro 8-bit spin sound generated with Web Audio API.
-// Creates a descending pitch sweep with some noise for a classic arcade feel.
-
+// Retro arcade spin sound - classic whirling effect with clean tones
 let audioContext = null
 
 function getAudioContext() {
@@ -13,77 +11,53 @@ function getAudioContext() {
 export function playSpinSound() {
   try {
     const ctx = getAudioContext()
-
-    // Resume context if suspended (required by browsers after user interaction)
-    if (ctx.state === 'suspended') {
-      ctx.resume()
-    }
+    if (ctx.state === 'suspended') ctx.resume()
 
     const now = ctx.currentTime
-    const SPIN_DURATION = 3.2 // Match the spin animation duration
-    const PATTERN_DURATION = 0.4 // One "chirp" pattern
+    const SPIN_DURATION = 3.2
 
-    // Create a sustained noise background throughout the entire spin
-    const noise = ctx.createBufferSource()
-    const bufferSize = ctx.sampleRate * SPIN_DURATION
-    const noiseBuffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate)
-    const noiseData = noiseBuffer.getChannelData(0)
-    for (let i = 0; i < bufferSize; i++) {
-      noiseData[i] = (Math.random() * 2 - 1) * 0.3
-    }
-    noise.buffer = noiseBuffer
-    noise.loop = false
+    // Create a classic arcade spin with accelerating pitch drops
+    // Pattern: high -> low -> high -> low (repeating) but accelerating
+    const baseNotes = [800, 400, 750, 380, 700, 350, 650, 320]
+    const timePerNote = SPIN_DURATION / baseNotes.length
 
-    // Create filter for the noise
-    const filter = ctx.createBiquadFilter()
-    filter.type = 'highpass'
-    filter.frequency.value = 400
-    filter.Q.value = 0.5
+    baseNotes.forEach((freq, idx) => {
+      const startTime = now + idx * timePerNote
+      const duration = timePerNote * 0.9 // Slight gap between notes
 
-    // Noise gain with slow fade-in and fade-out
-    const noiseGain = ctx.createGain()
-    noiseGain.gain.setValueAtTime(0, now)
-    noiseGain.gain.linearRampToValueAtTime(0.1, now + 0.1)
-    noiseGain.gain.linearRampToValueAtTime(0.1, now + SPIN_DURATION - 0.2)
-    noiseGain.gain.linearRampToValueAtTime(0, now + SPIN_DURATION)
+      const osc = ctx.createOscillator()
+      osc.type = 'square' // Square wave for retro 8-bit sound
+      osc.frequency.setValueAtTime(freq, startTime)
+      // Slight frequency sweep down during the note
+      osc.frequency.linearRampToValueAtTime(freq * 0.9, startTime + duration)
 
-    noise.connect(filter)
-    filter.connect(noiseGain)
-    noiseGain.connect(ctx.destination)
-    noise.start(now)
-    noise.stop(now + SPIN_DURATION)
+      const gain = ctx.createGain()
+      gain.gain.setValueAtTime(0.15, startTime)
+      gain.gain.exponentialRampToValueAtTime(0.02, startTime + duration)
 
-    // Repeat the pitch pattern every PATTERN_DURATION throughout the spin
-    const pitches = [
-      { freq: 600, duration: 0.08 },
-      { freq: 500, duration: 0.08 },
-      { freq: 400, duration: 0.1 },
-      { freq: 300, duration: 0.14 },
-    ]
+      osc.connect(gain)
+      gain.connect(ctx.destination)
 
-    for (let cycle = 0; cycle < Math.ceil(SPIN_DURATION / PATTERN_DURATION); cycle++) {
-      const cycleStart = cycle * PATTERN_DURATION
-      if (cycleStart >= SPIN_DURATION) break
+      osc.start(startTime)
+      osc.stop(startTime + duration)
+    })
 
-      pitches.forEach(({ freq, duration }) => {
-        const startTime = now + cycleStart + pitches.slice(0, pitches.indexOf({ freq, duration })).reduce((sum, p) => sum + p.duration, 0)
-        if (startTime + duration > now + SPIN_DURATION) return
+    // Add a subtle rising pitch underneath (like a motor spinning up)
+    const motorOsc = ctx.createOscillator()
+    motorOsc.type = 'triangle'
+    motorOsc.frequency.setValueAtTime(200, now)
+    motorOsc.frequency.exponentialRampToValueAtTime(800, now + SPIN_DURATION)
 
-        const osc = ctx.createOscillator()
-        osc.frequency.value = freq
-        osc.type = 'sine'
+    const motorGain = ctx.createGain()
+    motorGain.gain.setValueAtTime(0.06, now)
+    motorGain.gain.linearRampToValueAtTime(0.12, now + SPIN_DURATION * 0.5)
+    motorGain.gain.linearRampToValueAtTime(0.02, now + SPIN_DURATION)
 
-        const gain = ctx.createGain()
-        gain.gain.setValueAtTime(0.08, startTime)
-        gain.gain.exponentialRampToValueAtTime(0.01, startTime + duration)
+    motorOsc.connect(motorGain)
+    motorGain.connect(ctx.destination)
 
-        osc.connect(gain)
-        gain.connect(ctx.destination)
-
-        osc.start(startTime)
-        osc.stop(startTime + duration)
-      })
-    }
+    motorOsc.start(now)
+    motorOsc.stop(now + SPIN_DURATION)
   } catch (err) {
     console.warn('Could not play spin sound:', err?.message || err)
   }
