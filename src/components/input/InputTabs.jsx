@@ -1,88 +1,68 @@
 import { useState, useEffect } from 'react'
 import UsernameForm from './UsernameForm.jsx'
-import CSVUploadForm from './CSVUploadForm.jsx'
-import ShareBar from '../picker/ShareBar.jsx'
 import ProgressBar from '../shared/ProgressBar.jsx'
 import ErrorBanner from '../shared/ErrorBanner.jsx'
 
-export default function InputTabs({ scrapeLoading, scrapeProgress, scrapeError, onScrape, onUpload }) {
-  const [activeTab, setActiveTab] = useState('username')
+export default function InputTabs({ scrapeLoading, scrapeProgress, scrapeError, onScrape }) {
+  const [activeTab, setActiveTab] = useState('solo')
   const [visibleError, setVisibleError] = useState(null)
 
   useEffect(() => {
     if (scrapeError) {
       setVisibleError(scrapeError)
-      const timer = setTimeout(() => setVisibleError(null), 6000)
-      return () => clearTimeout(timer)
     }
   }, [scrapeError])
 
   return (
     <div className="w-full max-w-lg mx-auto space-y-5">
-      {/* Tabs */}
       <div className="flex gap-1 px-1 flex-wrap">
         <button
-          onClick={() => setActiveTab('username')}
+          type="button"
+          onClick={() => setActiveTab('solo')}
           className={`
             px-4 py-2 text-[10px] sm:text-xs font-bold uppercase tracking-widest
             transition-none border-t-2 border-x-2
-            ${activeTab === 'username'
+            ${activeTab === 'solo'
               ? 'bg-retro-gray border-retro-white shadow-[0_-2px_0_#FFF] translate-y-[2px] z-10'
               : 'bg-retro-muted border-retro-muted opacity-60'}
           `}
           style={{
-            borderColor: activeTab === 'username' ? '#FFFFFF #808080 transparent #FFFFFF' : '#808080'
+            borderColor: activeTab === 'solo' ? '#FFFFFF #808080 transparent #FFFFFF' : '#808080'
           }}
         >
-          Username
+          Random Film
         </button>
         <button
-          onClick={() => setActiveTab('csv')}
+          type="button"
+          onClick={() => setActiveTab('compare')}
           className={`
             px-4 py-2 text-[10px] sm:text-xs font-bold uppercase tracking-widest
             transition-none border-t-2 border-x-2
-            ${activeTab === 'csv'
+            ${activeTab === 'compare'
               ? 'bg-retro-gray border-retro-white shadow-[0_-2px_0_#FFF] translate-y-[2px] z-10'
               : 'bg-retro-muted border-retro-muted opacity-60'}
           `}
           style={{
-            borderColor: activeTab === 'csv' ? '#FFFFFF #808080 transparent #FFFFFF' : '#808080'
+            borderColor: activeTab === 'compare' ? '#FFFFFF #808080 transparent #FFFFFF' : '#808080'
           }}
         >
-          CSV Upload
-        </button>
-        <button
-          onClick={() => setActiveTab('share')}
-          className={`
-            px-4 py-2 text-[10px] sm:text-xs font-bold uppercase tracking-widest
-            transition-none border-t-2 border-x-2
-            ${activeTab === 'share'
-              ? 'bg-retro-gray border-retro-white shadow-[0_-2px_0_#FFF] translate-y-[2px] z-10'
-              : 'bg-retro-muted border-retro-muted opacity-60'}
-          `}
-          style={{
-            borderColor: activeTab === 'share' ? '#FFFFFF #808080 transparent #FFFFFF' : '#808080'
-          }}
-        >
-          Share
+          Common Films
         </button>
       </div>
 
       <div className="relative">
-        {activeTab === 'username' ? (
-          <UsernameForm onSubmit={onScrape} loading={scrapeLoading} />
-        ) : activeTab === 'csv' ? (
-          <CSVUploadForm onUpload={onUpload} />
-        ) : (
-          <ShareBar />
-        )}
+        {activeTab === 'solo' ? (
+          <UsernameForm mode="solo" onSubmit={onScrape} loading={scrapeLoading} />
+        ) : activeTab === 'compare' ? (
+          <UsernameForm mode="compare" onSubmit={onScrape} loading={scrapeLoading} />
+        ) : null}
       </div>
 
       {scrapeLoading && (
         <ProgressBar
           loaded={scrapeProgress.loaded}
           total={scrapeProgress.total}
-          label="Scraping watchlist pages…"
+          label={activeTab === 'compare' ? 'Fetching both public watchlists...' : 'Fetching watchlist pages...'}
         />
       )}
 
