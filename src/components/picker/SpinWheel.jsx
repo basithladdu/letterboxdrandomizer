@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { motion, useAnimation } from 'framer-motion'
 import { buildSpinSequence } from '../../utils/randomPicker.js'
-import { playSpinSound } from '../../utils/spinSound.js'
+import { playSpinSound, SLOT_SOUND_DURATION } from '../../utils/spinSound.js'
 
 const ITEM_HEIGHT = 72
 
@@ -43,7 +43,7 @@ export default function SpinWheel({ films, chosen, onComplete, spinning }) {
     controls.start({
       y: -totalDistance,
       transition: {
-        duration: 3.2,
+        duration: SLOT_SOUND_DURATION,
         ease: [0.25, 0.46, 0.45, 0.94],
       },
     }).then(() => {

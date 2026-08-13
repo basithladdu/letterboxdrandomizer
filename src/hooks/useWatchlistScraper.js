@@ -7,23 +7,43 @@ export function useWatchlistScraper() {
   const [loading, setLoading] = useState(false)
   const [progress, setProgress] = useState({ loaded: 0, total: 0 })
 
-  const scrape = useCallback(async (username) => {
+  const scrape = useCallback(async (usernames) => {
+    const list = [...new Set(
+      (Array.isArray(usernames) ? usernames : [usernames])
+        .map((username) => username.trim())
+        .filter(Boolean)
+    )]
+
     setLoading(true)
     setError(null)
     setFilms([])
     setProgress({ loaded: 0, total: 0 })
 
     try {
-      const result = await scrapeAllPages(username, (loaded, total) => {
-        setProgress({ loaded, total })
-      })
+      const progressByUser = new Map()
+      const settledResults = await Promise.allSettled(list.map(async (username) => {
+        const result = await scrapeAllPages(username, (loaded, total) => {
+          progressByUser.set(username, { loaded, total })
+          setProgress({
+            loaded: [...progressByUser.values()].reduce((sum, item) => sum + item.loaded, 0),
+            total: [...progressByUser.values()].reduce((sum, item) => sum + item.total, 0),
+          })
+        })
 
-      if (result.length === 0) {
-        throw new Error(`No films found for "${username}". Check the username or make the watchlist public.`)
-      }
+        if (result.length === 0) {
+          throw new Error(`No films found for "${username}". Check the username or make the watchlist public.`)
+        }
 
-      setFilms(result)
-      return result
+        return { username, films: result }
+      }))
+
+      const failed = settledResults.find((result) => result.status === 'rejected')
+      if (failed) throw failed.reason
+
+      const results = settledResults.map((result) => result.value)
+
+      setFilms(results.flatMap(({ films }) => films))
+      return results
     } catch (err) {
       setError(err.message || 'Failed to fetch watchlist')
       throw err
@@ -32,5 +52,7 @@ export function useWatchlistScraper() {
     }
   }, [])
 
-  return { films, error, loading, progress, scrape }
+  const clearError = useCallback(() => setError(null), [])
+
+  return { films, error, loading, progress, scrape, clearError }
 }

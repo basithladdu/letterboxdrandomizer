@@ -24,6 +24,37 @@ function StarRating({ rating }) {
   )
 }
 
+export function ViewOnLetterboxd({ film }) {
+  if (!film?.letterboxdUri) return null
+
+  return (
+    <a
+      href={film.letterboxdUri}
+      target="_blank"
+      rel="noopener noreferrer"
+      aria-label={`View ${film.title} on Letterboxd`}
+      className="block w-full py-2 sm:py-4 text-sm sm:text-lg font-black text-retro-black text-center uppercase tracking-widest border-4 transition-none"
+      style={{
+        backgroundColor: '#FFFF00',
+        borderColor: '#FFFFFF #808080 #808080 #FFFFFF',
+        boxShadow: 'inset -1px -1px 0 #404040, inset 1px 1px 0 #DFDFDF',
+        textShadow: '2px 2px 0 #808080'
+      }}
+      onMouseDown={(e) => {
+        e.currentTarget.style.borderColor = '#808080 #FFFFFF #FFFFFF #808080'
+        e.currentTarget.style.boxShadow = 'inset 1px 1px 0 #404040, inset -1px -1px 0 #DFDFDF'
+        e.currentTarget.style.transform = 'translate(1px, 1px)'
+      }}
+      onMouseUp={(e) => {
+        e.currentTarget.style.borderColor = '#FFFFFF #808080 #808080 #FFFFFF'
+        e.currentTarget.style.boxShadow = 'inset -1px -1px 0 #404040, inset 1px 1px 0 #DFDFDF'
+        e.currentTarget.style.transform = 'translate(0, 0)'
+      }}
+    >
+      VIEW ON LETTERBOXD
+    </a>
+  )
+}
 
 export default function MovieCard({ film }) {
 
@@ -53,6 +84,11 @@ export default function MovieCard({ film }) {
               {film.year && (
                 <p className="text-xs sm:text-base font-mono text-retro-muted mt-1">YEAR: {film.year}</p>
               )}
+              {film.watchlistOwners?.length === 2 && (
+                <p className="text-[10px] sm:text-sm font-mono text-retro-muted">
+                  COMMON TO: {film.watchlistOwners.join(' + ')}
+                </p>
+              )}
               {film.dateAdded && (
                 <p className="text-[10px] sm:text-sm font-mono text-retro-muted">ADDED: {film.dateAdded}</p>
               )}
@@ -65,33 +101,6 @@ export default function MovieCard({ film }) {
               </div>
             )}
 
-            <a
-              href={film.letterboxdUri}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="
-                block w-full py-2 sm:py-4 text-sm sm:text-lg font-black text-retro-black text-center uppercase tracking-widest
-                border-4 border-retro-black transition-none mt-4
-              "
-              style={{
-                backgroundColor: '#FFFF00',
-                borderColor: '#FFFFFF #808080 #808080 #FFFFFF',
-                boxShadow: 'inset -1px -1px 0 #404040, inset 1px 1px 0 #DFDFDF',
-                textShadow: '2px 2px 0 #808080'
-              }}
-              onMouseDown={(e) => {
-                e.currentTarget.style.borderColor = '#808080 #FFFFFF #FFFFFF #808080'
-                e.currentTarget.style.boxShadow = 'inset 1px 1px 0 #404040, inset -1px -1px 0 #DFDFDF'
-                e.currentTarget.style.transform = 'translate(1px, 1px)'
-              }}
-              onMouseUp={(e) => {
-                e.currentTarget.style.borderColor = '#FFFFFF #808080 #808080 #FFFFFF'
-                e.currentTarget.style.boxShadow = 'inset -1px -1px 0 #404040, inset 1px 1px 0 #DFDFDF'
-                e.currentTarget.style.transform = 'translate(0, 0)'
-              }}
-            >
-              VIEW ON LETTERBOXD
-            </a>
           </div>
         </div>
       </div>

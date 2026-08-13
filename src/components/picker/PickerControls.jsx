@@ -1,16 +1,24 @@
 export default function PickerControls({ onSpin, onReset, spinning, filmsCount }) {
   return (
     <div className="space-y-2 sm:space-y-3 w-full mx-auto">
+      <span className="sr-only" aria-live="polite">
+        {spinning
+          ? 'Choosing a film from your watchlist.'
+          : `${filmsCount} film${filmsCount === 1 ? '' : 's'} available.`}
+      </span>
       {/* Buttons Section */}
       <div className="grid grid-cols-2 gap-2 sm:gap-3 max-w-2xl mx-auto">
         {/* SPIN Button */}
         <button
+          type="button"
           onClick={onSpin}
           disabled={spinning}
+          aria-label={spinning ? 'Choosing a film' : 'Spin again to choose another film'}
+          aria-busy={spinning}
           className={`
-            py-2 sm:py-4 font-black text-xs sm:text-base uppercase tracking-widest
+            min-h-[44px] px-2 py-2 sm:py-4 font-black text-xs sm:text-base uppercase tracking-widest
             border-4 transition-none
-            flex items-center justify-center gap-2
+            flex items-center justify-center gap-2 touch-manipulation
             ${spinning ? 'opacity-50 cursor-not-allowed' : ''}
           `}
           style={{
@@ -50,11 +58,14 @@ export default function PickerControls({ onSpin, onReset, spinning, filmsCount }
 
         {/* RESET Button */}
         <button
+          type="button"
           onClick={onReset}
           disabled={spinning}
+          aria-label="Start over with a different watchlist"
           className={`
-            py-2 sm:py-4 font-black text-xs sm:text-base uppercase tracking-widest
+            min-h-[44px] px-2 py-2 sm:py-4 font-black text-xs sm:text-base uppercase tracking-widest
             border-4 transition-none
+            touch-manipulation
             ${spinning ? 'opacity-50 cursor-not-allowed' : ''}
           `}
           style={{

@@ -1,12 +1,18 @@
 import { proxyFetch } from './corsProxy.js'
 import { LB_BASE, LB_PAGE_SIZE } from '../utils/constants.js'
 
-const parser = new DOMParser()
-
 // How many pages to request at once. Letterboxd is fine with this and it keeps
 // a 3000-film watchlist to a few seconds instead of a minute.
 const CONCURRENCY = 5
 const PAGE_RETRIES = 3
+
+function parseDocument(html) {
+  if (typeof DOMParser === 'undefined') {
+    throw new Error('This environment cannot parse Letterboxd pages.')
+  }
+
+  return new DOMParser().parseFromString(html, 'text/html')
+}
 
 function parseFilms(doc) {
   const entries = doc.querySelectorAll('li.griditem div.react-component')
@@ -56,15 +62,20 @@ function parseTotal(doc) {
 
 // Fetch and parse a single page. Returns { films, total }.
 export async function scrapePage(username, page) {
-  const url = `${LB_BASE}/${username}/watchlist/page/${page}/`
+  const normalizedUsername = String(username ?? '').trim().replace(/^@/, '')
+  const url = `${LB_BASE}/${encodeURIComponent(normalizedUsername)}/watchlist/page/${page}/`
   const res = await proxyFetch(url)
 
-  if (res.status === 404) {
+  if (res.status === 404 && page === 1) {
     throw new Error(`User "${username}" not found.`)
   }
 
+  // A page after the end of a watchlist may be a 404 even when the user is
+  // valid. Treat it as the normal end condition for the no-total fallback.
+  if (res.status === 404) return { films: [], total: null }
+
   const html = await res.text()
-  const doc = parser.parseFromString(html, 'text/html')
+  const doc = parseDocument(html)
 
   if (page === 1) {
     const bodyText = doc.body?.textContent || ''
@@ -84,7 +95,7 @@ async function scrapePageWithRetry(username, page, expectFilms) {
       // A page that should hold films but came back empty means the proxy
       // handed us an error page with a 200 status. Retry rather than treating
       // it as the end of the watchlist.
-      if (result.films.length === 0 && expectFilms) {
+      if (result.films.length === 0 && expectFilms && result.total !== 0) {
         throw new Error(`Empty response for page ${page}`)
       }
       return result
@@ -102,7 +113,9 @@ async function scrapePageWithRetry(username, page, expectFilms) {
 // Scrape the complete watchlist, every page, with progress reporting.
 export async function scrapeAllPages(username, onProgress) {
   // Page 1 tells us exactly how many films to expect.
-  const first = await scrapePageWithRetry(username, 1, false)
+  // Retry an empty first response too: a proxy can return a 200 error page,
+  // which otherwise looks indistinguishable from an empty watchlist.
+  const first = await scrapePageWithRetry(username, 1, true)
   const total = first.total
 
   if (first.films.length === 0) {
@@ -150,8 +163,9 @@ export async function scrapeAllPages(username, onProgress) {
       let films
       try {
         films = (await scrapePageWithRetry(username, p, false)).films
-      } catch {
-        break
+      } catch (err) {
+        failedPages.push(p)
+        throw new Error(`Could not fetch watchlist page ${p} for "${username}": ${err.message}`)
       }
       if (films.length === 0) break
       byPage.set(p, films)
@@ -176,11 +190,17 @@ export async function scrapeAllPages(username, onProgress) {
     throw new Error(`No films found for "${username}". Is the watchlist public?`)
   }
 
+  const complete = failedPages.length === 0 && (total == null || allFilms.length >= total)
+  if (!complete) {
+    const pageDetails = failedPages.length ? ` Failed pages: ${failedPages.join(', ')}.` : ''
+    throw new Error(`Could not fetch the complete watchlist for "${username}".${pageDetails} Please try again.`)
+  }
+
   return Object.assign(allFilms, {
     meta: {
       expected: total,
       fetched: allFilms.length,
-      complete: failedPages.length === 0 && (total == null || allFilms.length >= total),
+      complete,
       failedPages,
     },
   })

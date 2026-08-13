@@ -1,6 +1,16 @@
 import { useEffect, useRef } from 'react'
 
+const FOCUSABLE_SELECTOR = [
+  'button:not([disabled])',
+  '[href]',
+  'input:not([disabled])',
+  'select:not([disabled])',
+  'textarea:not([disabled])',
+  '[tabindex]:not([tabindex="-1"])',
+].join(',')
+
 export default function HelpDialog({ mode, onClose }) {
+  const dialogRef = useRef(null)
   const closeButtonRef = useRef(null)
   const isCompare = mode === 'compare'
 
@@ -10,7 +20,31 @@ export default function HelpDialog({ mode, onClose }) {
     document.body.style.overflow = 'hidden'
 
     function handleKeyDown(event) {
-      if (event.key === 'Escape') onClose()
+      if (event.key === 'Escape') {
+        event.preventDefault()
+        onClose()
+        return
+      }
+
+      if (event.key !== 'Tab' || !dialogRef.current) return
+
+      const focusable = [...dialogRef.current.querySelectorAll(FOCUSABLE_SELECTOR)]
+      if (!focusable.length) return
+
+      const first = focusable[0]
+      const last = focusable[focusable.length - 1]
+      const active = document.activeElement
+
+      if (!dialogRef.current.contains(active)) {
+        event.preventDefault()
+        ;(event.shiftKey ? last : first).focus()
+      } else if (event.shiftKey && active === first) {
+        event.preventDefault()
+        last.focus()
+      } else if (!event.shiftKey && active === last) {
+        event.preventDefault()
+        first.focus()
+      }
     }
 
     document.addEventListener('keydown', handleKeyDown)
@@ -28,9 +62,11 @@ export default function HelpDialog({ mode, onClose }) {
       }}
     >
       <div
+        ref={dialogRef}
         role="dialog"
         aria-modal="true"
         aria-labelledby="help-dialog-title"
+        tabIndex={-1}
         className="w-[min(92vw,720px)] max-h-[88vh] retro-outset-deep bg-retro-gray border-4 overflow-hidden"
       >
         <div className="retro-titlebar px-3 py-2 flex items-center justify-between gap-3">
@@ -70,7 +106,7 @@ export default function HelpDialog({ mode, onClose }) {
             <div className="retro-inset bg-retro-gray p-3">
               <h3 className="text-xs sm:text-sm font-black uppercase text-retro-black">02. FETCH FILMS</h3>
               <p className="mt-2 text-[11px] sm:text-xs font-bold text-retro-black leading-relaxed">
-                {isCompare ? 'Click FIND SHARED FILMS.' : 'Click FETCH WATCHLIST.'} Every available page is read before the spin starts.
+                {isCompare ? 'Click FIND COMMON FILMS.' : 'Click FETCH WATCHLIST.'} Every available page is read before the spin starts.
               </p>
             </div>
             <div className="retro-inset bg-retro-gray p-3">
@@ -82,7 +118,7 @@ export default function HelpDialog({ mode, onClose }) {
             <div className="retro-inset bg-retro-gray p-3">
               <h3 className="text-xs sm:text-sm font-black uppercase text-retro-black">04. OPEN A FILM</h3>
               <p className="mt-2 text-[11px] sm:text-xs font-bold text-retro-black leading-relaxed">
-                In Common Films mode, SHARED FILMS lists every match. Select any title to open it on Letterboxd.
+                In Common Films mode, COMMON FILMS lists every match. Select any title to open it on Letterboxd.
               </p>
             </div>
           </div>

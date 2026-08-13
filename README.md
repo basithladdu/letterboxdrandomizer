@@ -1,27 +1,29 @@
-# Letterboxd Randomizer
+# Letterboxd Watchlist Mixer
 
-A lightweight web app to randomly pick a film from your Letterboxd watchlist. No API key needed — it works by fetching public watchlist data directly.
+A lightweight web app that picks a random film from one public Letterboxd watchlist or finds common films across two public lists. No API key or account is needed.
 
-[**Live Demo**](https://letterboxd-randomizer.vercel.app)
+[Live Demo](https://letterboxd-randomizer.vercel.app)
 
 ---
 
-## 🚀 Features
+## Features
 
-- **Direct Fetch** — Just enter your username to pull your watchlist.
-- **Slot Machine Reveal** — A fun Framer Motion animation to pick your next watch.
+- **Random Film** - The default mode picks a film from one public watchlist.
+- **Common Films** — Enter two usernames and find the films both people want to watch.
+- **Full Fetch** — Every available watchlist page is fetched, with pagination and retry handling.
+- **Slot Machine Reveal** — A retro Framer Motion animation picks the next film.
 - **Poster Previews** — Displays film posters directly from Letterboxd.
-- **Mobile Optimized** — Designed to work seamlessly across all devices.
-- **Privacy Focused** — No data storage, no tracking, just public data.
+- **Mobile Optimized** — Designed to work on narrow screens and touch devices.
+- **Privacy Focused** — No account required; only public watchlist data is used.
 
-## 🛠️ Tech Stack
+## Tech Stack
 
 - **React 18** + **Vite**
-- **Framer Motion** (Animations)
-- **Tailwind CSS** (Styling)
-- **CORS Proxy** (Scraping)
+- **Framer Motion** (animation)
+- **Tailwind CSS** (styling)
+- **Vercel serverless proxy** (Letterboxd fetching)
 
-## 💻 Development
+## Development
 
 1. Clone the repo:
    ```bash
@@ -36,24 +38,22 @@ A lightweight web app to randomly pick a film from your Letterboxd watchlist. No
    npm run dev
    ```
 
-## 🤝 Contributing
+## Watchlist Modes
 
-Contributions are welcome! Check out the [Contributing Guide](CONTRIBUTING.md) to get started.
+Random Film mode is the default. Enter one Letterboxd username and spin every film in that public watchlist.
 
-## 📂 CSV Export Method
+Common Films mode accepts two Letterboxd usernames. Both watchlists must be public. The app fetches every available page for each user, matches films by their Letterboxd slug, and spins only films that appear in both lists.
 
-If the username fetch fails (e.g., due to CORS proxy limits), you can use the direct export method:
+The CSV parser remains in the source for compatibility, but CSV upload is not exposed in the app interface.
 
-1.  Go to your Letterboxd watchlist (e.g., `letterboxd.com/USERNAME/watchlist/`).
-2.  Scroll to the bottom and click **Export**.
-3.  Upload the `watchlist.csv` file to the **CSV Upload** tab in the app.
+## Contributing
 
-## 📄 License
+Contributions are welcome. Check out the [Contributing Guide](CONTRIBUTING.md).
+
+## License
 
 This project is licensed under the [MIT License](LICENSE).
 
 ---
 
-**Made by [Shaik Abdul Basith](https://letterboxd.com/basithladoo)**
-
-[Letterboxd](https://letterboxd.com/basithladoo) | [GitHub](https://github.com/basithladoo) | [Twitter](https://twitter.com/basithladoo)
+Made by [Shaik Abdul Basith](https://letterboxd.com/basithladoo)

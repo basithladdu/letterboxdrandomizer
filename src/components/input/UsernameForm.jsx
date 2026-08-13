@@ -1,14 +1,12 @@
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import LoadingSpinner from '../shared/LoadingSpinner.jsx'
 import HelpDialog from '../shared/HelpDialog.jsx'
-import SupportButton from '../shared/SupportButton.jsx'
-import { SiLetterboxd, SiGithub, SiX, SiInstagram } from 'react-icons/si'
-import { BiEnvelope } from 'react-icons/bi'
 
 export default function UsernameForm({ onSubmit, loading, mode = 'solo' }) {
   const [usernames, setUsernames] = useState(['', ''])
   const [validationError, setValidationError] = useState(null)
   const [showHelp, setShowHelp] = useState(false)
+  const helpButtonRef = useRef(null)
 
   function handleSubmit(e) {
     e.preventDefault()
@@ -46,6 +44,11 @@ export default function UsernameForm({ onSubmit, loading, mode = 'solo' }) {
     setValidationError(null)
   }
 
+  function closeHelp() {
+    setShowHelp(false)
+    requestAnimationFrame(() => helpButtonRef.current?.focus())
+  }
+
   const visibleUsernames = usernames.slice(0, mode === 'compare' ? 2 : 1)
   const hasEmptyUsername = visibleUsernames.some((username) => !username.trim())
 
@@ -75,6 +78,8 @@ export default function UsernameForm({ onSubmit, loading, mode = 'solo' }) {
                   placeholder={index === 0 ? 'basithladoo' : 'zoerosebryant'}
                   disabled={loading}
                   autoComplete="off"
+                  autoCapitalize="none"
+                  enterKeyHint={mode === 'compare' && index === 0 ? 'next' : 'go'}
                   spellCheck={false}
                   className="
                     flex-1 border-2 border-retro-muted bg-retro-white px-2 sm:px-3 py-1.5 sm:py-2
@@ -133,7 +138,7 @@ export default function UsernameForm({ onSubmit, loading, mode = 'solo' }) {
               <span>{mode === 'compare' ? 'FETCHING BOTH WATCHLISTS&hellip;' : 'FETCHING WATCHLIST&hellip;'}</span>
             </>
           ) : (
-            mode === 'compare' ? <>&#9654; FIND SHARED FILMS</> : <>&#9654; FETCH WATCHLIST</>
+            mode === 'compare' ? <>&#9654; FIND COMMON FILMS</> : <>&#9654; FETCH WATCHLIST</>
           )}
         </button>
       </form>
@@ -142,6 +147,7 @@ export default function UsernameForm({ onSubmit, loading, mode = 'solo' }) {
         <div className="retro-titlebar px-2 sm:px-3 py-1 flex items-center justify-between gap-2">
           <span className="font-bold text-xs uppercase">Important Information</span>
           <button
+            ref={helpButtonRef}
             type="button"
             onClick={() => setShowHelp(true)}
             className="retro-outset bg-retro-gray text-retro-black px-2 py-1 text-[10px] font-black hover:bg-retro-yellow"
@@ -159,40 +165,8 @@ export default function UsernameForm({ onSubmit, loading, mode = 'solo' }) {
         </div>
       </div>
 
-      {showHelp && <HelpDialog mode={mode} onClose={() => setShowHelp(false)} />}
+      {showHelp && <HelpDialog mode={mode} onClose={closeHelp} />}
 
-      <div className="retro-outset bg-retro-gray border-2">
-        <div className="retro-titlebar px-2 py-0.5 flex justify-between items-center">
-          <span className="text-[9px] font-bold uppercase">These are my social handles</span>
-          <div className="flex gap-1">
-            <div className="w-2 h-2 bg-retro-red border border-retro-black" />
-            <div className="w-2 h-2 bg-retro-yellow border border-retro-black" />
-            <div className="w-2 h-2 bg-retro-green border border-retro-black" />
-          </div>
-        </div>
-        <div className="p-2 bg-retro-white flex flex-wrap justify-center gap-x-6 gap-y-2">
-          <a href="https://letterboxd.com/basithladoo" target="_blank" rel="noreferrer" className="flex items-center gap-1.5 text-[10px] font-black text-retro-black hover:bg-retro-yellow px-1 transition-colors">
-            <SiLetterboxd size={14} />
-            <span className="underline decoration-2">LETTERBOXD</span>
-          </a>
-          <a href="https://github.com/basithladdu" target="_blank" rel="noreferrer" className="flex items-center gap-1.5 text-[10px] font-black text-retro-black hover:bg-retro-yellow px-1 transition-colors">
-            <SiGithub size={14} />
-            <span className="underline decoration-2">GITHUB</span>
-          </a>
-          <a href="https://twitter.com/basithladoo" target="_blank" rel="noreferrer" className="flex items-center gap-1.5 text-[10px] font-black text-retro-black hover:bg-retro-yellow px-1 transition-colors">
-            <SiX size={14} />
-            <span className="underline decoration-2">TWITTER / X</span>
-          </a>
-          <a href="https://instagram.com/basithladdu" target="_blank" rel="noreferrer" className="flex items-center gap-1.5 text-[10px] font-black text-retro-black hover:bg-retro-yellow px-1 transition-colors">
-            <SiInstagram size={14} />
-            <span className="underline decoration-2">INSTAGRAM</span>
-          </a>
-          <a href="mailto:basithladoo@gmail.com" className="flex items-center gap-1.5 text-[10px] font-black text-retro-black hover:bg-retro-yellow px-1 transition-colors">
-            <BiEnvelope size={14} />
-            <span className="underline decoration-2">EMAIL</span>
-          </a>
-        </div>
-      </div>
     </div>
   )
 }

@@ -85,14 +85,14 @@ export default function App() {
 
       const sharedFilms = findSharedFilms(watchlists[0], watchlists[1], normalizedUsernames)
       if (sharedFilms.length === 0) {
-        throw new Error(`No shared films found between ${normalizedUsernames[0]} and ${normalizedUsernames[1]}.`)
+        throw new Error(`No common films found between ${normalizedUsernames[0]} and ${normalizedUsernames[1]}.`)
       }
 
       setWatchlistOwners(normalizedUsernames)
       setFilms(sharedFilms)
       startPicker(sharedFilms)
     } catch (error) {
-      setWatchlistError(error.message || 'Could not compare those watchlists.')
+      setWatchlistError(error.message || 'Could not find common films in those watchlists.')
     }
   }
 
@@ -217,7 +217,7 @@ export default function App() {
                 <p className="text-xs sm:text-sm font-mono text-retro-black mt-1 break-words">
                   {watchlistOwners.join(' + ')} &mdash; {films.length}{' '}
                   {watchlistOwners.length === 2
-                    ? `SHARED FILM${films.length === 1 ? '' : 'S'}`
+                    ? `COMMON FILM${films.length === 1 ? '' : 'S'}`
                     : `FILM${films.length === 1 ? '' : 'S'}`}
                 </p>
               </div>

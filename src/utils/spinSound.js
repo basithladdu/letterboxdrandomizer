@@ -1,5 +1,22 @@
-// Retro arcade spin sound - classic whirling effect with clean tones
+import slotMachineSoundUrl from '../assets/slot-machine-10-16.mp3'
+
+// The supplied clip is just over six seconds after MP3 encoding.
+export const SLOT_SOUND_DURATION = 6.1
+
+// Retro arcade spin sound - preserved as the browser fallback for the supplied clip.
 let audioContext = null
+
+function preloadSlotMachineSound() {
+  if (typeof Audio === 'undefined') return null
+
+  const audio = new Audio(slotMachineSoundUrl)
+  audio.preload = 'auto'
+  audio.load()
+  return audio
+}
+
+// Start buffering during app load so the first user-triggered spin can play immediately.
+let slotMachineAudio = preloadSlotMachineSound()
 
 function getAudioContext() {
   if (!audioContext) {
@@ -8,13 +25,13 @@ function getAudioContext() {
   return audioContext
 }
 
-export function playSpinSound() {
+function playLegacySpinSound() {
   try {
     const ctx = getAudioContext()
     if (ctx.state === 'suspended') ctx.resume()
 
     const now = ctx.currentTime
-    const SPIN_DURATION = 3.2
+    const SPIN_DURATION = SLOT_SOUND_DURATION
 
     // Create a classic arcade spin with accelerating pitch drops
     // Pattern: high -> low -> high -> low (repeating) but accelerating
@@ -60,5 +77,27 @@ export function playSpinSound() {
     motorOsc.stop(now + SPIN_DURATION)
   } catch (err) {
     console.warn('Could not play spin sound:', err?.message || err)
+  }
+}
+
+function playSlotMachineSound() {
+  if (typeof Audio === 'undefined') return false
+
+  try {
+    slotMachineAudio ||= preloadSlotMachineSound()
+    if (!slotMachineAudio) return false
+    slotMachineAudio.currentTime = 0
+    slotMachineAudio.volume = 0.65
+    const playRequest = slotMachineAudio.play()
+    playRequest?.catch(() => {})
+    return true
+  } catch {
+    return false
+  }
+}
+
+export function playSpinSound() {
+  if (!playSlotMachineSound()) {
+    playLegacySpinSound()
   }
 }

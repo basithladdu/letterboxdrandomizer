@@ -41,7 +41,7 @@ function ShareButton({ href, onClick, bg, color, shadow, children, label }) {
   )
 }
 
-export default function ShareBar({ film }) {
+export default function ShareBar({ film, watchlistOwners = [] }) {
   const [copied, setCopied] = useState(false)
   const [canNativeShare, setCanNativeShare] = useState(false)
 
@@ -58,7 +58,9 @@ export default function ShareBar({ film }) {
   const url = typeof window !== 'undefined' ? window.location.origin : SITE_URL
 
   const text = film
-    ? `The wheel picked "${film.title}"${film.year ? ` (${film.year})` : ''} from my Letterboxd watchlist! Spin yours:`
+    ? watchlistOwners.length === 2
+      ? `The wheel picked "${film.title}"${film.year ? ` (${film.year})` : ''} from ${watchlistOwners.join(' and ')}'s common Letterboxd films! Spin yours:`
+      : `The wheel picked "${film.title}"${film.year ? ` (${film.year})` : ''} from my Letterboxd watchlist! Spin yours:`
     : `Can't decide what to watch? Spin your Letterboxd watchlist:`
 
   const encodedText = encodeURIComponent(text)
