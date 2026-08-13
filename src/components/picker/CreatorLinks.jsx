@@ -1,5 +1,4 @@
 import { SiGithub, SiInstagram, SiLetterboxd, SiX } from 'react-icons/si'
-import SupportButton from '../shared/SupportButton.jsx'
 
 export default function CreatorLinks() {
   return (
@@ -52,10 +51,6 @@ export default function CreatorLinks() {
             <SiGithub size={15} aria-hidden="true" />
             GITHUB
           </a>
-          <SupportButton
-            className="retro-outset col-span-2 flex items-center justify-center gap-2 px-2 py-2 text-[10px] sm:text-xs font-black text-retro-black no-underline hover:bg-retro-yellow transition-colors"
-            iconSize={15}
-          />
         </div>
       </div>
     </section>

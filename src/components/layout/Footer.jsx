@@ -1,6 +1,5 @@
 import { BiBullseye, BiSmile, BiVolumeFull } from 'react-icons/bi'
 import { SiLetterboxd, SiGithub, SiX, SiInstagram } from 'react-icons/si'
-import SupportButton from '../shared/SupportButton.jsx'
 
 export default function Footer() {
   return (
@@ -59,9 +58,6 @@ export default function Footer() {
             <SiGithub size={14} />
             <span>GITHUB</span>
           </a>
-          <SupportButton
-            className="flex items-center gap-2 text-[10px] sm:text-xs font-bold text-retro-black hover:bg-retro-yellow px-1 transition-colors"
-          />
         </div>
       </div>
 

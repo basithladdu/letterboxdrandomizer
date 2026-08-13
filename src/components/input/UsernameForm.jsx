@@ -179,7 +179,6 @@ export default function UsernameForm({ onSubmit, loading, mode = 'solo' }) {
             <SiGithub size={14} />
             <span className="underline decoration-2">GITHUB</span>
           </a>
-          <SupportButton className="flex items-center gap-1.5 text-[10px] font-black text-retro-black hover:bg-retro-yellow px-1 transition-colors underline decoration-2" />
           <a href="https://twitter.com/basithladoo" target="_blank" rel="noreferrer" className="flex items-center gap-1.5 text-[10px] font-black text-retro-black hover:bg-retro-yellow px-1 transition-colors">
             <SiX size={14} />
             <span className="underline decoration-2">TWITTER / X</span>
