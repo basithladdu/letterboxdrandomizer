@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import Header from './components/layout/Header.jsx'
 import Footer from './components/layout/Footer.jsx'
 import InputTabs from './components/input/InputTabs.jsx'
@@ -10,6 +10,7 @@ import CreatorLinks from './components/picker/CreatorLinks.jsx'
 import { useWatchlistScraper } from './hooks/useWatchlistScraper.js'
 import { pickRandom } from './utils/randomPicker.js'
 import { findSharedFilms } from './utils/watchlistMatcher.js'
+import { fetchFilmMetadata } from './services/letterboxdScraper.js'
 import { motion, AnimatePresence } from 'framer-motion'
 import { getSavedWatchlist, saveWatchlist, logUserSearch } from './services/firebase.js'
 import AdminView from './components/admin/AdminView.jsx'
@@ -131,6 +132,27 @@ export default function App() {
 
     handleReset()
   }
+
+  useEffect(() => {
+    const slug = chosen?.letterboxdSlug
+    if (!slug) return undefined
+
+    let active = true
+    fetchFilmMetadata(slug).then((metadata) => {
+      if (!active || !metadata) return
+
+      setChosen((current) => (
+        current?.letterboxdSlug === slug ? { ...current, ...metadata } : current
+      ))
+      setFilms((current) => current.map((film) => (
+        film.letterboxdSlug === slug ? { ...film, ...metadata } : film
+      )))
+    })
+
+    return () => {
+      active = false
+    }
+  }, [chosen?.letterboxdSlug])
 
   const inputError = watchlistError || scrapeError
 

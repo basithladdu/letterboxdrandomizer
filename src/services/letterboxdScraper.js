@@ -5,6 +5,7 @@ import { LB_BASE, LB_PAGE_SIZE } from '../utils/constants.js'
 // a 3000-film watchlist to a few seconds instead of a minute.
 const CONCURRENCY = 5
 const PAGE_RETRIES = 3
+const filmMetadataCache = new Map()
 
 function parseDocument(html) {
   if (typeof DOMParser === 'undefined') {
@@ -12,6 +13,33 @@ function parseDocument(html) {
   }
 
   return new DOMParser().parseFromString(html, 'text/html')
+}
+
+function toAssetUrl(path) {
+  if (!path) return null
+
+  const absoluteUrl = path.startsWith('http') ? path : `${LB_BASE}${path}`
+  if (!absoluteUrl.startsWith(LB_BASE)) return absoluteUrl
+
+  return import.meta.env.DEV
+    ? absoluteUrl.replace(LB_BASE, '/lb-proxy')
+    : `/api/lb?url=${encodeURIComponent(absoluteUrl)}`
+}
+
+function posterUrlForSlug(slug, posterPath) {
+  return toAssetUrl(posterPath || `/film/${slug}/image-150/`)
+}
+
+function parseJsonLdScript(script) {
+  const raw = (script.textContent || '')
+    .replace(/\/\*\s*<!\[CDATA\[\s*\*\/|\/\*\s*\]\]>\s*\*\//g, '')
+    .trim()
+
+  try {
+    return JSON.parse(raw)
+  } catch {
+    return null
+  }
 }
 
 function parseFilms(doc) {
@@ -27,14 +55,9 @@ function parseFilms(doc) {
     const title = name.replace(/\s*\(\d{4}\)\s*$/, '').trim()
 
     const img = entry.querySelector('img.image')
-    let posterUrl = img?.getAttribute('src') || img?.getAttribute('data-src') || null
-
-    if (posterUrl) {
-      posterUrl = posterUrl
-        .replace(/resized\/film-poster\/.*?\/-\/-\/.*?\//, 'resized/film-poster/')
-        .replace(/125x187/, '230x345')
-        .replace(/0-70-0-105/g, '0-230-0-345')
-    }
+    const posterPath = entry.getAttribute('data-poster-url')
+      || img?.getAttribute('data-src')
+      || (img?.getAttribute('src')?.includes('empty-poster') ? null : img?.getAttribute('src'))
 
     if (title && slug) {
       films.push({
@@ -43,12 +66,54 @@ function parseFilms(doc) {
         letterboxdUri: `${LB_BASE}/film/${slug}/`,
         letterboxdSlug: slug,
         rating: null,
-        posterUrl,
+        posterUrl: posterUrlForSlug(slug, posterPath),
       })
     }
   })
 
   return films
+}
+
+export function fetchFilmMetadata(slug) {
+  const normalizedSlug = String(slug || '').trim().replace(/^\/+|\/+$/g, '')
+  if (!normalizedSlug) return Promise.resolve({})
+  if (filmMetadataCache.has(normalizedSlug)) return filmMetadataCache.get(normalizedSlug)
+
+  const request = (async () => {
+    const posterUrl = posterUrlForSlug(normalizedSlug)
+
+    try {
+      const res = await proxyFetch(`${LB_BASE}/film/${encodeURIComponent(normalizedSlug)}/`)
+      if (!res.ok) return { posterUrl }
+
+      const doc = parseDocument(await res.text())
+      let detailPosterUrl = posterUrl
+      const jsonLd = [...doc.querySelectorAll('script[type="application/ld+json"]')]
+        .map(parseJsonLdScript)
+        .find((data) => data?.image)
+
+      if (typeof jsonLd?.image === 'string') detailPosterUrl = jsonLd.image
+
+      const ratingNode = doc.querySelector('.averagerating')
+      const ratingTitle = ratingNode?.getAttribute('data-original-title') || ''
+      const ratingMeta = doc.querySelector('meta[name="twitter:data2"]')?.getAttribute('content') || ''
+      const ratingValue = jsonLd?.aggregateRating?.ratingValue
+      const ratingMatch = String(ratingValue || '').match(/\d+(?:\.\d+)?/)
+        || ratingTitle.match(/average of\s+(\d+(?:\.\d+)?)/i)
+        || ratingMeta.match(/(\d+(?:\.\d+)?)\s+out of/i)
+        || ratingNode?.textContent?.match(/\d+(?:\.\d+)?/)
+
+      return {
+        posterUrl: detailPosterUrl,
+        rating: ratingMatch?.[1] || ratingMatch?.[0] || null,
+      }
+    } catch {
+      return { posterUrl }
+    }
+  })()
+
+  filmMetadataCache.set(normalizedSlug, request)
+  return request
 }
 
 // Letterboxd puts the authoritative watchlist size on the grid container.

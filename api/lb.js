@@ -36,13 +36,20 @@ export default async function handler(req, res) {
       },
     })
 
-    const body = await upstream.text()
+    const contentType = upstream.headers.get('content-type') || 'text/html; charset=utf-8'
+    const isBinary = contentType.toLowerCase().startsWith('image/')
 
-    res.setHeader('Content-Type', 'text/html; charset=utf-8')
+    res.setHeader('Content-Type', contentType)
     res.setHeader('Access-Control-Allow-Origin', '*')
     // Watchlists change slowly; cache at the edge so repeat spins are instant.
     res.setHeader('Cache-Control', 's-maxage=3600, stale-while-revalidate=86400')
-    res.status(upstream.status).send(body)
+
+    if (isBinary) {
+      res.status(upstream.status).send(Buffer.from(await upstream.arrayBuffer()))
+      return
+    }
+
+    res.status(upstream.status).send(await upstream.text())
   } catch (err) {
     res.status(502).json({ error: 'Upstream fetch failed', detail: String(err?.message || err) })
   }

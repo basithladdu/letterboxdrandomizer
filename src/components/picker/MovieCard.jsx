@@ -1,5 +1,7 @@
+import { useEffect, useState } from 'react'
 import { motion } from 'framer-motion'
 import { BiMoviePlay } from 'react-icons/bi'
+import { fetchPoster } from '../../services/omdbService.js'
 
 function StarRating({ rating }) {
   if (!rating) return null
@@ -56,6 +58,53 @@ export function ViewOnLetterboxd({ film }) {
   )
 }
 
+function PosterArtwork({ film }) {
+  const [source, setSource] = useState(film.posterUrl || null)
+  const [fallbackTried, setFallbackTried] = useState(false)
+  const [failed, setFailed] = useState(!film.posterUrl)
+
+  useEffect(() => {
+    setSource(film.posterUrl || null)
+    setFallbackTried(false)
+    setFailed(!film.posterUrl)
+  }, [film.letterboxdSlug, film.posterUrl])
+
+  async function handleError() {
+    if (fallbackTried) {
+      setFailed(true)
+      return
+    }
+
+    setFallbackTried(true)
+    const fallbackPoster = await fetchPoster(film.title, film.year)
+    if (fallbackPoster) {
+      setSource(fallbackPoster)
+      setFailed(false)
+    } else {
+      setFailed(true)
+    }
+  }
+
+  return (
+    <div className="mx-auto w-full max-w-[180px] sm:max-w-none">
+      {failed || !source ? (
+        <div className="flex aspect-[2/3] w-full items-center justify-center border-4 border-retro-black bg-retro-gray p-3 text-center text-[10px] font-black uppercase text-retro-muted">
+          POSTER UNAVAILABLE
+        </div>
+      ) : (
+        <img
+          src={source}
+          alt={`Poster for ${film.title}${film.year ? ` (${film.year})` : ''}`}
+          className="block aspect-[2/3] w-full border-4 border-retro-black bg-retro-gray object-cover"
+          loading="eager"
+          decoding="async"
+          onError={handleError}
+        />
+      )}
+    </div>
+  )
+}
+
 export default function MovieCard({ film }) {
 
   return (
@@ -76,31 +125,34 @@ export default function MovieCard({ film }) {
         </div>
 
         <div className="p-2 sm:p-4 retro-inset bg-retro-white">
-          <div className="space-y-2 sm:space-y-4 retro-inset bg-retro-panelYellow p-4 sm:p-6">
-            <div className="border-b-4 border-retro-black pb-3 sm:pb-4">
-              <h2 className="text-xl sm:text-4xl font-black text-retro-black leading-tight uppercase">
-                {film.title}
-              </h2>
-              {film.year && (
-                <p className="text-xs sm:text-base font-mono text-retro-muted mt-1">YEAR: {film.year}</p>
-              )}
-              {film.watchlistOwners?.length === 2 && (
-                <p className="text-[10px] sm:text-sm font-mono text-retro-muted">
-                  COMMON TO: {film.watchlistOwners.join(' + ')}
-                </p>
-              )}
-              {film.dateAdded && (
-                <p className="text-[10px] sm:text-sm font-mono text-retro-muted">ADDED: {film.dateAdded}</p>
+          <div className="grid gap-4 retro-inset bg-retro-panelYellow p-4 sm:grid-cols-[minmax(0,180px)_1fr] sm:gap-6 sm:p-6">
+            <PosterArtwork film={film} />
+
+            <div className="min-w-0 space-y-2 sm:space-y-4">
+              <div className="border-b-4 border-retro-black pb-3 sm:pb-4">
+                <h2 className="text-xl sm:text-4xl font-black text-retro-black leading-tight uppercase">
+                  {film.title}
+                </h2>
+                {film.year && (
+                  <p className="text-xs sm:text-base font-mono text-retro-muted mt-1">YEAR: {film.year}</p>
+                )}
+                {film.watchlistOwners?.length === 2 && (
+                  <p className="text-[10px] sm:text-sm font-mono text-retro-muted">
+                    COMMON TO: {film.watchlistOwners.join(' + ')}
+                  </p>
+                )}
+                {film.dateAdded && (
+                  <p className="text-[10px] sm:text-sm font-mono text-retro-muted">ADDED: {film.dateAdded}</p>
+                )}
+              </div>
+
+              {film.rating && (
+                <div className="border-b-4 border-retro-black pb-3 sm:pb-4">
+                  <p className="text-xs font-bold text-retro-black mb-1 uppercase">LETTERBOXD RATING:</p>
+                  <StarRating rating={film.rating} />
+                </div>
               )}
             </div>
-
-            {film.rating && (
-              <div className="border-b-4 border-retro-black pb-3 sm:pb-4">
-                <p className="text-xs font-bold text-retro-black mb-1 uppercase">YOUR RATING:</p>
-                <StarRating rating={film.rating} />
-              </div>
-            )}
-
           </div>
         </div>
       </div>
