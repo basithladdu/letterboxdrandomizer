@@ -6,7 +6,8 @@
 const ALLOWED_HOST = 'letterboxd.com'
 
 export default async function handler(req, res) {
-  const target = req.query.url
+  const requestUrl = new URL(req.url || '/', `https://${req.headers.host || 'letterboxd.local'}`)
+  const target = requestUrl.searchParams.get('url')
 
   if (!target) {
     res.status(400).json({ error: 'Missing ?url=' })
