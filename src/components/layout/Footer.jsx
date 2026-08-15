@@ -2,7 +2,7 @@ import { BiBullseye, BiSmile, BiVolumeFull } from 'react-icons/bi'
 
 export default function Footer() {
   return (
-    <footer className="mt-auto border-t-4 border-retro-muted py-4 sm:py-6 px-3 sm:px-4 bg-retro-gray space-y-4 sm:space-y-6">
+    <footer className="mt-auto overflow-hidden border-t-4 border-retro-muted py-4 sm:py-6 px-3 sm:px-4 bg-retro-gray space-y-4 sm:space-y-6">
       <div className="retro-hr" />
 
       {/* Disclaimer */}
@@ -21,6 +21,18 @@ export default function Footer() {
         <span className="retro-outset p-1.5 sm:p-2 bg-retro-red text-retro-white"><BiSmile size={14} /></span>
         <span className="retro-outset p-1.5 sm:p-2 bg-retro-blue text-retro-white"><BiVolumeFull size={14} /></span>
       </div>
+
+      <p className="text-center text-[10px] sm:text-xs font-black uppercase text-retro-black">
+        SHAMELESS PLUG:{' '}
+        <a
+          href="https://wedevit.in"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="underline decoration-2 hover:bg-retro-yellow"
+        >
+          WANT US TO BUILD YOUR SOFTWARE? WEDEVIT.IN
+        </a>
+      </p>
     </footer>
   )
 }

@@ -1,5 +1,6 @@
 import { useState, useCallback } from 'react'
 import { scrapeAllPages } from '../services/letterboxdScraper.js'
+import { normalizeLetterboxdUsername } from '../utils/letterboxdInput.js'
 
 export function useWatchlistScraper() {
   const [films, setFilms] = useState([])
@@ -10,7 +11,7 @@ export function useWatchlistScraper() {
   const scrape = useCallback(async (usernames) => {
     const list = [...new Set(
       (Array.isArray(usernames) ? usernames : [usernames])
-        .map((username) => username.trim())
+        .map(normalizeLetterboxdUsername)
         .filter(Boolean)
     )]
 

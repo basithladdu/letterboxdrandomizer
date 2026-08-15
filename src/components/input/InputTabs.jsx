@@ -30,7 +30,7 @@ export default function InputTabs({ scrapeLoading, scrapeProgress, scrapeError, 
             borderColor: activeTab === 'solo' ? '#FFFFFF #808080 transparent #FFFFFF' : '#808080'
           }}
         >
-          Random Film
+          Watchlist Picker
         </button>
         <button
           type="button"

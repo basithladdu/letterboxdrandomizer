@@ -85,12 +85,12 @@ export default function HelpDialog({ mode, onClose }) {
         <div className="max-h-[calc(88vh-3.5rem)] overflow-y-auto p-3 sm:p-5 retro-inset bg-retro-white space-y-3 sm:space-y-4">
           <div className="retro-outset bg-retro-panelYellow border-2 p-3 sm:p-4">
             <h2 className="text-base sm:text-xl font-black uppercase text-retro-black">
-              {isCompare ? 'FIND COMMON FILMS' : 'PICK A RANDOM FILM'}
+              {isCompare ? 'FIND COMMON FILMS' : 'WATCHLIST PICKER'}
             </h2>
             <p className="mt-2 text-xs sm:text-sm font-bold text-retro-black leading-relaxed">
               {isCompare
-                ? 'Enter two Letterboxd usernames and the wheel will use only films that appear in both public watchlists.'
-                : 'Enter a Letterboxd username and the wheel will choose from every film in that public watchlist.'}
+                ? 'Enter two Letterboxd usernames or full profile/watchlist links. The picker uses only films that appear in both public watchlists.'
+                : 'Enter a Letterboxd username or full profile/watchlist link. The picker chooses from every film in that public watchlist.'}
             </p>
           </div>
 
@@ -99,8 +99,8 @@ export default function HelpDialog({ mode, onClose }) {
               <h3 className="text-xs sm:text-sm font-black uppercase text-retro-black">01. ENTER USERNAMES</h3>
               <p className="mt-2 text-[11px] sm:text-xs font-bold text-retro-black leading-relaxed">
                 {isCompare
-                  ? 'Use two different Letterboxd usernames. Both watchlists must be public.'
-                  : 'Use the exact Letterboxd username. The watchlist must be public.'}
+                  ? 'Use two different Letterboxd usernames or profile links. Both watchlists must be public.'
+                  : 'Use the exact Letterboxd username or profile link. The watchlist must be public.'}
               </p>
             </div>
             <div className="retro-inset bg-retro-gray p-3">

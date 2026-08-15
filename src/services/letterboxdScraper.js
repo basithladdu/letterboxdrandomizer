@@ -1,5 +1,6 @@
 import { proxyFetch } from './corsProxy.js'
 import { LB_BASE, LB_PAGE_SIZE } from '../utils/constants.js'
+import { normalizeLetterboxdUsername } from '../utils/letterboxdInput.js'
 
 // How many pages to request at once. Letterboxd is fine with this and it keeps
 // a 3000-film watchlist to a few seconds instead of a minute.
@@ -127,7 +128,8 @@ function parseTotal(doc) {
 
 // Fetch and parse a single page. Returns { films, total }.
 export async function scrapePage(username, page) {
-  const normalizedUsername = String(username ?? '').trim().replace(/^@/, '')
+  const normalizedUsername = normalizeLetterboxdUsername(username)
+  if (!normalizedUsername) throw new Error('Enter a valid Letterboxd username or profile link.')
   const url = `${LB_BASE}/${encodeURIComponent(normalizedUsername)}/watchlist/page/${page}/`
   const res = await proxyFetch(url)
 

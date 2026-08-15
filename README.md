@@ -8,7 +8,7 @@ A lightweight web app that picks a random film from one public Letterboxd watchl
 
 ## Features
 
-- **Random Film** - The default mode picks a film from one public watchlist.
+- **Watchlist Picker** - Picks a film from one public watchlist.
 - **Common Films** — Enter two usernames and find the films both people want to watch.
 - **Full Fetch** — Every available watchlist page is fetched, with pagination and retry handling.
 - **Slot Machine Reveal** — A retro Framer Motion animation picks the next film.
@@ -40,9 +40,9 @@ A lightweight web app that picks a random film from one public Letterboxd watchl
 
 ## Watchlist Modes
 
-Random Film mode is the default. Enter one Letterboxd username and spin every film in that public watchlist.
+Watchlist Picker is the default. Enter one Letterboxd username or full profile/watchlist link and pick from every film in that public watchlist.
 
-Common Films mode accepts two Letterboxd usernames. Both watchlists must be public. The app fetches every available page for each user, matches films by their Letterboxd slug, and spins only films that appear in both lists.
+Common Films mode accepts two Letterboxd usernames or full profile/watchlist links. Both watchlists must be public. The app fetches every available page for each user, matches films by their Letterboxd slug, and spins only films that appear in both lists.
 
 The CSV parser remains in the source for compatibility, but CSV upload is not exposed in the app interface.
 

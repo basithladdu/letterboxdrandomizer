@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { motion, useAnimation } from 'framer-motion'
 import { buildSpinSequence } from '../../utils/randomPicker.js'
-import { playSpinSound, SLOT_SOUND_DURATION } from '../../utils/spinSound.js'
+import { playSpinSound, preloadSpinSound, stopSpinSound, SLOT_SOUND_DURATION } from '../../utils/spinSound.js'
 
 const ITEM_HEIGHT = 72
 
@@ -26,6 +26,11 @@ export default function SpinWheel({ films, chosen, onComplete, spinning }) {
   const hasAnimated = useRef(false)
 
   useEffect(() => {
+    preloadSpinSound()
+    return () => stopSpinSound()
+  }, [])
+
+  useEffect(() => {
     if (!spinning || !chosen || !films.length) return
     if (hasAnimated.current) {
       hasAnimated.current = false
@@ -40,6 +45,8 @@ export default function SpinWheel({ films, chosen, onComplete, spinning }) {
 
     playSpinSound()
 
+    let cancelled = false
+
     controls.start({
       y: -totalDistance,
       transition: {
@@ -47,10 +54,18 @@ export default function SpinWheel({ films, chosen, onComplete, spinning }) {
         ease: [0.25, 0.46, 0.45, 0.94],
       },
     }).then(() => {
+      if (cancelled) return
+      stopSpinSound()
       hasAnimated.current = true
       createConfetti()
       onComplete?.()
     })
+
+    return () => {
+      cancelled = true
+      controls.stop()
+      stopSpinSound()
+    }
   }, [spinning, chosen])
 
   if (!spinning && !sequence.length) {

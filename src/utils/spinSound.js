@@ -5,18 +5,26 @@ export const SLOT_SOUND_DURATION = 6.1
 
 // Retro arcade spin sound - preserved as the browser fallback for the supplied clip.
 let audioContext = null
+const activeLegacySources = new Set()
+let soundPlaybackToken = 0
 
 function preloadSlotMachineSound() {
   if (typeof Audio === 'undefined') return null
 
   const audio = new Audio(slotMachineSoundUrl)
   audio.preload = 'auto'
+  audio.playsInline = true
   audio.load()
   return audio
 }
 
 // Start buffering during app load so the first user-triggered spin can play immediately.
 let slotMachineAudio = preloadSlotMachineSound()
+
+export function preloadSpinSound() {
+  slotMachineAudio ||= preloadSlotMachineSound()
+  slotMachineAudio?.load()
+}
 
 function getAudioContext() {
   if (!audioContext) {
@@ -27,6 +35,7 @@ function getAudioContext() {
 
 function playLegacySpinSound() {
   try {
+    stopLegacySpinSound()
     const ctx = getAudioContext()
     if (ctx.state === 'suspended') ctx.resume()
 
@@ -55,6 +64,9 @@ function playLegacySpinSound() {
       osc.connect(gain)
       gain.connect(ctx.destination)
 
+      activeLegacySources.add(osc)
+      osc.addEventListener('ended', () => activeLegacySources.delete(osc), { once: true })
+
       osc.start(startTime)
       osc.stop(startTime + duration)
     })
@@ -73,6 +85,9 @@ function playLegacySpinSound() {
     motorOsc.connect(motorGain)
     motorGain.connect(ctx.destination)
 
+    activeLegacySources.add(motorOsc)
+    motorOsc.addEventListener('ended', () => activeLegacySources.delete(motorOsc), { once: true })
+
     motorOsc.start(now)
     motorOsc.stop(now + SPIN_DURATION)
   } catch (err) {
@@ -80,7 +95,23 @@ function playLegacySpinSound() {
   }
 }
 
-function playSlotMachineSound() {
+function stopLegacySpinSound() {
+  activeLegacySources.forEach((source) => {
+    try {
+      source.stop()
+    } catch {
+      // The source may already have finished.
+    }
+    try {
+      source.disconnect()
+    } catch {
+      // Disconnect is best effort for finished sources.
+    }
+  })
+  activeLegacySources.clear()
+}
+
+function playSlotMachineSound(playbackToken) {
   if (typeof Audio === 'undefined') return false
 
   try {
@@ -89,15 +120,34 @@ function playSlotMachineSound() {
     slotMachineAudio.currentTime = 0
     slotMachineAudio.volume = 0.65
     const playRequest = slotMachineAudio.play()
-    playRequest?.catch(() => {})
+    playRequest?.catch(() => {
+      // Mobile autoplay policies can reject the element even after preload;
+      // keep the spin usable with the Web Audio fallback.
+      if (playbackToken === soundPlaybackToken) playLegacySpinSound()
+    })
     return true
   } catch {
     return false
   }
 }
 
+export function stopSpinSound() {
+  soundPlaybackToken += 1
+  if (slotMachineAudio) {
+    slotMachineAudio.pause()
+    try {
+      slotMachineAudio.currentTime = 0
+    } catch {
+      // Resetting a not-yet-ready audio element is not supported everywhere.
+    }
+  }
+  stopLegacySpinSound()
+}
+
 export function playSpinSound() {
-  if (!playSlotMachineSound()) {
+  stopSpinSound()
+  const playbackToken = soundPlaybackToken
+  if (!playSlotMachineSound(playbackToken)) {
     playLegacySpinSound()
   }
 }

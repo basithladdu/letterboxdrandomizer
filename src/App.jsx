@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import Header from './components/layout/Header.jsx'
 import Footer from './components/layout/Footer.jsx'
 import InputTabs from './components/input/InputTabs.jsx'
@@ -7,6 +7,7 @@ import MovieCard, { ViewOnLetterboxd } from './components/picker/MovieCard.jsx'
 import PickerControls from './components/picker/PickerControls.jsx'
 import SharedFilmsList from './components/picker/SharedFilmsList.jsx'
 import CreatorLinks from './components/picker/CreatorLinks.jsx'
+import FollowDialog from './components/picker/FollowDialog.jsx'
 import { useWatchlistScraper } from './hooks/useWatchlistScraper.js'
 import { pickRandom } from './utils/randomPicker.js'
 import { findSharedFilms } from './utils/watchlistMatcher.js'
@@ -14,6 +15,7 @@ import { fetchFilmMetadata } from './services/letterboxdScraper.js'
 import { motion, AnimatePresence } from 'framer-motion'
 import { getSavedWatchlist, saveWatchlist, logUserSearch } from './services/firebase.js'
 import AdminView from './components/admin/AdminView.jsx'
+import { normalizeLetterboxdUsername } from './utils/letterboxdInput.js'
 
 export default function App() {
   const [view, setView] = useState('input')
@@ -22,6 +24,8 @@ export default function App() {
   const [spinning, setSpinning] = useState(false)
   const [watchlistOwners, setWatchlistOwners] = useState([])
   const [watchlistError, setWatchlistError] = useState(null)
+  const [showFollowDialog, setShowFollowDialog] = useState(false)
+  const followTimerRef = useRef(null)
 
   const {
     scrape,
@@ -37,11 +41,15 @@ export default function App() {
 
     try {
       const normalizedUsernames = (Array.isArray(usernames) ? usernames : [usernames])
-        .map((username) => username.trim().replace(/^@/, ''))
+        .map(normalizeLetterboxdUsername)
         .filter(Boolean)
 
+      if (normalizedUsernames.length === 0) {
+        throw new Error('Enter a valid Letterboxd username or profile link.')
+      }
+
       if (normalizedUsernames.length > 2) {
-        throw new Error('Use one username for Random Film or two usernames for Common Films.')
+        throw new Error('Use one username for Watchlist Picker or two usernames for Common Films.')
       }
 
       const cachedEntries = await Promise.all(
@@ -98,6 +106,8 @@ export default function App() {
   }
 
   function startPicker(filmList) {
+    window.clearTimeout(followTimerRef.current)
+    setShowFollowDialog(false)
     const pick = pickRandom(filmList)
     setChosen(pick)
     setSpinning(true)
@@ -105,6 +115,8 @@ export default function App() {
   }
 
   function handleSpinAgain() {
+    window.clearTimeout(followTimerRef.current)
+    setShowFollowDialog(false)
     const pick = pickRandom(films)
     setChosen(pick)
     setSpinning(true)
@@ -112,6 +124,8 @@ export default function App() {
 
   function handleSpinComplete() {
     setSpinning(false)
+    window.clearTimeout(followTimerRef.current)
+    followTimerRef.current = window.setTimeout(() => setShowFollowDialog(true), 2000)
   }
 
   function handleReset() {
@@ -121,6 +135,8 @@ export default function App() {
     setSpinning(false)
     setWatchlistOwners([])
     setWatchlistError(null)
+    window.clearTimeout(followTimerRef.current)
+    setShowFollowDialog(false)
     clearScrapeError()
   }
 
@@ -153,6 +169,8 @@ export default function App() {
       active = false
     }
   }, [chosen?.letterboxdSlug])
+
+  useEffect(() => () => window.clearTimeout(followTimerRef.current), [])
 
   const inputError = watchlistError || scrapeError
 
@@ -188,10 +206,10 @@ export default function App() {
                   WHAT SHOULD I WATCH?
                 </h1>
                 <p className="text-sm sm:text-lg font-bold text-retro-black">
-                  SPIN THE WHEEL &amp; DISCOVER YOUR NEXT FILM!
+                  PICK FROM YOUR WATCHLIST!
                 </p>
                 <div className="text-xs font-mono text-retro-muted">
-                   Pick a RANDOM film from YOUR Letterboxd watchlist — or find COMMON FILMS in two public lists
+                   Pick a film from YOUR Letterboxd watchlist — or find COMMON FILMS in two public lists
                 </div>
               </div>
 
@@ -232,11 +250,11 @@ export default function App() {
                 &larr; BACK
               </button>
 
-              <div className="retro-outset bg-retro-panelYellow border-2 p-3 text-center">
+              <div className="retro-outset bg-retro-panelYellow border-2 px-2 py-2 sm:px-3 sm:py-2 flex flex-wrap items-center justify-between gap-1.5">
                 <p className="text-[10px] sm:text-xs font-black uppercase tracking-widest text-retro-black">
-                  {watchlistOwners.length === 2 ? 'COMMON FILMS MODE' : 'RANDOM FILM MODE'}
+                  {watchlistOwners.length === 2 ? 'COMMON FILMS' : 'WATCHLIST PICKER'}
                 </p>
-                <p className="text-xs sm:text-sm font-mono text-retro-black mt-1 break-words">
+                <p className="text-[10px] sm:text-xs font-mono text-retro-black break-words text-right">
                   {watchlistOwners.join(' + ')} &mdash; {films.length}{' '}
                   {watchlistOwners.length === 2
                     ? `COMMON FILM${films.length === 1 ? '' : 'S'}`
@@ -266,7 +284,6 @@ export default function App() {
                       />
                     </div>
                   </div>
-                  <CreatorLinks />
                 </>
               ) : (
                 <AnimatePresence>
@@ -287,13 +304,13 @@ export default function App() {
 
               {watchlistOwners.length === 2 && <SharedFilmsList films={films} />}
 
-              {!spinning && chosen && <CreatorLinks />}
             </motion.div>
           )}
         </AnimatePresence>
       </main>
 
       <Footer />
+      {showFollowDialog && <FollowDialog onClose={() => setShowFollowDialog(false)} />}
     </div>
   )
 }

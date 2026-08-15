@@ -1,6 +1,7 @@
 import { useRef, useState } from 'react'
 import LoadingSpinner from '../shared/LoadingSpinner.jsx'
 import HelpDialog from '../shared/HelpDialog.jsx'
+import { normalizeLetterboxdUsername } from '../../utils/letterboxdInput.js'
 
 export default function UsernameForm({ onSubmit, loading, mode = 'solo' }) {
   const [usernames, setUsernames] = useState(['', ''])
@@ -11,10 +12,10 @@ export default function UsernameForm({ onSubmit, loading, mode = 'solo' }) {
   function handleSubmit(e) {
     e.preventDefault()
     const submittedUsernames = mode === 'compare' ? usernames : [usernames[0]]
-    const trimmed = submittedUsernames.map((username) => username.trim().replace(/^@/, ''))
+    const trimmed = submittedUsernames.map(normalizeLetterboxdUsername)
 
     if (trimmed.some((username) => !username)) {
-      setValidationError(mode === 'compare' ? 'ENTER TWO USERNAMES' : 'ENTER A USERNAME')
+      setValidationError(mode === 'compare' ? 'ENTER TWO USERNAMES OR LETTERBOXD LINKS' : 'ENTER A USERNAME OR LETTERBOXD LINK')
       return
     }
 
@@ -29,8 +30,8 @@ export default function UsernameForm({ onSubmit, loading, mode = 'solo' }) {
 
   function handleKeyDown(e) {
     const ready = mode === 'compare'
-      ? usernames.every((username) => username.trim())
-      : Boolean(usernames[0].trim())
+      ? usernames.every((username) => normalizeLetterboxdUsername(username))
+      : Boolean(normalizeLetterboxdUsername(usernames[0]))
 
     if (e.key === 'Enter' && ready && !loading) {
       handleSubmit(e)
@@ -50,7 +51,7 @@ export default function UsernameForm({ onSubmit, loading, mode = 'solo' }) {
   }
 
   const visibleUsernames = usernames.slice(0, mode === 'compare' ? 2 : 1)
-  const hasEmptyUsername = visibleUsernames.some((username) => !username.trim())
+  const hasEmptyUsername = visibleUsernames.some((username) => !normalizeLetterboxdUsername(username))
 
   return (
     <div className="space-y-4">
@@ -67,7 +68,7 @@ export default function UsernameForm({ onSubmit, loading, mode = 'solo' }) {
             <div className="p-2 sm:p-4 retro-inset bg-retro-white">
               <div className="relative flex items-center gap-2 flex-wrap">
                 <label htmlFor={`letterboxd-username-${index}`} className="font-bold text-xs whitespace-nowrap text-retro-black">
-                  letterboxd.com/
+                  USERNAME OR LINK
                 </label>
                 <input
                   id={`letterboxd-username-${index}`}
@@ -75,7 +76,7 @@ export default function UsernameForm({ onSubmit, loading, mode = 'solo' }) {
                   value={username}
                   onChange={(e) => updateUsername(index, e.target.value)}
                   onKeyDown={handleKeyDown}
-                  placeholder={index === 0 ? 'basithladoo' : 'zoerosebryant'}
+                  placeholder={index === 0 ? 'basithladoo or letterboxd.com/...' : 'zoerosebryant or letterboxd.com/...'}
                   disabled={loading}
                   autoComplete="off"
                   autoCapitalize="none"

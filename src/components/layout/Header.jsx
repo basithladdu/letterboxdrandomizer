@@ -18,14 +18,14 @@ export default function Header({ onHome }) {
             LETTERBOXD
           </h1>
           <span className="border-l-4 border-retro-white pl-2 sm:pl-3 font-black text-xs sm:text-lg text-retro-yellow tracking-tight uppercase whitespace-nowrap">
-            RANDOMIZER
+            WATCHLIST PICKER
           </span>
         </button>
       </div>
 
       <div className="marquee-container bg-retro-yellow text-retro-black border-t-4 border-b-4 border-retro-black shadow-md">
         <p className="marquee-text font-bold tracking-wide text-sm">
-          ★ SPIN THE WHEEL AND GET YOUR NEXT FILM ★ FULLY RANDOM ★ DISCOVER YOUR NEXT WATCH ★
+          ★ PICK FROM YOUR WATCHLIST ★ FIND COMMON FILMS ★ DISCOVER YOUR NEXT WATCH ★
         </p>
       </div>
     </header>
