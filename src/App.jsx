@@ -12,6 +12,7 @@ import WatchlistRoaster from './components/picker/WatchlistRoaster.jsx'
 import CinemaTicket from './components/picker/CinemaTicket.jsx'
 import ShareBar from './components/picker/ShareBar.jsx'
 import FilmBattle from './components/picker/FilmBattle.jsx'
+import TinderSwipe from './components/picker/TinderSwipe.jsx'
 import FilterBar from './components/picker/FilterBar.jsx'
 import { useWatchlistScraper } from './hooks/useWatchlistScraper.js'
 import { pickRandom } from './utils/randomPicker.js'
@@ -27,7 +28,7 @@ function getInitialTab() {
   const path = window.location.pathname.toLowerCase().replace(/\/+$/, '')
   if (path === '/compare' || path === '/pair' || path === '/common') return 'compare'
   if (path === '/group' || path === '/mixer') return 'group'
-  if (path === '/battle' || path === '/tinder' || path === '/bracket') return 'battle'
+  if (path === '/swipe' || path === '/match' || path === '/tinder' || path === '/battle') return 'swipe'
   return 'solo'
 }
 
@@ -127,17 +128,17 @@ export default function App() {
 
       normalizedUsernames.forEach((username) => logUserSearch(username))
 
-      // 0. Battle Mode (1v1 Bracket / Tinder Mode)
-      if (options.isBattle || options.mode === 'battle') {
+      // 0. Swipe / Tinder Dating Deck Mode
+      if (options.mode === 'swipe' || options.isMatch || options.mode === 'match' || options.isBattle) {
         const userFilms = watchlistsWithOwners[0].films
         if (userFilms.length < 2) {
-          throw new Error(`Watchlist for "${normalizedUsernames[0]}" needs at least 2 films to start Battle mode.`)
+          throw new Error(`Watchlist for "${normalizedUsernames[0]}" needs at least 2 films to start Swipe deck.`)
         }
         setWatchlistOwners(normalizedUsernames)
         setFilms(userFilms)
         window.clearTimeout(followTimerRef.current)
         setShowFollowDialog(false)
-        setView('battle')
+        setView('swipe')
         return
       }
 
@@ -218,8 +219,8 @@ export default function App() {
     followTimerRef.current = window.setTimeout(() => setShowFollowDialog(true), 2500)
   }
 
-  function handleBattleWinner(winnerFilm) {
-    setChosen(winnerFilm)
+  function handleSwipeMatch(matchedFilm) {
+    setChosen(matchedFilm)
     setSpinning(false)
     setView('picker')
     window.clearTimeout(followTimerRef.current)
@@ -283,9 +284,9 @@ export default function App() {
             >
               <AdminView />
             </motion.div>
-          ) : view === 'battle' ? (
+          ) : view === 'swipe' ? (
             <motion.div
-              key="battle"
+              key="swipe"
               initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -16 }}
@@ -296,15 +297,15 @@ export default function App() {
                 type="button"
                 onClick={handleReset}
                 className="retro-outset px-3 py-2 text-xs font-black uppercase tracking-widest text-retro-black bg-retro-gray hover:bg-retro-yellow"
-                aria-label="Exit battle arena"
+                aria-label="Exit swipe deck"
               >
-                &larr; EXIT ARENA
+                &larr; EXIT SWIPE
               </button>
 
-              <FilmBattle
+              <TinderSwipe
                 films={films}
-                onWinner={handleBattleWinner}
-                onReset={() => startPicker(films)}
+                onMatch={handleSwipeMatch}
+                onReset={handleReset}
               />
             </motion.div>
           ) : view === 'input' ? (
@@ -324,10 +325,10 @@ export default function App() {
                   WHAT SHOULD I WATCH?
                 </h1>
                 <p className="text-sm sm:text-lg font-bold text-retro-black uppercase">
-                  PICK FROM YOUR WATCHLIST, 1v1 BATTLE, OR GROUP MOVIE NIGHT!
+                  PICK FROM WATCHLIST, SWIPE DECK, OR GROUP MOVIE NIGHT
                 </p>
                 <div className="text-xs font-mono text-retro-muted">
-                  Pick a film from your Letterboxd watchlist, find common films with a friend, play 1v1 Battle brackets, or pool watchlists with up to 6 friends!
+                  Pick a random film, find common films with friends, swipe left/right on your watchlist, or pool watchlists with up to 6 friends.
                 </div>
               </div>
 
@@ -373,7 +374,7 @@ export default function App() {
               <div className="retro-outset bg-retro-panelYellow border-2 px-2 py-2 sm:px-3 sm:py-2 flex flex-wrap items-center justify-between gap-1.5 font-mono">
                 <p className="text-[10px] sm:text-xs font-black uppercase tracking-widest text-retro-black">
                   {isGroup
-                    ? `🍿 GROUP MOVIE NIGHT (${watchlistOwners.length} FRIENDS)`
+                    ? `GROUP MOVIE NIGHT (${watchlistOwners.length} FRIENDS)`
                     : isPair
                     ? 'COMMON FILMS'
                     : 'WATCHLIST PICKER'}
@@ -436,7 +437,7 @@ export default function App() {
 
               <PickerControls
                 onSpin={handleSpinAgain}
-                onBattle={() => setView('battle')}
+                onSwipeDeck={() => setView('swipe')}
                 onReset={handleReset}
                 spinning={spinning}
                 filmsCount={filteredFilms.length || films.length}

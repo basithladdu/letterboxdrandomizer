@@ -19,16 +19,20 @@ function parseDocument(html) {
 function toAssetUrl(path) {
   if (!path) return null
 
-  const absoluteUrl = path.startsWith('http') ? path : `${LB_BASE}${path}`
-  if (!absoluteUrl.startsWith(LB_BASE)) return absoluteUrl
+  // Direct CDN URLs (e.g. a.ltrbxd.com) can be rendered directly by browsers
+  if (path.startsWith('http://') || path.startsWith('https://')) {
+    return path
+  }
 
+  const absoluteUrl = `${LB_BASE}${path}`
   return import.meta.env.DEV
     ? absoluteUrl.replace(LB_BASE, '/lb-proxy')
     : `/api/lb?url=${encodeURIComponent(absoluteUrl)}`
 }
 
 function posterUrlForSlug(slug, posterPath) {
-  return toAssetUrl(posterPath || `/film/${slug}/image-150/`)
+  if (posterPath) return toAssetUrl(posterPath)
+  return `https://a.ltrbxd.com/resized/film-poster/${slug}/image-150/`
 }
 
 function parseJsonLdScript(script) {

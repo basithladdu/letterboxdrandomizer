@@ -14,7 +14,7 @@ export default async function handler(req, res) {
     return
   }
 
-  // SSRF guard: only ever fetch Letterboxd over https.
+  // SSRF guard: allow letterboxd.com and ltrbxd.com (including CDN subdomains)
   let parsed
   try {
     parsed = new URL(target)
@@ -22,8 +22,9 @@ export default async function handler(req, res) {
     res.status(400).json({ error: 'Invalid url' })
     return
   }
-  if (parsed.protocol !== 'https:' || (parsed.hostname !== ALLOWED_HOST && parsed.hostname !== `www.${ALLOWED_HOST}`)) {
-    res.status(403).json({ error: 'Only letterboxd.com is allowed' })
+  const isAllowed = /(?:^|\.)(?:letterboxd\.com|ltrbxd\.com)$/i.test(parsed.hostname)
+  if (parsed.protocol !== 'https:' || !isAllowed) {
+    res.status(403).json({ error: 'Only letterboxd.com and ltrbxd.com are allowed' })
     return
   }
 

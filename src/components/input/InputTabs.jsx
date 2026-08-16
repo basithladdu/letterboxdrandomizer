@@ -8,7 +8,7 @@ function getTabFromPath() {
   const path = window.location.pathname.toLowerCase().replace(/\/+$/, '')
   if (path === '/compare' || path === '/pair' || path === '/common') return 'compare'
   if (path === '/group' || path === '/mixer') return 'group'
-  if (path === '/battle' || path === '/tinder' || path === '/bracket') return 'battle'
+  if (path === '/swipe' || path === '/match' || path === '/tinder') return 'swipe'
   return 'solo'
 }
 
@@ -46,7 +46,7 @@ export default function InputTabs({ scrapeLoading, scrapeProgress, scrapeError, 
       solo: '/',
       compare: '/compare',
       group: '/group',
-      battle: '/battle',
+      swipe: '/swipe',
     }
     const target = pathMap[tab] || '/'
     if (window.location.pathname !== target) {
@@ -54,81 +54,39 @@ export default function InputTabs({ scrapeLoading, scrapeProgress, scrapeError, 
     }
   }
 
+  const tabs = [
+    { id: 'solo', label: 'SOLO' },
+    { id: 'compare', label: 'PAIR (2)' },
+    { id: 'group', label: 'GROUP (3-6)' },
+    { id: 'swipe', label: 'SWIPE' },
+  ]
+
   return (
-    <div className="w-full max-w-xl mx-auto space-y-5">
-      {/* 4 Subtabs Side-by-Side in Responsive Grid */}
+    <div className="w-full max-w-xl mx-auto space-y-4 font-sans">
+      {/* 4 Clean Subtabs Side-by-Side Without Overflow or Clipping */}
       <div className="grid grid-cols-4 gap-1 px-1">
-        <button
-          type="button"
-          onClick={() => switchTab('solo')}
-          className={`
-            px-1 sm:px-2 py-2 text-[9px] sm:text-xs font-bold uppercase tracking-wider text-center
-            transition-none border-t-2 border-x-2 truncate
-            ${activeTab === 'solo'
-              ? 'bg-retro-gray border-retro-white shadow-[0_-2px_0_#FFF] translate-y-[2px] z-10 text-retro-black'
-              : 'bg-retro-muted border-retro-muted opacity-60'}
-          `}
-          style={{
-            borderColor: activeTab === 'solo' ? '#FFFFFF #808080 transparent #FFFFFF' : '#808080'
-          }}
-          title="Watchlist Picker (Solo)"
-        >
-          Solo
-        </button>
-
-        <button
-          type="button"
-          onClick={() => switchTab('compare')}
-          className={`
-            px-1 sm:px-2 py-2 text-[9px] sm:text-xs font-bold uppercase tracking-wider text-center
-            transition-none border-t-2 border-x-2 truncate
-            ${activeTab === 'compare'
-              ? 'bg-retro-gray border-retro-white shadow-[0_-2px_0_#FFF] translate-y-[2px] z-10 text-retro-black'
-              : 'bg-retro-muted border-retro-muted opacity-60'}
-          `}
-          style={{
-            borderColor: activeTab === 'compare' ? '#FFFFFF #808080 transparent #FFFFFF' : '#808080'
-          }}
-          title="Common Films (2 Friends)"
-        >
-          Pair (2)
-        </button>
-
-        <button
-          type="button"
-          onClick={() => switchTab('group')}
-          className={`
-            px-1 sm:px-2 py-2 text-[9px] sm:text-xs font-black uppercase tracking-wider text-center
-            transition-none border-t-2 border-x-2 truncate
-            ${activeTab === 'group'
-              ? 'bg-retro-gray border-retro-white shadow-[0_-2px_0_#FFF] translate-y-[2px] z-10 text-retro-black'
-              : 'bg-retro-muted border-retro-muted opacity-60'}
-          `}
-          style={{
-            borderColor: activeTab === 'group' ? '#FFFFFF #808080 transparent #FFFFFF' : '#808080'
-          }}
-          title="Group Movie Night (3-6 Friends)"
-        >
-          🍿 Group (3-6)
-        </button>
-
-        <button
-          type="button"
-          onClick={() => switchTab('battle')}
-          className={`
-            px-1 sm:px-2 py-2 text-[9px] sm:text-xs font-black uppercase tracking-wider text-center
-            transition-none border-t-2 border-x-2 truncate
-            ${activeTab === 'battle'
-              ? 'bg-retro-gray border-retro-white shadow-[0_-2px_0_#FFF] translate-y-[2px] z-10 text-retro-black'
-              : 'bg-retro-muted border-retro-muted opacity-60'}
-          `}
-          style={{
-            borderColor: activeTab === 'battle' ? '#FFFFFF #808080 transparent #FFFFFF' : '#808080'
-          }}
-          title="Watchlist Battle (1v1 Elimination / Tinder Mode)"
-        >
-          🥊 Battle (1v1)
-        </button>
+        {tabs.map((tab) => {
+          const isActive = activeTab === tab.id
+          return (
+            <button
+              key={tab.id}
+              type="button"
+              onClick={() => switchTab(tab.id)}
+              className={`
+                px-1 sm:px-3 py-2 text-[10px] sm:text-xs font-black uppercase tracking-wider text-center
+                transition-none border-t-2 border-x-2 flex items-center justify-center
+                ${isActive
+                  ? 'bg-retro-gray border-retro-white shadow-[0_-2px_0_#FFF] translate-y-[2px] z-10 text-retro-black'
+                  : 'bg-retro-muted border-retro-muted text-neutral-800 opacity-70 hover:opacity-100'}
+              `}
+              style={{
+                borderColor: isActive ? '#FFFFFF #808080 transparent #FFFFFF' : '#808080'
+              }}
+            >
+              {tab.label}
+            </button>
+          )
+        })}
       </div>
 
       <div className="relative">
@@ -146,12 +104,12 @@ export default function InputTabs({ scrapeLoading, scrapeProgress, scrapeError, 
           total={scrapeProgress.total}
           label={
             activeTab === 'group'
-              ? 'Fetching group watchlists concurrently...'
+              ? 'FETCHING GROUP WATCHLISTS...'
               : activeTab === 'compare'
-              ? 'Fetching both public watchlists...'
-              : activeTab === 'battle'
-              ? 'Seeding contenders for Watchlist Battle...'
-              : 'Fetching watchlist pages...'
+              ? 'FETCHING BOTH WATCHLISTS...'
+              : activeTab === 'swipe'
+              ? 'LOADING SWIPE DECK...'
+              : 'FETCHING WATCHLIST...'
           }
         />
       )}

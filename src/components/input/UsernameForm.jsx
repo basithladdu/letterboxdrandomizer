@@ -17,7 +17,7 @@ export default function UsernameForm({ onSubmit, loading, mode = 'solo' }) {
   // Reset or adjust username input count when tab mode changes
   useEffect(() => {
     setValidationError(null)
-    if (mode === 'solo' || mode === 'battle') {
+    if (mode === 'solo' || mode === 'match' || mode === 'battle') {
       setUsernames((prev) => [prev[0] || ''])
     } else if (mode === 'compare') {
       setUsernames((prev) => [prev[0] || '', prev[1] || ''])
@@ -37,7 +37,7 @@ export default function UsernameForm({ onSubmit, loading, mode = 'solo' }) {
   function handleSubmit(e) {
     if (e) e.preventDefault()
 
-    const targetUsernames = (mode === 'solo' || mode === 'battle')
+    const targetUsernames = (mode === 'solo' || mode === 'match' || mode === 'battle')
       ? [usernames[0]]
       : mode === 'compare'
       ? usernames.slice(0, 2)
@@ -66,8 +66,8 @@ export default function UsernameForm({ onSubmit, loading, mode = 'solo' }) {
     setValidationError(null)
     if (mode === 'solo') {
       onSubmit(trimmed[0], { mode: 'solo' })
-    } else if (mode === 'battle') {
-      onSubmit(trimmed[0], { mode: 'battle', isBattle: true })
+    } else if (mode === 'match' || mode === 'battle') {
+      onSubmit(trimmed[0], { mode: 'match', isMatch: true })
     } else if (mode === 'compare') {
       onSubmit(trimmed, { mode: 'compare' })
     } else {
@@ -133,7 +133,7 @@ export default function UsernameForm({ onSubmit, loading, mode = 'solo' }) {
                     : 'bg-retro-white text-retro-muted border-retro-muted'
                 }`}
               >
-                🍿 MAJORITY (2+ FRIENDS)
+                MAJORITY (2+ FRIENDS)
               </button>
               <button
                 type="button"
@@ -144,7 +144,7 @@ export default function UsernameForm({ onSubmit, loading, mode = 'solo' }) {
                     : 'bg-retro-white text-retro-muted border-retro-muted'
                 }`}
               >
-                🎯 100% UNANIMOUS (ALL)
+                100% UNANIMOUS (ALL)
               </button>
             </div>
           </div>
@@ -258,13 +258,19 @@ export default function UsernameForm({ onSubmit, loading, mode = 'solo' }) {
                   ? `FETCHING ${usernames.length} PUBLIC WATCHLISTS...`
                   : mode === 'compare'
                   ? 'FETCHING BOTH WATCHLISTS...'
-                  : mode === 'battle'
-                  ? 'SEEDING BATTLE ARENA...'
+                  : mode === 'swipe' || mode === 'match' || mode === 'battle'
+                  ? 'LOADING SWIPE DECK...'
                   : 'FETCHING WATCHLIST...'}
               </span>
             </>
           ) : (
-            mode === 'battle' ? <>🥊 ENTER BATTLE ARENA (1v1)</> : mode === 'group' ? <>🍿 SPIN GROUP MOVIE NIGHT</> : mode === 'compare' ? <>▶ FIND COMMON FILMS</> : <>▶ FETCH WATCHLIST</>
+            mode === 'swipe' || mode === 'match' || mode === 'battle'
+              ? <>START SWIPE DECK</>
+              : mode === 'group'
+              ? <>SPIN GROUP MOVIE NIGHT</>
+              : mode === 'compare'
+              ? <>FIND COMMON FILMS</>
+              : <>FETCH WATCHLIST</>
           )}
         </button>
       </form>

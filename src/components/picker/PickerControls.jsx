@@ -1,4 +1,4 @@
-export default function PickerControls({ onSpin, onBattle, onReset, spinning, filmsCount }) {
+export default function PickerControls({ onSpin, onSwipeDeck, onReset, spinning, filmsCount }) {
   return (
     <div className="space-y-2 sm:space-y-3 w-full mx-auto font-sans">
       <span className="sr-only" aria-live="polite">
@@ -7,7 +7,7 @@ export default function PickerControls({ onSpin, onBattle, onReset, spinning, fi
           : `${filmsCount} film${filmsCount === 1 ? '' : 's'} available.`}
       </span>
 
-      {/* 3 Buttons Grid Section */}
+      {/* 3 Clean Retro Buttons Section */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 max-w-2xl mx-auto">
         {/* SPIN Button */}
         <button
@@ -20,7 +20,7 @@ export default function PickerControls({ onSpin, onBattle, onReset, spinning, fi
             min-h-[44px] px-2 py-2 sm:py-3 font-black text-xs sm:text-sm uppercase tracking-widest
             border-4 transition-none
             flex items-center justify-center gap-2 touch-manipulation
-            ${spinning ? 'opacity-50 cursor-not-allowed' : ''}
+            ${spinning ? 'opacity-50 cursor-not-allowed' : 'hover:brightness-110'}
           `}
           style={{
             backgroundColor: '#FF0000',
@@ -38,15 +38,15 @@ export default function PickerControls({ onSpin, onBattle, onReset, spinning, fi
               SPINNING…
             </>
           ) : (
-            <>🎰 SPIN AGAIN</>
+            <>SPIN AGAIN</>
           )}
         </button>
 
-        {/* 1v1 BATTLE Button */}
-        {onBattle && (
+        {/* SWIPE DECK Button */}
+        {onSwipeDeck && (
           <button
             type="button"
-            onClick={onBattle}
+            onClick={onSwipeDeck}
             disabled={spinning || filmsCount < 2}
             className={`
               min-h-[44px] px-2 py-2 sm:py-3 font-black text-xs sm:text-sm uppercase tracking-widest
@@ -61,7 +61,7 @@ export default function PickerControls({ onSpin, onBattle, onReset, spinning, fi
               boxShadow: 'inset -1px -1px 0 #404040, inset 1px 1px 0 #DFDFDF',
             }}
           >
-            🥊 1v1 BATTLE
+            SWIPE DECK
           </button>
         )}
 
@@ -75,7 +75,7 @@ export default function PickerControls({ onSpin, onBattle, onReset, spinning, fi
             min-h-[44px] px-2 py-2 sm:py-3 font-black text-xs sm:text-sm uppercase tracking-widest
             border-4 transition-none
             touch-manipulation
-            ${spinning ? 'opacity-50 cursor-not-allowed' : ''}
+            ${spinning ? 'opacity-50 cursor-not-allowed' : 'hover:brightness-110'}
           `}
           style={{
             backgroundColor: '#0000FF',

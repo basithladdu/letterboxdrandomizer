@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { motion } from 'framer-motion'
 import { BiPlayCircle, BiLinkExternal } from 'react-icons/bi'
 import { fetchPoster } from '../../services/omdbService.js'
+import { fetchFilmMetadata } from '../../services/letterboxdScraper.js'
 
 function StarRating({ rating }) {
   if (!rating) return null
@@ -94,13 +95,42 @@ export function ViewOnLetterboxd({ film }) {
 function PosterArtwork({ film }) {
   const [source, setSource] = useState(film.posterUrl || null)
   const [fallbackTried, setFallbackTried] = useState(false)
-  const [failed, setFailed] = useState(!film.posterUrl)
+  const [failed, setFailed] = useState(false)
 
   useEffect(() => {
+    let cancelled = false
     setSource(film.posterUrl || null)
     setFallbackTried(false)
-    setFailed(!film.posterUrl)
-  }, [film.letterboxdSlug, film.posterUrl])
+    setFailed(false)
+
+    // If posterUrl is missing, resolve via metadata or OMDb
+    if (!film.posterUrl) {
+      if (film.letterboxdSlug) {
+        fetchFilmMetadata(film.letterboxdSlug).then((meta) => {
+          if (cancelled) return
+          if (meta?.posterUrl) {
+            setSource(meta.posterUrl)
+          } else {
+            fetchPoster(film.title, film.year).then((p) => {
+              if (cancelled) return
+              if (p) setSource(p)
+              else setFailed(true)
+            })
+          }
+        })
+      } else {
+        fetchPoster(film.title, film.year).then((p) => {
+          if (cancelled) return
+          if (p) setSource(p)
+          else setFailed(true)
+        })
+      }
+    }
+
+    return () => {
+      cancelled = true
+    }
+  }, [film.letterboxdSlug, film.posterUrl, film.title, film.year])
 
   async function handleError() {
     if (fallbackTried) {
