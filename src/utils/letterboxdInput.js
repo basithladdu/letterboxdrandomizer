@@ -31,8 +31,16 @@ export function normalizeLetterboxdUsername(value) {
     const hostname = url.hostname.toLowerCase()
     if (hostname !== 'letterboxd.com' && hostname !== 'www.letterboxd.com') return ''
 
-    const [profilePath] = url.pathname.split('/').filter(Boolean)
-    if (!profilePath || RESERVED_PROFILE_PATHS.has(profilePath.toLowerCase())) return ''
+    const parts = url.pathname.split('/').filter(Boolean)
+    if (!parts.length) return ''
+
+    // If it's a custom list: /username/list/list-slug/
+    if (parts.length >= 3 && parts[1].toLowerCase() === 'list' && parts[2]) {
+      return `${decodeURIComponent(parts[0]).replace(/^@/, '').trim()}/list/${decodeURIComponent(parts[2]).trim()}`
+    }
+
+    const profilePath = parts[0]
+    if (RESERVED_PROFILE_PATHS.has(profilePath.toLowerCase())) return ''
 
     return decodeURIComponent(profilePath).replace(/^@/, '').trim()
   } catch {

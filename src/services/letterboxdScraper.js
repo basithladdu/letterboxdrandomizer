@@ -129,12 +129,17 @@ function parseTotal(doc) {
 // Fetch and parse a single page. Returns { films, total }.
 export async function scrapePage(username, page) {
   const normalizedUsername = normalizeLetterboxdUsername(username)
-  if (!normalizedUsername) throw new Error('Enter a valid Letterboxd username or profile link.')
-  const url = `${LB_BASE}/${encodeURIComponent(normalizedUsername)}/watchlist/page/${page}/`
+  if (!normalizedUsername) throw new Error('Enter a valid Letterboxd username, profile link, or list URL.')
+  
+  const path = normalizedUsername.includes('/list/')
+    ? `${normalizedUsername}/page/${page}/`
+    : `${encodeURIComponent(normalizedUsername)}/watchlist/page/${page}/`
+
+  const url = `${LB_BASE}/${path}`
   const res = await proxyFetch(url)
 
   if (res.status === 404 && page === 1) {
-    throw new Error(`User "${username}" not found.`)
+    throw new Error(`Letterboxd page or user "${username}" not found.`)
   }
 
   // A page after the end of a watchlist may be a 404 even when the user is

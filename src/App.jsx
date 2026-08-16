@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState, useMemo } from 'react'
 import Header from './components/layout/Header.jsx'
 import Footer from './components/layout/Footer.jsx'
 import InputTabs from './components/input/InputTabs.jsx'
@@ -11,6 +11,8 @@ import FollowDialog from './components/picker/FollowDialog.jsx'
 import WatchlistRoaster from './components/picker/WatchlistRoaster.jsx'
 import CinemaTicket from './components/picker/CinemaTicket.jsx'
 import ShareBar from './components/picker/ShareBar.jsx'
+import FilmBattle from './components/picker/FilmBattle.jsx'
+import FilterBar from './components/picker/FilterBar.jsx'
 import { useWatchlistScraper } from './hooks/useWatchlistScraper.js'
 import { pickRandom } from './utils/randomPicker.js'
 import { findSharedFilms, findGroupSharedFilms } from './utils/watchlistMatcher.js'
@@ -20,14 +22,26 @@ import { getSavedWatchlist, saveWatchlist, logUserSearch } from './services/fire
 import AdminView from './components/admin/AdminView.jsx'
 import { normalizeLetterboxdUsername } from './utils/letterboxdInput.js'
 
+function getInitialTab() {
+  if (typeof window === 'undefined') return 'solo'
+  const path = window.location.pathname.toLowerCase().replace(/\/+$/, '')
+  if (path === '/compare' || path === '/pair' || path === '/common') return 'compare'
+  if (path === '/group' || path === '/mixer') return 'group'
+  if (path === '/battle' || path === '/tinder' || path === '/bracket') return 'battle'
+  return 'solo'
+}
+
 export default function App() {
   const [view, setView] = useState('input')
+  const [currentTab, setCurrentTab] = useState(getInitialTab)
   const [films, setFilms] = useState([])
   const [chosen, setChosen] = useState(null)
   const [spinning, setSpinning] = useState(false)
   const [watchlistOwners, setWatchlistOwners] = useState([])
   const [watchlistError, setWatchlistError] = useState(null)
   const [showFollowDialog, setShowFollowDialog] = useState(false)
+  const [activeDecade, setActiveDecade] = useState('all')
+  const [activeRating, setActiveRating] = useState('all')
   const followTimerRef = useRef(null)
 
   const {
@@ -37,6 +51,29 @@ export default function App() {
     error: scrapeError,
     clearError: clearScrapeError,
   } = useWatchlistScraper()
+
+  // Filtered films pool based on cinephile filter pills
+  const filteredFilms = useMemo(() => {
+    return films.filter((f) => {
+      if (activeDecade !== 'all') {
+        const year = parseInt(f.year, 10)
+        if (!year) return true
+        if (activeDecade === 'classic' && year >= 1980) return false
+        if (activeDecade === '80s' && (year < 1980 || year > 1989)) return false
+        if (activeDecade === '90s' && (year < 1990 || year > 1999)) return false
+        if (activeDecade === '00s' && (year < 2000 || year > 2009)) return false
+        if (activeDecade === '10s' && (year < 2010 || year > 2019)) return false
+        if (activeDecade === '20s' && year < 2020) return false
+      }
+      if (activeRating !== 'all') {
+        const rating = parseFloat(f.rating)
+        if (!rating) return true
+        if (activeRating === '3.5' && rating < 3.5) return false
+        if (activeRating === '4.0' && rating < 4.0) return false
+      }
+      return true
+    })
+  }, [films, activeDecade, activeRating])
 
   async function handleScrape(usernames, options = {}) {
     setWatchlistError(null)
@@ -48,7 +85,7 @@ export default function App() {
         .filter(Boolean)
 
       if (normalizedUsernames.length === 0) {
-        throw new Error('Enter a valid Letterboxd username or profile link.')
+        throw new Error('Enter a valid Letterboxd username, profile link, or list URL.')
       }
 
       if (normalizedUsernames.length > 6) {
@@ -90,7 +127,21 @@ export default function App() {
 
       normalizedUsernames.forEach((username) => logUserSearch(username))
 
-      // 1. Solo Watchlist
+      // 0. Battle Mode (1v1 Bracket / Tinder Mode)
+      if (options.isBattle || options.mode === 'battle') {
+        const userFilms = watchlistsWithOwners[0].films
+        if (userFilms.length < 2) {
+          throw new Error(`Watchlist for "${normalizedUsernames[0]}" needs at least 2 films to start Battle mode.`)
+        }
+        setWatchlistOwners(normalizedUsernames)
+        setFilms(userFilms)
+        window.clearTimeout(followTimerRef.current)
+        setShowFollowDialog(false)
+        setView('battle')
+        return
+      }
+
+      // 1. Solo Watchlist / Custom List
       if (normalizedUsernames.length === 1) {
         const userFilms = watchlistsWithOwners[0].films
         setWatchlistOwners(normalizedUsernames)
@@ -145,7 +196,8 @@ export default function App() {
   function startPicker(filmList) {
     window.clearTimeout(followTimerRef.current)
     setShowFollowDialog(false)
-    const pick = pickRandom(filmList)
+    const pool = filmList.length ? filmList : films
+    const pick = pickRandom(pool)
     setChosen(pick)
     setSpinning(true)
     setView('picker')
@@ -154,13 +206,22 @@ export default function App() {
   function handleSpinAgain() {
     window.clearTimeout(followTimerRef.current)
     setShowFollowDialog(false)
-    const pick = pickRandom(films)
+    const pool = filteredFilms.length ? filteredFilms : films
+    const pick = pickRandom(pool)
     setChosen(pick)
     setSpinning(true)
   }
 
   function handleSpinComplete() {
     setSpinning(false)
+    window.clearTimeout(followTimerRef.current)
+    followTimerRef.current = window.setTimeout(() => setShowFollowDialog(true), 2500)
+  }
+
+  function handleBattleWinner(winnerFilm) {
+    setChosen(winnerFilm)
+    setSpinning(false)
+    setView('picker')
     window.clearTimeout(followTimerRef.current)
     followTimerRef.current = window.setTimeout(() => setShowFollowDialog(true), 2500)
   }
@@ -172,62 +233,79 @@ export default function App() {
     setSpinning(false)
     setWatchlistOwners([])
     setWatchlistError(null)
+    setActiveDecade('all')
+    setActiveRating('all')
     window.clearTimeout(followTimerRef.current)
     setShowFollowDialog(false)
     clearScrapeError()
   }
 
   function handleHome() {
-    if (window.location.pathname !== '/') {
-      window.location.assign('/')
-      return
-    }
-
     handleReset()
+    if (typeof window !== 'undefined' && window.location.pathname !== '/') {
+      window.history.pushState({}, '', '/')
+      setCurrentTab('solo')
+    }
   }
 
+  // Load enriched OMDB metadata when chosen film is updated
   useEffect(() => {
-    const slug = chosen?.letterboxdSlug
-    if (!slug) return undefined
+    if (!chosen || chosen.overview || !chosen.letterboxdSlug) return
 
-    let active = true
-    fetchFilmMetadata(slug).then((metadata) => {
-      if (!active || !metadata) return
-
-      setChosen((current) => (
-        current?.letterboxdSlug === slug ? { ...current, ...metadata } : current
-      ))
-      setFilms((current) => current.map((film) => (
-        film.letterboxdSlug === slug ? { ...film, ...metadata } : film
-      )))
+    let cancelled = false
+    fetchFilmMetadata(chosen.letterboxdSlug).then((meta) => {
+      if (cancelled || !meta) return
+      setChosen((prev) => (prev && prev.letterboxdSlug === chosen.letterboxdSlug ? { ...prev, ...meta } : prev))
     })
 
     return () => {
-      active = false
+      cancelled = true
     }
   }, [chosen?.letterboxdSlug])
 
-  useEffect(() => () => window.clearTimeout(followTimerRef.current), [])
-
+  const isPair = watchlistOwners.length === 2
+  const isGroup = watchlistOwners.length >= 3
   const inputError = watchlistError || scrapeError
 
-  const isGroup = watchlistOwners.length > 2
-  const isPair = watchlistOwners.length === 2
-
   return (
-    <div className="flex min-h-screen flex-col bg-retro-gray">
+    <div className="flex flex-col min-h-screen bg-retro-gray text-retro-black font-sans">
       <Header onHome={handleHome} />
 
-      <main className="flex-1 px-3 py-4 sm:px-4 sm:py-8">
+      <main className="flex-1 px-3 sm:px-4 py-4 sm:py-6 max-w-4xl w-full mx-auto">
         <AnimatePresence mode="wait">
-          {window.location.pathname === '/admin' ? (
+          {view === 'admin' ? (
             <motion.div
               key="admin"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              transition={{ duration: 0.2 }}
             >
               <AdminView />
+            </motion.div>
+          ) : view === 'battle' ? (
+            <motion.div
+              key="battle"
+              initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -16 }}
+              transition={{ duration: 0.25 }}
+              className="mx-auto max-w-2xl space-y-4"
+            >
+              <button
+                type="button"
+                onClick={handleReset}
+                className="retro-outset px-3 py-2 text-xs font-black uppercase tracking-widest text-retro-black bg-retro-gray hover:bg-retro-yellow"
+                aria-label="Exit battle arena"
+              >
+                &larr; EXIT ARENA
+              </button>
+
+              <FilmBattle
+                films={films}
+                onWinner={handleBattleWinner}
+                onReset={() => startPicker(films)}
+              />
             </motion.div>
           ) : view === 'input' ? (
             <motion.div
@@ -245,15 +323,17 @@ export default function App() {
                 <h1 className="text-3xl sm:text-6xl font-black text-rainbow uppercase tracking-tight" style={{ textShadow: '2px 2px 0 #808080' }}>
                   WHAT SHOULD I WATCH?
                 </h1>
-                <p className="text-sm sm:text-lg font-bold text-retro-black">
-                  PICK FROM YOUR WATCHLIST OR GROUP MOVIE NIGHT!
+                <p className="text-sm sm:text-lg font-bold text-retro-black uppercase">
+                  PICK FROM YOUR WATCHLIST, 1v1 BATTLE, OR GROUP MOVIE NIGHT!
                 </p>
                 <div className="text-xs font-mono text-retro-muted">
-                   Pick a film from your Letterboxd watchlist, find common films with a friend, or pool watchlists with up to 6 friends!
+                  Pick a film from your Letterboxd watchlist, find common films with a friend, play 1v1 Battle brackets, or pool watchlists with up to 6 friends!
                 </div>
               </div>
 
               <InputTabs
+                activeTab={currentTab}
+                onTabChange={setCurrentTab}
                 onScrape={handleScrape}
                 scrapeLoading={scrapeLoading}
                 scrapeProgress={scrapeProgress}
@@ -290,7 +370,7 @@ export default function App() {
                 &larr; BACK
               </button>
 
-              <div className="retro-outset bg-retro-panelYellow border-2 px-2 py-2 sm:px-3 sm:py-2 flex flex-wrap items-center justify-between gap-1.5">
+              <div className="retro-outset bg-retro-panelYellow border-2 px-2 py-2 sm:px-3 sm:py-2 flex flex-wrap items-center justify-between gap-1.5 font-mono">
                 <p className="text-[10px] sm:text-xs font-black uppercase tracking-widest text-retro-black">
                   {isGroup
                     ? `🍿 GROUP MOVIE NIGHT (${watchlistOwners.length} FRIENDS)`
@@ -309,13 +389,22 @@ export default function App() {
               {/* Watchlist Roaster & Quick Stats Diagnostic */}
               <WatchlistRoaster films={films} watchlistOwners={watchlistOwners} />
 
+              {/* Cinephile Filters */}
+              <FilterBar
+                films={filteredFilms}
+                activeDecade={activeDecade}
+                onDecadeChange={setActiveDecade}
+                activeRating={activeRating}
+                onRatingChange={setActiveRating}
+              />
+
               <div className="retro-hr" />
 
               {spinning ? (
                 <>
                   <div className="retro-outset-deep bg-retro-gray border-4 overflow-hidden">
                     <div className="retro-titlebar px-3 py-2 flex justify-between items-center">
-                      <span className="font-bold">SPIN_WHEEL.EXE</span>
+                      <span className="font-bold uppercase">SPIN_WHEEL.EXE</span>
                       <div className="flex gap-2">
                         <div className="w-4 h-4 retro-outset bg-retro-yellow" />
                         <div className="w-4 h-4 retro-outset bg-retro-yellow" />
@@ -324,7 +413,7 @@ export default function App() {
                     </div>
                     <div className="p-6 retro-inset bg-retro-white">
                       <SpinWheel
-                        films={films}
+                        films={filteredFilms.length ? filteredFilms : films}
                         chosen={chosen}
                         spinning={spinning}
                         onComplete={handleSpinComplete}
@@ -347,9 +436,10 @@ export default function App() {
 
               <PickerControls
                 onSpin={handleSpinAgain}
+                onBattle={() => setView('battle')}
                 onReset={handleReset}
                 spinning={spinning}
-                filmsCount={films.length}
+                filmsCount={filteredFilms.length || films.length}
               />
 
               {!spinning && chosen && <ViewOnLetterboxd film={chosen} />}

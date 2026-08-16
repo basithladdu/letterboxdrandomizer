@@ -17,7 +17,7 @@ export default function UsernameForm({ onSubmit, loading, mode = 'solo' }) {
   // Reset or adjust username input count when tab mode changes
   useEffect(() => {
     setValidationError(null)
-    if (mode === 'solo') {
+    if (mode === 'solo' || mode === 'battle') {
       setUsernames((prev) => [prev[0] || ''])
     } else if (mode === 'compare') {
       setUsernames((prev) => [prev[0] || '', prev[1] || ''])
@@ -37,7 +37,7 @@ export default function UsernameForm({ onSubmit, loading, mode = 'solo' }) {
   function handleSubmit(e) {
     if (e) e.preventDefault()
 
-    const targetUsernames = mode === 'solo'
+    const targetUsernames = (mode === 'solo' || mode === 'battle')
       ? [usernames[0]]
       : mode === 'compare'
       ? usernames.slice(0, 2)
@@ -65,11 +65,13 @@ export default function UsernameForm({ onSubmit, loading, mode = 'solo' }) {
 
     setValidationError(null)
     if (mode === 'solo') {
-      onSubmit(trimmed[0])
+      onSubmit(trimmed[0], { mode: 'solo' })
+    } else if (mode === 'battle') {
+      onSubmit(trimmed[0], { mode: 'battle', isBattle: true })
     } else if (mode === 'compare') {
-      onSubmit(trimmed)
+      onSubmit(trimmed, { mode: 'compare' })
     } else {
-      onSubmit(trimmed, { groupMode: groupStrategy })
+      onSubmit(trimmed, { mode: 'group', groupMode: groupStrategy })
     }
   }
 
@@ -256,11 +258,13 @@ export default function UsernameForm({ onSubmit, loading, mode = 'solo' }) {
                   ? `FETCHING ${usernames.length} PUBLIC WATCHLISTS...`
                   : mode === 'compare'
                   ? 'FETCHING BOTH WATCHLISTS...'
+                  : mode === 'battle'
+                  ? 'SEEDING BATTLE ARENA...'
                   : 'FETCHING WATCHLIST...'}
               </span>
             </>
           ) : (
-            mode === 'group' ? <>🍿 SPIN GROUP MOVIE NIGHT</> : mode === 'compare' ? <>▶ FIND COMMON FILMS</> : <>▶ FETCH WATCHLIST</>
+            mode === 'battle' ? <>🥊 ENTER BATTLE ARENA (1v1)</> : mode === 'group' ? <>🍿 SPIN GROUP MOVIE NIGHT</> : mode === 'compare' ? <>▶ FIND COMMON FILMS</> : <>▶ FETCH WATCHLIST</>
           )}
         </button>
       </form>

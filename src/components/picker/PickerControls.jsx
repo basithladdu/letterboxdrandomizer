@@ -1,13 +1,14 @@
-export default function PickerControls({ onSpin, onReset, spinning, filmsCount }) {
+export default function PickerControls({ onSpin, onBattle, onReset, spinning, filmsCount }) {
   return (
-    <div className="space-y-2 sm:space-y-3 w-full mx-auto">
+    <div className="space-y-2 sm:space-y-3 w-full mx-auto font-sans">
       <span className="sr-only" aria-live="polite">
         {spinning
           ? 'Choosing a film from your watchlist.'
           : `${filmsCount} film${filmsCount === 1 ? '' : 's'} available.`}
       </span>
-      {/* Buttons Section */}
-      <div className="grid grid-cols-2 gap-2 sm:gap-3 max-w-2xl mx-auto">
+
+      {/* 3 Buttons Grid Section */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 max-w-2xl mx-auto">
         {/* SPIN Button */}
         <button
           type="button"
@@ -16,7 +17,7 @@ export default function PickerControls({ onSpin, onReset, spinning, filmsCount }
           aria-label={spinning ? 'Choosing a film' : 'Spin again to choose another film'}
           aria-busy={spinning}
           className={`
-            min-h-[44px] px-2 py-2 sm:py-4 font-black text-xs sm:text-base uppercase tracking-widest
+            min-h-[44px] px-2 py-2 sm:py-3 font-black text-xs sm:text-sm uppercase tracking-widest
             border-4 transition-none
             flex items-center justify-center gap-2 touch-manipulation
             ${spinning ? 'opacity-50 cursor-not-allowed' : ''}
@@ -28,22 +29,7 @@ export default function PickerControls({ onSpin, onReset, spinning, filmsCount }
             boxShadow: spinning
               ? 'inset 1px 1px 0 #404040, inset -1px -1px 0 #DFDFDF'
               : 'inset -1px -1px 0 #404040, inset 1px 1px 0 #DFDFDF',
-            transform: spinning ? 'translate(1px, 1px)' : 'translate(0, 0)',
             textShadow: '2px 2px 0 #800000'
-          }}
-          onMouseDown={(e) => {
-            if (!spinning) {
-              e.currentTarget.style.borderColor = '#808080 #FFFFFF #FFFFFF #808080'
-              e.currentTarget.style.boxShadow = 'inset 1px 1px 0 #404040, inset -1px -1px 0 #DFDFDF'
-              e.currentTarget.style.transform = 'translate(1px, 1px)'
-            }
-          }}
-          onMouseUp={(e) => {
-            if (!spinning) {
-              e.currentTarget.style.borderColor = '#FFFFFF #808080 #808080 #FFFFFF'
-              e.currentTarget.style.boxShadow = 'inset -1px -1px 0 #404040, inset 1px 1px 0 #DFDFDF'
-              e.currentTarget.style.transform = 'translate(0, 0)'
-            }
           }}
         >
           {spinning ? (
@@ -52,9 +38,32 @@ export default function PickerControls({ onSpin, onReset, spinning, filmsCount }
               SPINNING…
             </>
           ) : (
-            <>SPIN AGAIN</>
+            <>🎰 SPIN AGAIN</>
           )}
         </button>
+
+        {/* 1v1 BATTLE Button */}
+        {onBattle && (
+          <button
+            type="button"
+            onClick={onBattle}
+            disabled={spinning || filmsCount < 2}
+            className={`
+              min-h-[44px] px-2 py-2 sm:py-3 font-black text-xs sm:text-sm uppercase tracking-widest
+              border-4 transition-none
+              flex items-center justify-center gap-1.5 touch-manipulation
+              ${spinning || filmsCount < 2 ? 'opacity-50 cursor-not-allowed' : 'hover:bg-[#FFE033]'}
+            `}
+            style={{
+              backgroundColor: '#E5A912',
+              color: '#111111',
+              borderColor: '#FFFFFF #808080 #808080 #FFFFFF',
+              boxShadow: 'inset -1px -1px 0 #404040, inset 1px 1px 0 #DFDFDF',
+            }}
+          >
+            🥊 1v1 BATTLE
+          </button>
+        )}
 
         {/* RESET Button */}
         <button
@@ -63,7 +72,7 @@ export default function PickerControls({ onSpin, onReset, spinning, filmsCount }
           disabled={spinning}
           aria-label="Start over with a different watchlist"
           className={`
-            min-h-[44px] px-2 py-2 sm:py-4 font-black text-xs sm:text-base uppercase tracking-widest
+            min-h-[44px] px-2 py-2 sm:py-3 font-black text-xs sm:text-sm uppercase tracking-widest
             border-4 transition-none
             touch-manipulation
             ${spinning ? 'opacity-50 cursor-not-allowed' : ''}
@@ -75,22 +84,7 @@ export default function PickerControls({ onSpin, onReset, spinning, filmsCount }
             boxShadow: spinning
               ? 'inset 1px 1px 0 #404040, inset -1px -1px 0 #DFDFDF'
               : 'inset -1px -1px 0 #404040, inset 1px 1px 0 #DFDFDF',
-            transform: spinning ? 'translate(1px, 1px)' : 'translate(0, 0)',
             textShadow: '2px 2px 0 #000080'
-          }}
-          onMouseDown={(e) => {
-            if (!spinning) {
-              e.currentTarget.style.borderColor = '#808080 #FFFFFF #FFFFFF #808080'
-              e.currentTarget.style.boxShadow = 'inset 1px 1px 0 #404040, inset -1px -1px 0 #DFDFDF'
-              e.currentTarget.style.transform = 'translate(1px, 1px)'
-            }
-          }}
-          onMouseUp={(e) => {
-            if (!spinning) {
-              e.currentTarget.style.borderColor = '#FFFFFF #808080 #808080 #FFFFFF'
-              e.currentTarget.style.boxShadow = 'inset -1px -1px 0 #404040, inset 1px 1px 0 #DFDFDF'
-              e.currentTarget.style.transform = 'translate(0, 0)'
-            }
           }}
         >
           START OVER
