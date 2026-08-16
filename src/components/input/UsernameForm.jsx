@@ -106,10 +106,10 @@ export default function UsernameForm({ onSubmit, loading, mode = 'solo' }) {
 
   const placeholders = [
     'basithladoo',
+    'connoreatspants',
+    'kurstboy',
     'zoerosebryant',
     'davidehrlich',
-    'karsten',
-    'criterionguy',
     'cinema_lover',
   ]
 

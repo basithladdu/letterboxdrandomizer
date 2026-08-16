@@ -13,6 +13,7 @@ export default function HelpDialog({ mode, onClose }) {
   const dialogRef = useRef(null)
   const closeButtonRef = useRef(null)
   const isCompare = mode === 'compare'
+  const isGroup = mode === 'group'
 
   useEffect(() => {
     closeButtonRef.current?.focus()
@@ -85,10 +86,16 @@ export default function HelpDialog({ mode, onClose }) {
         <div className="max-h-[calc(88vh-3.5rem)] overflow-y-auto p-3 sm:p-5 retro-inset bg-retro-white space-y-3 sm:space-y-4">
           <div className="retro-outset bg-retro-panelYellow border-2 p-3 sm:p-4">
             <h2 className="text-base sm:text-xl font-black uppercase text-retro-black">
-              {isCompare ? 'FIND COMMON FILMS' : 'WATCHLIST PICKER'}
+              {isGroup
+                ? '🍿 GROUP MOVIE NIGHT (3-6 FRIENDS)'
+                : isCompare
+                ? 'FIND COMMON FILMS'
+                : 'WATCHLIST PICKER'}
             </h2>
             <p className="mt-2 text-xs sm:text-sm font-bold text-retro-black leading-relaxed">
-              {isCompare
+              {isGroup
+                ? 'Enter 3 to 6 Letterboxd usernames or profile links. Choose Unanimous (100% overlap) or Majority (2+ friends) to pool watchlists together.'
+                : isCompare
                 ? 'Enter two Letterboxd usernames or full profile/watchlist links. The picker uses only films that appear in both public watchlists.'
                 : 'Enter a Letterboxd username or full profile/watchlist link. The picker chooses from every film in that public watchlist.'}
             </p>
@@ -96,29 +103,48 @@ export default function HelpDialog({ mode, onClose }) {
 
           <div className="grid gap-3 sm:grid-cols-2">
             <div className="retro-inset bg-retro-gray p-3">
-              <h3 className="text-xs sm:text-sm font-black uppercase text-retro-black">01. ENTER USERNAMES</h3>
+              <h3 className="text-xs sm:text-sm font-black uppercase text-retro-black">
+                {isGroup ? '01. ENTER 3-6 FRIENDS' : '01. ENTER USERNAMES'}
+              </h3>
               <p className="mt-2 text-[11px] sm:text-xs font-bold text-retro-black leading-relaxed">
-                {isCompare
+                {isGroup
+                  ? 'Add 3 to 6 different usernames. All watchlists must be set to public.'
+                  : isCompare
                   ? 'Use two different Letterboxd usernames or profile links. Both watchlists must be public.'
                   : 'Use the exact Letterboxd username or profile link. The watchlist must be public.'}
               </p>
             </div>
+
             <div className="retro-inset bg-retro-gray p-3">
-              <h3 className="text-xs sm:text-sm font-black uppercase text-retro-black">02. FETCH FILMS</h3>
+              <h3 className="text-xs sm:text-sm font-black uppercase text-retro-black">
+                {isGroup ? '02. MATCH STRATEGY' : '02. FETCH FILMS'}
+              </h3>
               <p className="mt-2 text-[11px] sm:text-xs font-bold text-retro-black leading-relaxed">
-                {isCompare ? 'Click FIND COMMON FILMS.' : 'Click FETCH WATCHLIST.'} Every available page is read before the spin starts.
+                {isGroup
+                  ? 'Select 100% Unanimous (shared by everyone) or Majority (shared by 2+ friends).'
+                  : isCompare
+                  ? 'Click FIND COMMON FILMS. Every available page is read before the spin starts.'
+                  : 'Click FETCH WATCHLIST. Every available page is read before the spin starts.'}
               </p>
             </div>
+
             <div className="retro-inset bg-retro-gray p-3">
               <h3 className="text-xs sm:text-sm font-black uppercase text-retro-black">03. SPIN</h3>
               <p className="mt-2 text-[11px] sm:text-xs font-bold text-retro-black leading-relaxed">
                 The slot-machine sound plays with the wheel. Use SPIN AGAIN for another pick.
               </p>
             </div>
+
             <div className="retro-inset bg-retro-gray p-3">
-              <h3 className="text-xs sm:text-sm font-black uppercase text-retro-black">04. OPEN A FILM</h3>
+              <h3 className="text-xs sm:text-sm font-black uppercase text-retro-black">
+                {isGroup ? '04. EXPORT TICKET' : '04. OPEN A FILM'}
+              </h3>
               <p className="mt-2 text-[11px] sm:text-xs font-bold text-retro-black leading-relaxed">
-                In Common Films mode, COMMON FILMS lists every match. Select any title to open it on Letterboxd.
+                {isGroup
+                  ? 'Download a retro cinema ticket stub with all friend badges, or check streaming on JustWatch.'
+                  : isCompare
+                  ? 'In Common Films mode, COMMON FILMS lists every match. Select any title to open it on Letterboxd.'
+                  : 'Open the picked title directly on Letterboxd or check streaming on JustWatch.'}
               </p>
             </div>
           </div>
