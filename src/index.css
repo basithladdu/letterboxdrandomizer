@@ -259,6 +259,11 @@ a:not([class*="hover"]):hover {
 }
 
 /* Blinking badge */
+@keyframes blink {
+  0%, 49% { opacity: 1; }
+  50%, 100% { opacity: 0; }
+}
+
 .badge-new {
   animation: blink 1s steps(2, start) infinite;
   background: #FF0000;
@@ -269,9 +274,19 @@ a:not([class*="hover"]):hover {
 }
 
 /* Hero heading rainbow */
+@keyframes rainbow {
+  0% { color: #FF0000; }
+  17% { color: #FF8000; }
+  33% { color: #FFFF00; }
+  50% { color: #00FF00; }
+  67% { color: #0080FF; }
+  83% { color: #8000FF; }
+  100% { color: #FF0000; }
+}
+
 .text-rainbow {
   animation: rainbow 4s linear infinite;
-  font-weight: black;
+  font-weight: 900;
 }
 
 /* Reduce motion for rainbow text */
