@@ -11,9 +11,9 @@ const FOCUSABLE_SELECTOR = [
 ].join(',')
 
 const paymentMethods = [
-  { label: 'KO-FI', value: 'ko-fi.com/basithladoo', href: 'https://ko-fi.com/basithladoo' },
-  { label: 'PAYPAL', value: 'paypal.me/basithladdu', href: 'https://paypal.me/basithladdu' },
-  { label: 'UPI (GPAY / PHONEPE / PAYTM)', value: 'basithmuqeeth-1@okhdfcbank', copyable: true },
+  { label: '☕ KO-FI ($ / EUR / GLOBAL)', value: 'ko-fi.com/basithladoo', href: 'https://ko-fi.com/basithladoo', badge: '$' },
+  { label: '$ PAYPAL (USD / GLOBAL)', value: 'paypal.me/basithladdu', href: 'https://paypal.me/basithladdu', badge: '$' },
+  { label: '₹ UPI (GPAY / PHONEPE / PAYTM)', value: 'basithmuqeeth-1@okhdfcbank', copyable: true, badge: '₹' },
 ]
 
 export default function SupportDialog({ onClose }) {
@@ -39,10 +39,15 @@ export default function SupportDialog({ onClose }) {
 
       const first = focusable[0]
       const last = focusable[focusable.length - 1]
-      if (event.shiftKey && document.activeElement === first) {
+      const active = document.activeElement
+
+      if (!dialogRef.current.contains(active)) {
+        event.preventDefault()
+        ;(event.shiftKey ? last : first).focus()
+      } else if (event.shiftKey && active === first) {
         event.preventDefault()
         last.focus()
-      } else if (!event.shiftKey && document.activeElement === last) {
+      } else if (!event.shiftKey && active === last) {
         event.preventDefault()
         first.focus()
       }
@@ -96,7 +101,14 @@ export default function SupportDialog({ onClose }) {
         <dl className="p-3 sm:p-4 retro-inset bg-retro-white space-y-3">
           {paymentMethods.map((method) => (
             <div key={method.label} className="retro-outset bg-retro-gray border-2 p-3">
-              <dt className="text-[10px] sm:text-xs font-black uppercase text-retro-black">{method.label}</dt>
+              <div className="flex items-center justify-between">
+                <dt className="text-[10px] sm:text-xs font-black uppercase text-retro-black">{method.label}</dt>
+                {method.badge && (
+                  <span className="bg-retro-yellow text-retro-black font-black text-[9px] px-1.5 py-0.5 border border-retro-black">
+                    {method.badge}
+                  </span>
+                )}
+              </div>
               <dd className="mt-1 font-mono text-xs sm:text-sm font-bold text-retro-black break-all flex items-center justify-between gap-2">
                 {method.href ? (
                   <a

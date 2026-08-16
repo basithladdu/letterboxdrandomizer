@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { SiWhatsapp, SiX, SiTelegram, SiReddit } from 'react-icons/si'
 import { BiLink, BiCheck, BiShareAlt } from 'react-icons/bi'
 
-const SITE_URL = 'https://letterboxdrandomizer.vercel.app'
+const SITE_URL = 'https://letterboxdrandomizer.wedevit.in'
 
 // Shared 3D bevel styling used across the retro buttons.
 const raised = {

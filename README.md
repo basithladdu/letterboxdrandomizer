@@ -2,7 +2,7 @@
 
 A retro lightweight web app that picks a random film from public Letterboxd watchlists, finds common films across pairs, or pools watchlists for group movie nights with up to 6 friends. No API key or account is needed.
 
-[Live Demo](https://letterboxd-randomizer.vercel.app)
+[Live Demo](https://letterboxdrandomizer.wedevit.in/)
 
 ---
 

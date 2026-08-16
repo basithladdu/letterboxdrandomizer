@@ -15,9 +15,9 @@ const socials = [
 ]
 
 const paymentMethods = [
-  { label: 'KO-FI', value: 'ko-fi.com/basithladoo', href: 'https://ko-fi.com/basithladoo' },
-  { label: 'PAYPAL', value: 'paypal.me/basithladdu', href: 'https://paypal.me/basithladdu' },
-  { label: 'UPI (GPAY / PHONEPE / PAYTM)', value: 'basithmuqeeth-1@okhdfcbank', copyable: true },
+  { label: '☕ KO-FI ($ / EUR / GLOBAL)', value: 'ko-fi.com/basithladoo', href: 'https://ko-fi.com/basithladoo', badge: '$' },
+  { label: '$ PAYPAL (USD / GLOBAL)', value: 'paypal.me/basithladdu', href: 'https://paypal.me/basithladdu', badge: '$' },
+  { label: '₹ UPI (GPAY / PHONEPE / PAYTM)', value: 'basithmuqeeth-1@okhdfcbank', copyable: true, badge: '₹' },
 ]
 
 export default function FollowDialog({ onClose }) {
@@ -139,7 +139,14 @@ export default function FollowDialog({ onClose }) {
             <dl className="space-y-2">
               {paymentMethods.map((method) => (
                 <div key={method.label} className="retro-outset bg-retro-gray border-2 p-2.5">
-                  <dt className="text-[9px] sm:text-[10px] font-black uppercase text-retro-black">{method.label}</dt>
+                  <div className="flex items-center justify-between">
+                    <dt className="text-[9px] sm:text-[10px] font-black uppercase text-retro-black">{method.label}</dt>
+                    {method.badge && (
+                      <span className="bg-retro-yellow text-retro-black font-black text-[9px] px-1.5 py-0.5 border border-retro-black">
+                        {method.badge}
+                      </span>
+                    )}
+                  </div>
                   <dd className="mt-0.5 font-mono text-xs sm:text-sm font-bold text-retro-black break-all flex items-center justify-between gap-2">
                     {method.href ? (
                       <a

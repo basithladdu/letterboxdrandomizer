@@ -16,7 +16,7 @@ Letterboxd Randomizer is a fun, retro-styled web application that helps users de
 Currently, the app relies on public scraping and CORS proxies, which can be unreliable and slow. We would like to use the official API to fetch user watchlists more efficiently and provide a better experience for the Letterboxd community.
 
 **Project Links:**
-- **Live Site:** https://letterboxdrandomizer.vercel.app/
+- **Live Site:** https://letterboxdrandomizer.wedevit.in/
 - **GitHub Repository:** https://github.com/basithladoo/letterboxdrandomizer
 
 The project is entirely open-source, non-commercial, and does not replicate any paid subscription features.

@@ -84,12 +84,19 @@ export default function WatchlistRoaster({ films = [], watchlistOwners = [] }) {
 
     const topDecadePct = validYears.length > 0 ? Math.round((topCount / validYears.length) * 100) : 0
 
-    // Time to finish at 1 film/day
+    // Time to finish at 1 film/night (~1.9 hrs average runtime)
     const daysToFinish = total
-    const yearsToFinish = (total / 365).toFixed(1)
+    const hoursToFinish = Math.round(total * 1.9)
     const finishDate = new Date()
     finishDate.setDate(finishDate.getDate() + daysToFinish)
-    const finishMonthYear = finishDate.toLocaleDateString('en-US', { month: 'short', year: 'numeric' })
+    const finishMonthYear = finishDate.toLocaleDateString('en-US', { month: 'short', year: 'numeric', day: total < 30 ? 'numeric' : undefined })
+
+    let timeSummary = `${daysToFinish} DAYS (~${hoursToFinish} HRS)`
+    if (total >= 365) {
+      timeSummary = `~${(total / 365).toFixed(1)} YRS (${daysToFinish} DAYS / ~${hoursToFinish} HRS)`
+    } else if (total >= 30) {
+      timeSummary = `~${(total / 30.4).toFixed(1)} MONTHS (${daysToFinish} DAYS / ~${hoursToFinish} HRS)`
+    }
 
     return {
       total,
@@ -98,7 +105,8 @@ export default function WatchlistRoaster({ films = [], watchlistOwners = [] }) {
       topDecade,
       topDecadePct,
       daysToFinish,
-      yearsToFinish,
+      hoursToFinish,
+      timeSummary,
       finishMonthYear,
     }
   }, [films])
@@ -165,10 +173,10 @@ export default function WatchlistRoaster({ films = [], watchlistOwners = [] }) {
               <span className="font-black">{stats.total} TITLES</span>
             </div>
 
-            <div className="flex justify-between border-b border-retro-muted pb-1">
-              <span className="font-bold uppercase text-retro-muted">TIME TO CLEAR (1/NIGHT):</span>
-              <span className="font-black text-right">
-                ~{stats.yearsToFinish} YRS ({stats.finishMonthYear})
+            <div className="flex flex-col sm:flex-row sm:justify-between border-b border-retro-muted pb-1 gap-0.5">
+              <span className="font-bold uppercase text-retro-muted">TIME TO CLEAR (1 FILM/NIGHT):</span>
+              <span className="font-black text-left sm:text-right">
+                {stats.timeSummary} &bull; {stats.finishMonthYear}
               </span>
             </div>
 
