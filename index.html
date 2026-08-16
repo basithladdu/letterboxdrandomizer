@@ -2,42 +2,131 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-    <title>What Should We Watch? — Letterboxd Watchlist Mixer</title>
+    <!-- Primary Meta Tags -->
+    <title>What Should We Watch? — Letterboxd Watchlist Mixer &amp; Movie Picker</title>
+    <meta
+      name="title"
+      content="What Should We Watch? — Letterboxd Watchlist Mixer &amp; Movie Picker"
+    />
     <meta
       name="description"
-      content="Pick a random film from a public Letterboxd watchlist or find common films in two public lists."
+      content="Can't decide what to watch? Pick a random movie from your public Letterboxd watchlist, find common films with a friend, or pool watchlists for a Group Movie Night with up to 6 friends. No login or API key needed."
     />
-    <meta name="theme-color" content="#008080" />
+    <meta
+      name="keywords"
+      content="Letterboxd, Letterboxd randomizer, Letterboxd watchlist picker, movie picker, group movie night, what should i watch, film roulette, common films letterboxd, random film generator, cinephile, wedevit"
+    />
+    <meta name="author" content="Shaik Abdul Basith, WEDEVIT.IN" />
+    <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
+    <meta name="theme-color" content="#000080" />
+
+    <!-- Icons & Manifest -->
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="manifest" href="/manifest.json" />
     <link rel="canonical" href="https://letterboxdrandomizer.wedevit.in/" />
 
+    <!-- Open Graph / Facebook / WhatsApp / Discord -->
     <meta property="og:type" content="website" />
     <meta property="og:site_name" content="Letterboxd Watchlist Mixer" />
+    <meta property="og:locale" content="en_US" />
     <meta property="og:url" content="https://letterboxdrandomizer.wedevit.in/" />
     <meta property="og:title" content="What Should We Watch? — Letterboxd Watchlist Mixer" />
     <meta
       property="og:description"
-      content="Pick a random film from a public Letterboxd watchlist or find common films in two public lists."
+      content="Spin a random film from your public Letterboxd watchlist, find common films with a friend, or pool watchlists for a Group Movie Night with up to 6 friends."
     />
     <meta property="og:image" content="https://letterboxdrandomizer.wedevit.in/og.png" />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
-    <meta property="og:image:alt" content="What Should We Watch? — spin common films from two Letterboxd watchlists." />
+    <meta property="og:image:alt" content="What Should We Watch? — Spin random or common films from Letterboxd watchlists." />
 
+    <!-- Twitter / X -->
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:site" content="@basithladoo" />
     <meta name="twitter:creator" content="@basithladoo" />
     <meta name="twitter:title" content="What Should We Watch? — Letterboxd Watchlist Mixer" />
     <meta
       name="twitter:description"
-      content="Pick a random film from a public Letterboxd watchlist or find common films in two public lists."
+      content="Spin a random film from your public Letterboxd watchlist, find common films with a friend, or pool watchlists for a Group Movie Night with up to 6 friends."
     />
     <meta name="twitter:image" content="https://letterboxdrandomizer.wedevit.in/og.png" />
+    <meta name="twitter:image:alt" content="What Should We Watch? — Letterboxd Watchlist Mixer preview card." />
+
+    <!-- Structured Data (JSON-LD): WebApplication -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "WebApplication",
+        "name": "Letterboxd Watchlist Mixer",
+        "url": "https://letterboxdrandomizer.wedevit.in/",
+        "applicationCategory": "EntertainmentApplication",
+        "operatingSystem": "All",
+        "browserRequirements": "Requires JavaScript. Requires HTML5.",
+        "offers": {
+          "@type": "Offer",
+          "price": "0",
+          "priceCurrency": "USD"
+        },
+        "creator": {
+          "@type": "Person",
+          "name": "Shaik Abdul Basith",
+          "url": "https://letterboxd.com/basithladoo"
+        },
+        "publisher": {
+          "@type": "Organization",
+          "name": "WEDEVIT.IN",
+          "url": "https://wedevit.in"
+        },
+        "description": "A retro web app to randomly select films from public Letterboxd watchlists, compare common films between pairs, or host group movie night draws."
+      }
+    </script>
+
+    <!-- Structured Data (JSON-LD): FAQPage -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        "mainEntity": [
+          {
+            "@type": "Question",
+            "name": "How does Letterboxd Watchlist Mixer work?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Enter your public Letterboxd username or link. The app reads every film in your public watchlist and uses an authentic retro slot machine roulette to pick a movie for you."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Can I find common films between two Letterboxd watchlists?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Yes. In the Common Films tab, enter two usernames. The app cross-references both watchlists to find shared movies and spins only from films both users want to watch."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "How does Group Movie Night work for 3 to 6 friends?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "In the Group Movie Night tab, add 3 to 6 Letterboxd usernames. You can choose Unanimous mode (films present on all watchlists) or Majority mode (films shared by 2 or more friends)."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Do I need a Letterboxd account or API key to use this tool?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "No account or API key is required. The app only accesses public watchlist data."
+            }
+          }
+        ]
+      }
+    </script>
 
     <style>
-      body { background-color: #14181c; margin: 0; }
+      body { background-color: #C0C0C0; margin: 0; }
     </style>
   </head>
   <body>

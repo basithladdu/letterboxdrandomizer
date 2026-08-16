@@ -1,0 +1,17 @@
+{
+  "name": "Letterboxd Watchlist Mixer",
+  "short_name": "LBX Mixer",
+  "description": "Pick a random film from public Letterboxd watchlists, find common films with friends, or host Group Movie Nights.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#C0C0C0",
+  "theme_color": "#000080",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

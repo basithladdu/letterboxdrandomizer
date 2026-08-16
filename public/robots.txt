@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://letterboxdrandomizer.wedevit.in/sitemap.xml
