@@ -1,4 +1,4 @@
-import { SiGithub, SiInstagram, SiLetterboxd, SiX } from 'react-icons/si'
+import { SiInstagram, SiLetterboxd, SiX } from 'react-icons/si'
 import SupportButton from '../shared/SupportButton.jsx'
 
 export default function CreatorLinks() {
@@ -15,7 +15,7 @@ export default function CreatorLinks() {
         <p className="text-center text-[10px] sm:text-xs font-black text-retro-black uppercase tracking-wide">
           I&apos;M NOT KYLIE JENNER &mdash; JUST DM ME
         </p>
-        <div className="grid grid-cols-2 gap-2">
+        <div className="grid grid-cols-3 gap-2">
           <a
             href="https://instagram.com/basithladdu"
             target="_blank"
@@ -43,17 +43,8 @@ export default function CreatorLinks() {
             <SiLetterboxd size={15} aria-hidden="true" />
             LETTERBOXD
           </a>
-          <a
-            href="https://github.com/basithladdu/letterboxdrandomizer"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="retro-outset flex items-center justify-center gap-2 px-2 py-2 text-[10px] sm:text-xs font-black text-retro-black no-underline hover:bg-retro-yellow transition-colors"
-          >
-            <SiGithub size={15} aria-hidden="true" />
-            GITHUB
-          </a>
           <SupportButton
-            className="retro-outset col-span-2 flex min-h-[44px] items-center justify-center gap-2 px-2 py-2 text-[10px] sm:text-xs font-black text-retro-black no-underline hover:bg-retro-yellow transition-colors touch-manipulation"
+            className="retro-outset col-span-3 flex min-h-[44px] items-center justify-center gap-2 px-2 py-2 text-[10px] sm:text-xs font-black text-retro-black no-underline hover:bg-retro-yellow transition-colors touch-manipulation"
             iconSize={15}
           />
         </div>

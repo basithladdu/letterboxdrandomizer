@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react'
-import { SiGithub, SiInstagram, SiLetterboxd, SiX } from 'react-icons/si'
+import { SiInstagram, SiLetterboxd, SiX } from 'react-icons/si'
 
 const FOCUSABLE_SELECTOR = [
   'button:not([disabled])',
@@ -11,7 +11,6 @@ const socials = [
   { label: 'INSTAGRAM', href: 'https://instagram.com/basithladdu', Icon: SiInstagram },
   { label: 'TWITTER / X', href: 'https://twitter.com/basithladoo', Icon: SiX },
   { label: 'LETTERBOXD', href: 'https://letterboxd.com/basithladoo', Icon: SiLetterboxd },
-  { label: 'GITHUB', href: 'https://github.com/basithladdu/letterboxdrandomizer', Icon: SiGithub },
 ]
 
 export default function FollowDialog({ onClose }) {
@@ -90,7 +89,7 @@ export default function FollowDialog({ onClose }) {
           <p id="follow-dialog-message" className="text-center text-[10px] sm:text-xs font-black text-retro-black uppercase tracking-wide">
             I&apos;M NOT KYLIE JENNER &mdash; JUST DM ME
           </p>
-          <div className="grid grid-cols-2 gap-2">
+          <div className="grid grid-cols-3 gap-2">
             {socials.map(({ label, href, Icon }) => (
               <a
                 key={label}

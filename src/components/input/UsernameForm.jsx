@@ -68,7 +68,7 @@ export default function UsernameForm({ onSubmit, loading, mode = 'solo' }) {
             <div className="p-2 sm:p-4 retro-inset bg-retro-white">
               <div className="relative flex items-center gap-2 flex-wrap">
                 <label htmlFor={`letterboxd-username-${index}`} className="font-bold text-xs whitespace-nowrap text-retro-black">
-                  USERNAME OR LINK
+                  USERNAME
                 </label>
                 <input
                   id={`letterboxd-username-${index}`}
@@ -76,7 +76,7 @@ export default function UsernameForm({ onSubmit, loading, mode = 'solo' }) {
                   value={username}
                   onChange={(e) => updateUsername(index, e.target.value)}
                   onKeyDown={handleKeyDown}
-                  placeholder={index === 0 ? 'basithladoo or letterboxd.com/...' : 'zoerosebryant or letterboxd.com/...'}
+                  placeholder={index === 0 ? 'basithladoo' : 'zoerosebryant'}
                   disabled={loading}
                   autoComplete="off"
                   autoCapitalize="none"
@@ -87,7 +87,7 @@ export default function UsernameForm({ onSubmit, loading, mode = 'solo' }) {
                     text-retro-black placeholder:text-retro-muted
                     font-mono text-xs sm:text-sm uppercase tracking-widest
                     focus-visible:outline-dotted focus-visible:outline-2 focus-visible:outline-retro-black
-                    disabled:opacity-50 min-w-[100px] transition-all
+                    disabled:opacity-50 min-w-[100px]
                   "
                 />
               </div>
