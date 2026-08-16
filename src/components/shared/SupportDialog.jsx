@@ -1,4 +1,5 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
+import { BiCopy, BiCheck } from 'react-icons/bi'
 
 const FOCUSABLE_SELECTOR = [
   'button:not([disabled])',
@@ -11,13 +12,14 @@ const FOCUSABLE_SELECTOR = [
 
 const paymentMethods = [
   { label: 'KO-FI', value: 'ko-fi.com/basithladoo', href: 'https://ko-fi.com/basithladoo' },
-  { label: 'PAYPAL', value: 'basithladdu' },
-  { label: 'GPAY / HDFC', value: 'basithmuqeeth-1@okhdfcbank' },
+  { label: 'PAYPAL', value: 'paypal.me/basithladdu', href: 'https://paypal.me/basithladdu' },
+  { label: 'UPI (GPAY / PHONEPE / PAYTM)', value: 'basithmuqeeth-1@okhdfcbank', copyable: true },
 ]
 
 export default function SupportDialog({ onClose }) {
   const dialogRef = useRef(null)
   const closeButtonRef = useRef(null)
+  const [copiedKey, setCopiedKey] = useState(null)
 
   useEffect(() => {
     closeButtonRef.current?.focus()
@@ -53,6 +55,16 @@ export default function SupportDialog({ onClose }) {
     }
   }, [onClose])
 
+  const copyToClipboard = async (text, key) => {
+    try {
+      await navigator.clipboard.writeText(text)
+      setCopiedKey(key)
+      setTimeout(() => setCopiedKey(null), 2000)
+    } catch {
+      // Fallback
+    }
+  }
+
   return (
     <div
       className="fixed inset-0 z-[120] flex items-center justify-center bg-black/60 p-3 sm:p-6"
@@ -85,7 +97,7 @@ export default function SupportDialog({ onClose }) {
           {paymentMethods.map((method) => (
             <div key={method.label} className="retro-outset bg-retro-gray border-2 p-3">
               <dt className="text-[10px] sm:text-xs font-black uppercase text-retro-black">{method.label}</dt>
-              <dd className="mt-1 font-mono text-xs sm:text-sm font-bold text-retro-black break-all">
+              <dd className="mt-1 font-mono text-xs sm:text-sm font-bold text-retro-black break-all flex items-center justify-between gap-2">
                 {method.href ? (
                   <a
                     href={method.href}
@@ -95,7 +107,28 @@ export default function SupportDialog({ onClose }) {
                   >
                     {method.value}
                   </a>
-                ) : method.value}
+                ) : (
+                  <span>{method.value}</span>
+                )}
+
+                {method.copyable && (
+                  <button
+                    type="button"
+                    onClick={() => copyToClipboard(method.value, method.label)}
+                    className="retro-outset bg-retro-yellow text-retro-black px-2 py-1 text-[10px] font-black hover:bg-[#FFE033] flex items-center gap-1 flex-shrink-0"
+                    aria-label={`Copy ${method.label}`}
+                  >
+                    {copiedKey === method.label ? (
+                      <>
+                        <BiCheck size={12} /> COPIED!
+                      </>
+                    ) : (
+                      <>
+                        <BiCopy size={12} /> COPY
+                      </>
+                    )}
+                  </button>
+                )}
               </dd>
             </div>
           ))}

@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { motion } from 'framer-motion'
-import { BiMoviePlay } from 'react-icons/bi'
+import { BiPlayCircle, BiLinkExternal } from 'react-icons/bi'
 import { fetchPoster } from '../../services/omdbService.js'
 
 function StarRating({ rating }) {
@@ -29,32 +29,65 @@ function StarRating({ rating }) {
 export function ViewOnLetterboxd({ film }) {
   if (!film?.letterboxdUri) return null
 
+  const justWatchQuery = encodeURIComponent(`${film.title} ${film.year || ''}`.trim())
+  const justWatchUrl = `https://www.justwatch.com/us/search?q=${justWatchQuery}`
+
   return (
-    <a
-      href={film.letterboxdUri}
-      target="_blank"
-      rel="noopener noreferrer"
-      aria-label={`View ${film.title} on Letterboxd`}
-      className="block w-full py-2 sm:py-4 text-sm sm:text-lg font-black text-retro-black text-center uppercase tracking-widest border-4 transition-none"
-      style={{
-        backgroundColor: '#FFFF00',
-        borderColor: '#FFFFFF #808080 #808080 #FFFFFF',
-        boxShadow: 'inset -1px -1px 0 #404040, inset 1px 1px 0 #DFDFDF',
-        textShadow: '2px 2px 0 #808080'
-      }}
-      onMouseDown={(e) => {
-        e.currentTarget.style.borderColor = '#808080 #FFFFFF #FFFFFF #808080'
-        e.currentTarget.style.boxShadow = 'inset 1px 1px 0 #404040, inset -1px -1px 0 #DFDFDF'
-        e.currentTarget.style.transform = 'translate(1px, 1px)'
-      }}
-      onMouseUp={(e) => {
-        e.currentTarget.style.borderColor = '#FFFFFF #808080 #808080 #FFFFFF'
-        e.currentTarget.style.boxShadow = 'inset -1px -1px 0 #404040, inset 1px 1px 0 #DFDFDF'
-        e.currentTarget.style.transform = 'translate(0, 0)'
-      }}
-    >
-      VIEW ON LETTERBOXD
-    </a>
+    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+      <a
+        href={film.letterboxdUri}
+        target="_blank"
+        rel="noopener noreferrer"
+        aria-label={`View ${film.title} on Letterboxd`}
+        className="flex items-center justify-center gap-2 py-2.5 sm:py-3.5 text-xs sm:text-base font-black text-retro-black text-center uppercase tracking-widest border-4 transition-none"
+        style={{
+          backgroundColor: '#FFFF00',
+          borderColor: '#FFFFFF #808080 #808080 #FFFFFF',
+          boxShadow: 'inset -1px -1px 0 #404040, inset 1px 1px 0 #DFDFDF',
+          textShadow: '2px 2px 0 #808080'
+        }}
+        onMouseDown={(e) => {
+          e.currentTarget.style.borderColor = '#808080 #FFFFFF #FFFFFF #808080'
+          e.currentTarget.style.boxShadow = 'inset 1px 1px 0 #404040, inset -1px -1px 0 #DFDFDF'
+          e.currentTarget.style.transform = 'translate(1px, 1px)'
+        }}
+        onMouseUp={(e) => {
+          e.currentTarget.style.borderColor = '#FFFFFF #808080 #808080 #FFFFFF'
+          e.currentTarget.style.boxShadow = 'inset -1px -1px 0 #404040, inset 1px 1px 0 #DFDFDF'
+          e.currentTarget.style.transform = 'translate(0, 0)'
+        }}
+      >
+        <BiLinkExternal size={18} />
+        VIEW ON LETTERBOXD
+      </a>
+
+      <a
+        href={justWatchUrl}
+        target="_blank"
+        rel="noopener noreferrer"
+        aria-label={`Find where to stream ${film.title}`}
+        className="flex items-center justify-center gap-2 py-2.5 sm:py-3.5 text-xs sm:text-base font-black text-retro-white text-center uppercase tracking-widest border-4 transition-none"
+        style={{
+          backgroundColor: '#00AA00',
+          borderColor: '#FFFFFF #808080 #808080 #FFFFFF',
+          boxShadow: 'inset -1px -1px 0 #404040, inset 1px 1px 0 #DFDFDF',
+          textShadow: '2px 2px 0 #004400'
+        }}
+        onMouseDown={(e) => {
+          e.currentTarget.style.borderColor = '#808080 #FFFFFF #FFFFFF #808080'
+          e.currentTarget.style.boxShadow = 'inset 1px 1px 0 #404040, inset -1px -1px 0 #DFDFDF'
+          e.currentTarget.style.transform = 'translate(1px, 1px)'
+        }}
+        onMouseUp={(e) => {
+          e.currentTarget.style.borderColor = '#FFFFFF #808080 #808080 #FFFFFF'
+          e.currentTarget.style.boxShadow = 'inset -1px -1px 0 #404040, inset 1px 1px 0 #DFDFDF'
+          e.currentTarget.style.transform = 'translate(0, 0)'
+        }}
+      >
+        <BiPlayCircle size={20} />
+        WHERE TO WATCH
+      </a>
+    </div>
   )
 }
 
@@ -106,6 +139,9 @@ function PosterArtwork({ film }) {
 }
 
 export default function MovieCard({ film }) {
+  const totalUsers = film.totalUsers || film.watchlistOwners?.length || 1
+  const sharedCount = film.overlapCount || (film.watchlistOwners?.length === 2 ? 2 : 1)
+  const isGroup = totalUsers > 2
 
   return (
     <motion.div
@@ -129,18 +165,45 @@ export default function MovieCard({ film }) {
             <PosterArtwork film={film} />
 
             <div className="min-w-0 space-y-2 sm:space-y-4">
-              <div className="border-b-4 border-retro-black pb-3 sm:pb-4">
+              <div className="border-b-4 border-retro-black pb-3 sm:pb-4 space-y-1">
                 <h2 className="text-xl sm:text-4xl font-black text-retro-black leading-tight uppercase">
                   {film.title}
                 </h2>
                 {film.year && (
-                  <p className="text-xs sm:text-base font-mono text-retro-muted mt-1">YEAR: {film.year}</p>
+                  <p className="text-xs sm:text-base font-mono text-retro-muted">YEAR: {film.year}</p>
                 )}
+
                 {film.watchlistOwners?.length === 2 && (
-                  <p className="text-[10px] sm:text-sm font-mono text-retro-muted">
+                  <p className="text-[10px] sm:text-xs font-mono font-bold text-retro-black bg-retro-gray/50 p-1 border border-retro-muted">
                     COMMON TO: {film.watchlistOwners.join(' + ')}
                   </p>
                 )}
+
+                {isGroup && (
+                  <div className="p-1.5 bg-retro-gray border border-retro-muted space-y-1">
+                    <div className="flex items-center justify-between gap-1 text-[10px] sm:text-xs font-black uppercase">
+                      <span className="text-retro-black">
+                        SHARED BY {sharedCount} OF {totalUsers} FRIENDS:
+                      </span>
+                      {film.isUnanimous && (
+                        <span className="bg-retro-red text-retro-white px-1 py-0.2 text-[9px]">
+                          100% UNANIMOUS
+                        </span>
+                      )}
+                    </div>
+                    <div className="flex flex-wrap gap-1">
+                      {(film.sharedBy || film.watchlistOwners || []).map((u) => (
+                        <span
+                          key={u}
+                          className="bg-retro-white text-retro-black border border-retro-black px-1.5 py-0.5 text-[9px] font-mono font-bold"
+                        >
+                          @{u}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
                 {film.dateAdded && (
                   <p className="text-[10px] sm:text-sm font-mono text-retro-muted">ADDED: {film.dateAdded}</p>
                 )}

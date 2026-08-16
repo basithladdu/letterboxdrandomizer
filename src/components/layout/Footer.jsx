@@ -21,18 +21,6 @@ export default function Footer() {
         <span className="retro-outset p-1.5 sm:p-2 bg-retro-red text-retro-white"><BiSmile size={14} /></span>
         <span className="retro-outset p-1.5 sm:p-2 bg-retro-blue text-retro-white"><BiVolumeFull size={14} /></span>
       </div>
-
-      <p className="text-center text-[10px] sm:text-xs font-black uppercase text-retro-black">
-        SHAMELESS PLUG:{' '}
-        <a
-          href="https://wedevit.in"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="underline decoration-2 hover:bg-retro-yellow"
-        >
-          WANT US TO BUILD YOUR SOFTWARE? WEDEVIT.IN
-        </a>
-      </p>
     </footer>
   )
 }

@@ -8,9 +8,12 @@ import PickerControls from './components/picker/PickerControls.jsx'
 import SharedFilmsList from './components/picker/SharedFilmsList.jsx'
 import CreatorLinks from './components/picker/CreatorLinks.jsx'
 import FollowDialog from './components/picker/FollowDialog.jsx'
+import WatchlistRoaster from './components/picker/WatchlistRoaster.jsx'
+import CinemaTicket from './components/picker/CinemaTicket.jsx'
+import ShareBar from './components/picker/ShareBar.jsx'
 import { useWatchlistScraper } from './hooks/useWatchlistScraper.js'
 import { pickRandom } from './utils/randomPicker.js'
-import { findSharedFilms } from './utils/watchlistMatcher.js'
+import { findSharedFilms, findGroupSharedFilms } from './utils/watchlistMatcher.js'
 import { fetchFilmMetadata } from './services/letterboxdScraper.js'
 import { motion, AnimatePresence } from 'framer-motion'
 import { getSavedWatchlist, saveWatchlist, logUserSearch } from './services/firebase.js'
@@ -35,7 +38,7 @@ export default function App() {
     clearError: clearScrapeError,
   } = useWatchlistScraper()
 
-  async function handleScrape(usernames) {
+  async function handleScrape(usernames, options = {}) {
     setWatchlistError(null)
     clearScrapeError()
 
@@ -48,10 +51,11 @@ export default function App() {
         throw new Error('Enter a valid Letterboxd username or profile link.')
       }
 
-      if (normalizedUsernames.length > 2) {
-        throw new Error('Use one username for Watchlist Picker or two usernames for Common Films.')
+      if (normalizedUsernames.length > 6) {
+        throw new Error('Group Movie Night supports up to 6 friends.')
       }
 
+      // Check cached watchlists
       const cachedEntries = await Promise.all(
         normalizedUsernames.map(async (username) => ({
           username,
@@ -63,12 +67,13 @@ export default function App() {
       const usernamesToScrape = normalizedUsernames.filter(
         (username) => !cachedByUsername.get(username.toLowerCase())
       )
+
       const scrapedEntries = usernamesToScrape.length ? await scrape(usernamesToScrape) : []
       const scrapedByUsername = new Map(
         scrapedEntries.map(({ username, films: result }) => [username.toLowerCase(), result])
       )
 
-      const watchlists = normalizedUsernames.map((username) => {
+      const watchlistsWithOwners = normalizedUsernames.map((username) => {
         const key = username.toLowerCase()
         const result = cachedByUsername.get(key) || scrapedByUsername.get(key)
 
@@ -80,28 +85,60 @@ export default function App() {
           saveWatchlist(username, result, result.meta)
         }
 
-        return result
+        return { username, films: result }
       })
 
       normalizedUsernames.forEach((username) => logUserSearch(username))
 
+      // 1. Solo Watchlist
       if (normalizedUsernames.length === 1) {
+        const userFilms = watchlistsWithOwners[0].films
         setWatchlistOwners(normalizedUsernames)
-        setFilms(watchlists[0])
-        startPicker(watchlists[0])
+        setFilms(userFilms)
+        startPicker(userFilms)
         return
       }
 
-      const sharedFilms = findSharedFilms(watchlists[0], watchlists[1], normalizedUsernames)
-      if (sharedFilms.length === 0) {
-        throw new Error(`No common films found between ${normalizedUsernames[0]} and ${normalizedUsernames[1]}.`)
+      // 2. Pair Comparison (2 Users)
+      if (normalizedUsernames.length === 2) {
+        const sharedFilms = findSharedFilms(
+          watchlistsWithOwners[0].films,
+          watchlistsWithOwners[1].films,
+          normalizedUsernames
+        )
+
+        if (sharedFilms.length === 0) {
+          throw new Error(
+            `No common films found between ${normalizedUsernames[0]} and ${normalizedUsernames[1]}.`
+          )
+        }
+
+        setWatchlistOwners(normalizedUsernames)
+        setFilms(sharedFilms)
+        startPicker(sharedFilms)
+        return
+      }
+
+      // 3. Group Movie Night (3-6 Users)
+      const groupMode = options.groupMode || 'majority'
+      let matchingFilms = findGroupSharedFilms(watchlistsWithOwners, { mode: groupMode, minOverlap: 2 })
+
+      // Graceful fallback if 100% intersection yielded 0
+      if (matchingFilms.length === 0 && groupMode === 'intersection') {
+        matchingFilms = findGroupSharedFilms(watchlistsWithOwners, { mode: 'majority', minOverlap: 2 })
+      }
+
+      if (matchingFilms.length === 0) {
+        throw new Error(
+          `No matching films found across the ${normalizedUsernames.length} watchlists. Try adding more films or switching to majority mode!`
+        )
       }
 
       setWatchlistOwners(normalizedUsernames)
-      setFilms(sharedFilms)
-      startPicker(sharedFilms)
+      setFilms(matchingFilms)
+      startPicker(matchingFilms)
     } catch (error) {
-      setWatchlistError(error.message || 'Could not find common films in those watchlists.')
+      setWatchlistError(error.message || 'Could not find matching films in those watchlists.')
     }
   }
 
@@ -125,7 +162,7 @@ export default function App() {
   function handleSpinComplete() {
     setSpinning(false)
     window.clearTimeout(followTimerRef.current)
-    followTimerRef.current = window.setTimeout(() => setShowFollowDialog(true), 2000)
+    followTimerRef.current = window.setTimeout(() => setShowFollowDialog(true), 2500)
   }
 
   function handleReset() {
@@ -174,6 +211,9 @@ export default function App() {
 
   const inputError = watchlistError || scrapeError
 
+  const isGroup = watchlistOwners.length > 2
+  const isPair = watchlistOwners.length === 2
+
   return (
     <div className="flex min-h-screen flex-col bg-retro-gray">
       <Header onHome={handleHome} />
@@ -206,10 +246,10 @@ export default function App() {
                   WHAT SHOULD I WATCH?
                 </h1>
                 <p className="text-sm sm:text-lg font-bold text-retro-black">
-                  PICK FROM YOUR WATCHLIST!
+                  PICK FROM YOUR WATCHLIST OR GROUP MOVIE NIGHT!
                 </p>
                 <div className="text-xs font-mono text-retro-muted">
-                   Pick a film from YOUR Letterboxd watchlist — or find COMMON FILMS in two public lists
+                   Pick a film from your Letterboxd watchlist, find common films with a friend, or pool watchlists with up to 6 friends!
                 </div>
               </div>
 
@@ -252,15 +292,22 @@ export default function App() {
 
               <div className="retro-outset bg-retro-panelYellow border-2 px-2 py-2 sm:px-3 sm:py-2 flex flex-wrap items-center justify-between gap-1.5">
                 <p className="text-[10px] sm:text-xs font-black uppercase tracking-widest text-retro-black">
-                  {watchlistOwners.length === 2 ? 'COMMON FILMS' : 'WATCHLIST PICKER'}
+                  {isGroup
+                    ? `🍿 GROUP MOVIE NIGHT (${watchlistOwners.length} FRIENDS)`
+                    : isPair
+                    ? 'COMMON FILMS'
+                    : 'WATCHLIST PICKER'}
                 </p>
                 <p className="text-[10px] sm:text-xs font-mono text-retro-black break-words text-right">
                   {watchlistOwners.join(' + ')} &mdash; {films.length}{' '}
-                  {watchlistOwners.length === 2
-                    ? `COMMON FILM${films.length === 1 ? '' : 'S'}`
+                  {isGroup || isPair
+                    ? `MATCHING FILM${films.length === 1 ? '' : 'S'}`
                     : `FILM${films.length === 1 ? '' : 'S'}`}
                 </p>
               </div>
+
+              {/* Watchlist Roaster & Quick Stats Diagnostic */}
+              <WatchlistRoaster films={films} watchlistOwners={watchlistOwners} />
 
               <div className="retro-hr" />
 
@@ -288,7 +335,12 @@ export default function App() {
               ) : (
                 <AnimatePresence>
                   {chosen && (
-                    <MovieCard key={chosen.letterboxdSlug + chosen.title} film={chosen} />
+                    <div className="space-y-4">
+                      <MovieCard key={chosen.letterboxdSlug + chosen.title} film={chosen} />
+
+                      {/* Retro Cinema Ticket Stub with built-in PNG Export and WEDEVIT.IN branding */}
+                      <CinemaTicket film={chosen} watchlistOwners={watchlistOwners} />
+                    </div>
                   )}
                 </AnimatePresence>
               )}
@@ -302,7 +354,13 @@ export default function App() {
 
               {!spinning && chosen && <ViewOnLetterboxd film={chosen} />}
 
-              {watchlistOwners.length === 2 && <SharedFilmsList films={films} />}
+              {!spinning && (
+                <ShareBar film={chosen} watchlistOwners={watchlistOwners} />
+              )}
+
+              {(isGroup || isPair) && (
+                <SharedFilmsList films={films} watchlistOwners={watchlistOwners} />
+              )}
 
             </motion.div>
           )}

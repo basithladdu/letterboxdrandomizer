@@ -48,6 +48,17 @@ export default function CreatorLinks() {
             iconSize={15}
           />
         </div>
+        <p className="text-center text-[10px] sm:text-xs font-black uppercase text-retro-black pt-1">
+          SHAMELESS PLUG:{' '}
+          <a
+            href="https://wedevit.in"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="underline decoration-2 hover:bg-retro-yellow"
+          >
+            WANT US TO BUILD YOUR SOFTWARE? WEDEVIT.IN
+          </a>
+        </p>
       </div>
     </section>
   )
