@@ -1,5 +1,6 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { SiInstagram, SiLetterboxd, SiX } from 'react-icons/si'
+import { BiCoffee, BiCopy, BiCheck } from 'react-icons/bi'
 
 const FOCUSABLE_SELECTOR = [
   'button:not([disabled])',
@@ -13,9 +14,16 @@ const socials = [
   { label: 'LETTERBOXD', href: 'https://letterboxd.com/basithladoo', Icon: SiLetterboxd },
 ]
 
+const paymentMethods = [
+  { label: 'KO-FI', value: 'ko-fi.com/basithladoo', href: 'https://ko-fi.com/basithladoo' },
+  { label: 'PAYPAL', value: 'paypal.me/basithladdu', href: 'https://paypal.me/basithladdu' },
+  { label: 'UPI (GPAY / PHONEPE / PAYTM)', value: 'basithmuqeeth-1@okhdfcbank', copyable: true },
+]
+
 export default function FollowDialog({ onClose }) {
   const dialogRef = useRef(null)
   const closeButtonRef = useRef(null)
+  const [copiedKey, setCopiedKey] = useState(null)
 
   useEffect(() => {
     closeButtonRef.current?.focus()
@@ -56,6 +64,16 @@ export default function FollowDialog({ onClose }) {
     }
   }, [onClose])
 
+  const copyToClipboard = async (text, key) => {
+    try {
+      await navigator.clipboard.writeText(text)
+      setCopiedKey(key)
+      setTimeout(() => setCopiedKey(null), 2000)
+    } catch {
+      // Fallback
+    }
+  }
+
   return (
     <div
       className="fixed inset-0 z-[120] flex items-center justify-center bg-black/60 p-3 sm:p-6"
@@ -70,38 +88,94 @@ export default function FollowDialog({ onClose }) {
         aria-labelledby="follow-dialog-title"
         aria-describedby="follow-dialog-message"
         tabIndex={-1}
-        className="w-[min(92vw,460px)] retro-outset-deep bg-retro-gray border-4 overflow-hidden"
+        className="w-[min(92vw,480px)] retro-outset-deep bg-retro-gray border-4 overflow-hidden"
       >
         <div className="retro-titlebar px-3 py-2 flex items-center justify-between gap-3">
-          <span id="follow-dialog-title" className="font-bold text-xs sm:text-sm">FOLLOW ME</span>
+          <span id="follow-dialog-title" className="font-bold text-xs sm:text-sm">SUPPORT &amp; SOCIALS</span>
           <button
             ref={closeButtonRef}
             type="button"
             onClick={onClose}
             className="retro-outset bg-retro-gray text-retro-black px-2 py-1 text-[10px] font-black hover:bg-retro-yellow"
-            aria-label="Close follow dialog"
+            aria-label="Close dialog"
           >
             CLOSE
           </button>
         </div>
 
-        <div className="p-3 sm:p-4 retro-inset bg-retro-white space-y-3">
-          <p id="follow-dialog-message" className="text-center text-[10px] sm:text-xs font-black text-retro-black uppercase tracking-wide">
-            I&apos;M NOT KYLIE JENNER &mdash; JUST DM ME
-          </p>
-          <div className="grid grid-cols-3 gap-2">
-            {socials.map(({ label, href, Icon }) => (
-              <a
-                key={label}
-                href={href}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="retro-outset flex min-h-[44px] items-center justify-center gap-2 px-2 py-2 text-[10px] sm:text-xs font-black text-retro-black no-underline hover:bg-retro-yellow transition-colors touch-manipulation"
-              >
-                <Icon size={15} aria-hidden="true" />
-                {label}
-              </a>
-            ))}
+        <div className="p-3 sm:p-4 retro-inset bg-retro-white space-y-4 max-h-[80vh] overflow-y-auto">
+          {/* Socials section */}
+          <div className="space-y-2">
+            <p id="follow-dialog-message" className="text-center text-[10px] sm:text-xs font-black text-retro-black uppercase tracking-wide">
+              I&apos;M NOT KYLIE JENNER &mdash; JUST DM ME
+            </p>
+            <div className="grid grid-cols-3 gap-2">
+              {socials.map(({ label, href, Icon }) => (
+                <a
+                  key={label}
+                  href={href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="retro-outset flex min-h-[44px] items-center justify-center gap-1.5 px-1.5 py-2 text-[9px] sm:text-xs font-black text-retro-black no-underline hover:bg-retro-yellow transition-colors touch-manipulation"
+                >
+                  <Icon size={14} aria-hidden="true" />
+                  <span className="truncate">{label}</span>
+                </a>
+              ))}
+            </div>
+          </div>
+
+          <div className="retro-hr" />
+
+          {/* Support / Buy me a coffee section */}
+          <div className="space-y-2.5">
+            <div className="flex items-center justify-center gap-1.5 text-retro-black">
+              <BiCoffee size={16} />
+              <p className="text-center text-[10px] sm:text-xs font-black uppercase tracking-wide">
+                IF YOU WANNA BUY ME A COFFEE
+              </p>
+            </div>
+
+            <dl className="space-y-2">
+              {paymentMethods.map((method) => (
+                <div key={method.label} className="retro-outset bg-retro-gray border-2 p-2.5">
+                  <dt className="text-[9px] sm:text-[10px] font-black uppercase text-retro-black">{method.label}</dt>
+                  <dd className="mt-0.5 font-mono text-xs sm:text-sm font-bold text-retro-black break-all flex items-center justify-between gap-2">
+                    {method.href ? (
+                      <a
+                        href={method.href}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="underline decoration-2 hover:bg-retro-yellow"
+                      >
+                        {method.value}
+                      </a>
+                    ) : (
+                      <span>{method.value}</span>
+                    )}
+
+                    {method.copyable && (
+                      <button
+                        type="button"
+                        onClick={() => copyToClipboard(method.value, method.label)}
+                        className="retro-outset bg-retro-yellow text-retro-black px-2 py-1 text-[10px] font-black hover:bg-[#FFE033] flex items-center gap-1 flex-shrink-0"
+                        aria-label={`Copy ${method.label}`}
+                      >
+                        {copiedKey === method.label ? (
+                          <>
+                            <BiCheck size={12} /> COPIED!
+                          </>
+                        ) : (
+                          <>
+                            <BiCopy size={12} /> COPY
+                          </>
+                        )}
+                      </button>
+                    )}
+                  </dd>
+                </div>
+              ))}
+            </dl>
           </div>
         </div>
       </section>
