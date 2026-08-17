@@ -9,7 +9,7 @@ const MIN_GROUP_USERS = 3
 
 export default function UsernameForm({ onSubmit, loading, mode = 'solo' }) {
   const [usernames, setUsernames] = useState([''])
-  const [groupStrategy, setGroupStrategy] = useState('majority') // 'intersection' | 'majority'
+  const [groupStrategy, setGroupStrategy] = useState('intersection') // Default: 100% Unanimous (ALL)
   const [validationError, setValidationError] = useState(null)
   const [showHelp, setShowHelp] = useState(false)
   const helpButtonRef = useRef(null)
@@ -116,14 +116,23 @@ export default function UsernameForm({ onSubmit, loading, mode = 'solo' }) {
 
   const hasEmptyUsername = usernames.some((u) => !normalizeLetterboxdUsername(u))
 
-  const placeholders = [
-    'basithladoo',
-    'connoreatspants',
-    'kurstboy',
-    'zoerosebryant',
-    'davidehrlich',
-    'cinema_lover',
-  ]
+  const getPlaceholder = (index) => {
+    if (mode === 'compare') {
+      return index === 0 ? 'basithladoo' : 'zoerosebryant'
+    }
+    if (mode === 'solo') {
+      return 'basithladoo'
+    }
+    const list = [
+      'basithladoo',
+      'zoerosebryant',
+      'connoreatspants',
+      'kurstboy',
+      'davidehrlich',
+      'cinema_lover',
+    ]
+    return list[index % list.length]
+  }
 
   const allowAddMore = (mode === 'group' || mode === 'swipe') && usernames.length < MAX_GROUP_USERS
   const allowRemove = (mode === 'swipe' && usernames.length > 1) || (mode === 'group' && usernames.length > MIN_GROUP_USERS)
@@ -200,7 +209,7 @@ export default function UsernameForm({ onSubmit, loading, mode = 'solo' }) {
                   value={username}
                   onChange={(e) => updateUsername(index, e.target.value)}
                   onKeyDown={(e) => handleKeyDown(e, index)}
-                  placeholder={placeholders[index % placeholders.length]}
+                  placeholder={getPlaceholder(index)}
                   disabled={loading}
                   autoComplete="off"
                   autoCapitalize="none"

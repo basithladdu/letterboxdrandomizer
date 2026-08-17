@@ -91,7 +91,6 @@ export default function InputTabs({ scrapeLoading, scrapeProgress, scrapeError, 
 
       <div className="relative">
         <UsernameForm
-          key={activeTab}
           mode={activeTab}
           onSubmit={(usernames, options) => onScrape(usernames, { ...options, mode: activeTab })}
           loading={scrapeLoading}

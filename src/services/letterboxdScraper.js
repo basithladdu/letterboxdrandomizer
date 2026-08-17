@@ -31,8 +31,10 @@ function toAssetUrl(path) {
 }
 
 function posterUrlForSlug(slug, posterPath) {
-  if (posterPath) return toAssetUrl(posterPath)
-  return `https://a.ltrbxd.com/resized/film-poster/${slug}/image-150/`
+  if (posterPath && !posterPath.includes('empty-poster')) {
+    return toAssetUrl(posterPath)
+  }
+  return null
 }
 
 function parseJsonLdScript(script) {
@@ -48,23 +50,41 @@ function parseJsonLdScript(script) {
 }
 
 function parseFilms(doc) {
-  const entries = doc.querySelectorAll('li.griditem div.react-component')
+  const entries = doc.querySelectorAll(
+    'li.griditem div.react-component, li.poster-container div.film-poster, div.film-poster, li.poster-container, [data-film-slug], [data-item-slug]'
+  )
   const films = []
+  const seenSlugs = new Set()
 
   entries.forEach((entry) => {
-    const slug = entry.getAttribute('data-item-slug') || ''
-    const name = entry.getAttribute('data-item-name') || ''
+    const slug = (
+      entry.getAttribute('data-item-slug') ||
+      entry.getAttribute('data-film-slug') ||
+      entry.getAttribute('data-target-link')?.replace(/^\/film\/|\/$/g, '') ||
+      ''
+    ).trim()
+
+    const name = (
+      entry.getAttribute('data-item-name') ||
+      entry.getAttribute('data-film-name') ||
+      entry.querySelector('img')?.getAttribute('alt') ||
+      ''
+    ).trim()
 
     const yearMatch = name.match(/\((\d{4})\)/)
-    const year = yearMatch ? yearMatch[1] : ''
+    const year = yearMatch ? yearMatch[1] : (entry.getAttribute('data-film-release-year') || '')
     const title = name.replace(/\s*\(\d{4}\)\s*$/, '').trim()
 
-    const img = entry.querySelector('img.image')
-    const posterPath = entry.getAttribute('data-poster-url')
-      || img?.getAttribute('data-src')
-      || (img?.getAttribute('src')?.includes('empty-poster') ? null : img?.getAttribute('src'))
+    const img = entry.querySelector('img.image') || entry.querySelector('img')
+    const posterPath = (
+      img?.getAttribute('src') ||
+      img?.getAttribute('data-src') ||
+      entry.getAttribute('data-poster-url') ||
+      ''
+    )
 
-    if (title && slug) {
+    if (title && slug && !seenSlugs.has(slug)) {
+      seenSlugs.add(slug)
       films.push({
         title,
         year,

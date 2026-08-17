@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { SiInstagram, SiLetterboxd, SiX } from 'react-icons/si'
-import { BiCoffee, BiCopy, BiCheck } from 'react-icons/bi'
+import { BiCoffee, BiCopy, BiCheck, BiLinkExternal } from 'react-icons/bi'
 
 const FOCUSABLE_SELECTOR = [
   'button:not([disabled])',
@@ -15,9 +15,26 @@ const socials = [
 ]
 
 const paymentMethods = [
-  { label: '☕ KO-FI ($ / EUR / GLOBAL)', value: 'ko-fi.com/basithladoo', href: 'https://ko-fi.com/basithladoo', badge: '$' },
-  { label: '$ PAYPAL (USD / GLOBAL)', value: 'paypal.me/basithladdu', href: 'https://paypal.me/basithladdu', badge: '$' },
-  { label: '₹ UPI (GPAY / PHONEPE / PAYTM)', value: 'basithmuqeeth-1@okhdfcbank', copyable: true, badge: '₹' },
+  {
+    label: 'KO-FI ($ / EUR / GLOBAL)',
+    value: 'https://ko-fi.com/basithladoo',
+    display: 'ko-fi.com/basithladoo',
+    href: 'https://ko-fi.com/basithladoo',
+    badge: '$',
+  },
+  {
+    label: 'PAYPAL (USD / GLOBAL)',
+    value: 'https://paypal.me/basithladdu',
+    display: 'paypal.me/basithladdu',
+    href: 'https://paypal.me/basithladdu',
+    badge: '$',
+  },
+  {
+    label: 'UPI (GPAY / PHONEPE / PAYTM)',
+    value: 'basithmuqeeth-1@okhdfcbank',
+    display: 'basithmuqeeth-1@okhdfcbank',
+    badge: '₹',
+  },
 ]
 
 export default function FollowDialog({ onClose }) {
@@ -77,7 +94,7 @@ export default function FollowDialog({ onClose }) {
   return (
     <div
       className="fixed inset-0 z-[120] flex items-center justify-center bg-black/60 p-3 sm:p-6"
-      onMouseDown={(event) => {
+      onClick={(event) => {
         if (event.target === event.currentTarget) onClose()
       }}
     >
@@ -88,10 +105,11 @@ export default function FollowDialog({ onClose }) {
         aria-labelledby="follow-dialog-title"
         aria-describedby="follow-dialog-message"
         tabIndex={-1}
-        className="w-[min(92vw,480px)] retro-outset-deep bg-retro-gray border-4 overflow-hidden"
+        className="w-[min(92vw,480px)] retro-outset-deep bg-retro-gray border-4 overflow-hidden shadow-[8px_8px_0_#000]"
+        onClick={(e) => e.stopPropagation()}
       >
         <div className="retro-titlebar px-3 py-2 flex items-center justify-between gap-3">
-          <span id="follow-dialog-title" className="font-bold text-xs sm:text-sm">SUPPORT &amp; SOCIALS</span>
+          <span id="follow-dialog-title" className="font-bold text-xs sm:text-sm uppercase">SUPPORT &amp; SOCIALS</span>
           <button
             ref={closeButtonRef}
             type="button"
@@ -136,53 +154,54 @@ export default function FollowDialog({ onClose }) {
               </p>
             </div>
 
-            <dl className="space-y-2">
+            <div className="space-y-2.5">
               {paymentMethods.map((method) => (
-                <div key={method.label} className="retro-outset bg-retro-gray border-2 p-2.5">
+                <div key={method.label} className="retro-outset bg-retro-gray border-2 p-2.5 space-y-1.5">
                   <div className="flex items-center justify-between">
-                    <dt className="text-[9px] sm:text-[10px] font-black uppercase text-retro-black">{method.label}</dt>
+                    <span className="text-[9px] sm:text-[10px] font-black uppercase text-retro-black">{method.label}</span>
                     {method.badge && (
                       <span className="bg-retro-yellow text-retro-black font-black text-[9px] px-1.5 py-0.5 border border-retro-black">
                         {method.badge}
                       </span>
                     )}
                   </div>
-                  <dd className="mt-0.5 font-mono text-xs sm:text-sm font-bold text-retro-black break-all flex items-center justify-between gap-2">
-                    {method.href ? (
+                  
+                  <div className="font-mono text-xs sm:text-sm font-bold text-retro-black break-all">
+                    {method.display}
+                  </div>
+
+                  <div className="flex items-center gap-2 pt-1">
+                    {method.href && (
                       <a
                         href={method.href}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="underline decoration-2 hover:bg-retro-yellow"
+                        className="retro-outset bg-[#00AA00] hover:bg-[#00CC00] text-retro-white px-2.5 py-1 text-[10px] font-black flex items-center gap-1 no-underline flex-1 justify-center"
                       >
-                        {method.value}
+                        <BiLinkExternal size={13} /> OPEN LINK ↗
                       </a>
-                    ) : (
-                      <span>{method.value}</span>
                     )}
 
-                    {method.copyable && (
-                      <button
-                        type="button"
-                        onClick={() => copyToClipboard(method.value, method.label)}
-                        className="retro-outset bg-retro-yellow text-retro-black px-2 py-1 text-[10px] font-black hover:bg-[#FFE033] flex items-center gap-1 flex-shrink-0"
-                        aria-label={`Copy ${method.label}`}
-                      >
-                        {copiedKey === method.label ? (
-                          <>
-                            <BiCheck size={12} /> COPIED!
-                          </>
-                        ) : (
-                          <>
-                            <BiCopy size={12} /> COPY
-                          </>
-                        )}
-                      </button>
-                    )}
-                  </dd>
+                    <button
+                      type="button"
+                      onClick={() => copyToClipboard(method.value, method.label)}
+                      className="retro-outset bg-retro-yellow text-retro-black px-2.5 py-1 text-[10px] font-black hover:bg-[#FFE033] flex items-center gap-1 flex-1 justify-center"
+                      aria-label={`Copy ${method.label}`}
+                    >
+                      {copiedKey === method.label ? (
+                        <>
+                          <BiCheck size={13} className="text-green-800" /> COPIED!
+                        </>
+                      ) : (
+                        <>
+                          <BiCopy size={13} /> COPY
+                        </>
+                      )}
+                    </button>
+                  </div>
                 </div>
               ))}
-            </dl>
+            </div>
           </div>
         </div>
       </section>

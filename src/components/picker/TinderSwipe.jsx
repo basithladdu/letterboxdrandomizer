@@ -4,6 +4,38 @@ import { fetchPoster } from '../../services/omdbService.js'
 import { fetchFilmMetadata } from '../../services/letterboxdScraper.js'
 import { BiHeart, BiX, BiStar, BiUndo, BiCameraMovie } from 'react-icons/bi'
 
+// Web Audio API Match sound effect
+function playMatchSound() {
+  try {
+    const AudioContext = window.AudioContext || window.webkitAudioContext
+    if (!AudioContext) return
+    const ctx = new AudioContext()
+    if (ctx.state === 'suspended') {
+      ctx.resume()
+    }
+    // High energy match chord arpeggio (C5 -> E5 -> G5 -> C6)
+    const notes = [523.25, 659.25, 783.99, 1046.50]
+    notes.forEach((freq, index) => {
+      const osc = ctx.createOscillator()
+      const gain = ctx.createGain()
+      osc.type = 'triangle'
+      osc.frequency.setValueAtTime(freq, ctx.currentTime + index * 0.07)
+
+      gain.gain.setValueAtTime(0, ctx.currentTime + index * 0.07)
+      gain.gain.linearRampToValueAtTime(0.25, ctx.currentTime + index * 0.07 + 0.02)
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + index * 0.07 + 0.38)
+
+      osc.connect(gain)
+      gain.connect(ctx.destination)
+
+      osc.start(ctx.currentTime + index * 0.07)
+      osc.stop(ctx.currentTime + index * 0.07 + 0.42)
+    })
+  } catch {
+    // Audio fallback
+  }
+}
+
 function SwipeCard({ film, onSwipe, isTop }) {
   const x = useMotionValue(0)
   const rotate = useTransform(x, [-200, 200], [-16, 16])
@@ -18,32 +50,57 @@ function SwipeCard({ film, onSwipe, isTop }) {
 
   useEffect(() => {
     let cancelled = false
-    if (!film?.letterboxdSlug) return
-
-    // Fetch poster and metadata if missing
-    if (!poster) {
-      fetchPoster(film.title, film.year).then((url) => {
-        if (!cancelled && url) setPoster(url)
-      })
+    if (film?.posterUrl) {
+      setPoster(film.posterUrl)
     }
 
-    fetchFilmMetadata(film.letterboxdSlug).then((meta) => {
-      if (!cancelled && meta) {
-        if (meta.posterUrl && !poster) setPoster(meta.posterUrl)
-        setMetadata((prev) => ({ ...prev, ...meta }))
+    if (!film?.posterUrl) {
+      if (film?.letterboxdSlug) {
+        fetchFilmMetadata(film.letterboxdSlug).then((meta) => {
+          if (cancelled) return
+          if (meta?.posterUrl) {
+            setPoster(meta.posterUrl)
+          } else {
+            fetchPoster(film.title, film.year).then((p) => {
+              if (!cancelled && p) setPoster(p)
+            })
+          }
+          if (meta) {
+            setMetadata((prev) => ({ ...prev, ...meta }))
+          }
+        })
+      } else {
+        fetchPoster(film?.title, film?.year).then((p) => {
+          if (!cancelled && p) setPoster(p)
+        })
       }
-    })
+    } else if (film?.letterboxdSlug && (!film.rating || !film.year)) {
+      fetchFilmMetadata(film.letterboxdSlug).then((meta) => {
+        if (!cancelled && meta) {
+          setMetadata((prev) => ({ ...prev, ...meta }))
+        }
+      })
+    }
 
     return () => {
       cancelled = true
     }
-  }, [film?.letterboxdSlug, film?.title, film?.year])
+  }, [film?.letterboxdSlug, film?.posterUrl, film?.title, film?.year])
+
+  const handleImageError = async () => {
+    const fallback = await fetchPoster(film?.title, film?.year)
+    if (fallback) {
+      setPoster(fallback)
+    } else {
+      setPoster(null)
+    }
+  }
 
   const handleDragEnd = (event, info) => {
-    const swipeThreshold = 90
-    if (info.offset.x > swipeThreshold || info.velocity.x > 500) {
+    const swipeThreshold = 80
+    if (info.offset.x > swipeThreshold || info.velocity.x > 450) {
       onSwipe('like', film)
-    } else if (info.offset.x < -swipeThreshold || info.velocity.x < -500) {
+    } else if (info.offset.x < -swipeThreshold || info.velocity.x < -450) {
       onSwipe('nope', film)
     }
   }
@@ -73,14 +130,14 @@ function SwipeCard({ film, onSwipe, isTop }) {
         <>
           <motion.div
             style={{ opacity: likeOpacity }}
-            className="absolute top-6 left-6 z-30 pointer-events-none border-4 border-[#00FF00] bg-[#00FF00]/20 text-[#00FF00] font-black font-mono text-2xl sm:text-3xl px-3 py-1 -rotate-12 uppercase tracking-widest"
+            className="absolute top-6 left-6 z-30 pointer-events-none border-4 border-[#00FF00] bg-[#00FF00]/25 text-[#00FF00] font-black font-mono text-2xl sm:text-3xl px-3 py-1 -rotate-12 uppercase tracking-widest shadow-[0_0_10px_#00FF00]"
           >
             LIKE
           </motion.div>
 
           <motion.div
             style={{ opacity: nopeOpacity }}
-            className="absolute top-6 right-6 z-30 pointer-events-none border-4 border-retro-red bg-retro-red/20 text-retro-red font-black font-mono text-2xl sm:text-3xl px-3 py-1 rotate-12 uppercase tracking-widest"
+            className="absolute top-6 right-6 z-30 pointer-events-none border-4 border-retro-red bg-retro-red/25 text-retro-red font-black font-mono text-2xl sm:text-3xl px-3 py-1 rotate-12 uppercase tracking-widest shadow-[0_0_10px_#FF0000]"
           >
             PASS
           </motion.div>
@@ -94,7 +151,7 @@ function SwipeCard({ film, onSwipe, isTop }) {
             src={poster}
             alt={film.title}
             className="w-full h-full object-contain pointer-events-none"
-            onError={() => setPoster(null)}
+            onError={handleImageError}
           />
         ) : (
           <div className="p-6 text-center text-retro-muted font-mono font-bold text-xs uppercase flex flex-col items-center gap-2">
@@ -105,11 +162,11 @@ function SwipeCard({ film, onSwipe, isTop }) {
       </div>
 
       {/* Movie Details Strip */}
-      <div className="mt-3 p-2 bg-[#222222] border-2 border-retro-muted text-retro-white space-y-1">
+      <div className="mt-3 p-2 bg-[#222222] border-2 border-retro-muted text-retro-white space-y-1 font-mono">
         <h3 className="text-base sm:text-xl font-black uppercase leading-tight line-clamp-1">
           {film.title}
         </h3>
-        <div className="flex items-center justify-between font-mono text-xs text-retro-yellow font-bold">
+        <div className="flex items-center justify-between text-xs text-retro-yellow font-bold">
           <span>YEAR: {metadata.year || film.year || 'N/A'}</span>
           {metadata.rating ? <span>RATING: ★ {metadata.rating}</span> : null}
         </div>
@@ -144,6 +201,7 @@ export default function TinderSwipe({ films = [], watchlistOwners = [], onMatch,
     setDeck((prev) => prev.slice(1))
 
     if (direction === 'like' || direction === 'superlike') {
+      playMatchSound()
       setMatchedFilm(film)
       setShowMatchModal(true)
     }
@@ -326,7 +384,13 @@ export default function TinderSwipe({ films = [], watchlistOwners = [], onMatch,
               <div className="space-y-2 pt-2 font-mono">
                 <button
                   type="button"
-                  onClick={() => onMatch(matchedFilm)}
+                  onClick={() => {
+                    setShowMatchModal(false)
+                    if (typeof window !== 'undefined') {
+                      window.scrollTo({ top: 0, behavior: 'smooth' })
+                    }
+                    onMatch(matchedFilm)
+                  }}
                   className="w-full py-3 bg-[#00AA00] hover:bg-[#00CC00] text-retro-white font-black text-sm uppercase tracking-widest retro-outset"
                 >
                   VIEW TICKET &amp; DETAILS
