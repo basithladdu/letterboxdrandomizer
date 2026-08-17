@@ -15,20 +15,25 @@ function playSwipeSound(type) {
     }
 
     if (type === 'pass' || type === 'nope') {
-      // Subtle downward swoosh / pass click
-      const osc = ctx.createOscillator()
-      const gain = ctx.createGain()
-      osc.type = 'sine'
-      osc.frequency.setValueAtTime(240, ctx.currentTime)
-      osc.frequency.exponentialRampToValueAtTime(110, ctx.currentTime + 0.12)
+      // Clear "reject" buzz - two-note descending square-wave blip
+      const notes = [220, 165]
+      notes.forEach((freq, index) => {
+        const startTime = ctx.currentTime + index * 0.09
+        const osc = ctx.createOscillator()
+        const gain = ctx.createGain()
+        osc.type = 'square'
+        osc.frequency.setValueAtTime(freq, startTime)
+        osc.frequency.exponentialRampToValueAtTime(freq * 0.85, startTime + 0.1)
 
-      gain.gain.setValueAtTime(0.18, ctx.currentTime)
-      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.12)
+        gain.gain.setValueAtTime(0.001, startTime)
+        gain.gain.linearRampToValueAtTime(0.22, startTime + 0.015)
+        gain.gain.exponentialRampToValueAtTime(0.001, startTime + 0.14)
 
-      osc.connect(gain)
-      gain.connect(ctx.destination)
-      osc.start()
-      osc.stop(ctx.currentTime + 0.13)
+        osc.connect(gain)
+        gain.connect(ctx.destination)
+        osc.start(startTime)
+        osc.stop(startTime + 0.15)
+      })
     } else if (type === 'undo') {
       // Upward rewind chirp
       const osc = ctx.createOscillator()
