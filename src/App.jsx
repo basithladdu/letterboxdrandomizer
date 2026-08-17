@@ -78,6 +78,25 @@ export default function App() {
     return () => window.removeEventListener('popstate', handlePopState)
   }, [])
 
+  // Dynamic document title for SEO and social routing
+  useEffect(() => {
+    if (typeof document === 'undefined') return
+    const titleMap = {
+      solo: 'What Should I Watch? — Letterboxd Watchlist Mixer',
+      compare: 'Common Films Picker — Letterboxd Pair Mixer',
+      group: 'Group Movie Night — Letterboxd Watchlist Mixer (3-6 Friends)',
+      swipe: 'Swipe Deck — Letterboxd Watchlist Tinder & Movie Picker',
+    }
+    const baseTitle = titleMap[currentTab] || 'What Should I Watch? — Letterboxd Watchlist Mixer'
+    if (view === 'swipe') {
+      document.title = 'Swipe Deck — Letterboxd Watchlist Tinder'
+    } else if (view === 'picker' && chosen?.title) {
+      document.title = `🎬 ${chosen.title} (${chosen.year || ''}) — Letterboxd Watchlist Mixer`
+    } else {
+      document.title = baseTitle
+    }
+  }, [currentTab, view, chosen])
+
   // Filtered films pool based on cinephile filter pills
   const filteredFilms = useMemo(() => {
     return films.filter((f) => {
