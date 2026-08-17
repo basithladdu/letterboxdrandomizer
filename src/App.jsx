@@ -40,6 +40,7 @@ export default function App() {
   const [watchlistOwners, setWatchlistOwners] = useState([])
   const [watchlistError, setWatchlistError] = useState(null)
   const [showFollowDialog, setShowFollowDialog] = useState(false)
+  const [matchedFromSwipe, setMatchedFromSwipe] = useState(false)
   const [activeDecade, setActiveDecade] = useState('all')
   const [activeRating, setActiveRating] = useState('all')
   const followTimerRef = useRef(null)
@@ -236,6 +237,7 @@ export default function App() {
   function startPicker(filmList) {
     window.clearTimeout(followTimerRef.current)
     setShowFollowDialog(false)
+    setMatchedFromSwipe(false)
     const pool = filmList.length ? filmList : films
     const pick = pickRandom(pool)
     setChosen(pick)
@@ -262,8 +264,19 @@ export default function App() {
     setChosen(matchedFilm)
     setSpinning(false)
     setView('picker')
+    setMatchedFromSwipe(true)
     window.clearTimeout(followTimerRef.current)
     followTimerRef.current = window.setTimeout(() => setShowFollowDialog(true), 2500)
+  }
+
+  // Returning from a swipe match should resume the deck (films are still in
+  // memory) instead of wiping everything and forcing a re-fetch.
+  function handleBackToSwipe() {
+    window.clearTimeout(followTimerRef.current)
+    setShowFollowDialog(false)
+    setChosen(null)
+    setMatchedFromSwipe(false)
+    setView('swipe')
   }
 
   function handleReset() {
@@ -275,6 +288,7 @@ export default function App() {
     setWatchlistError(null)
     setActiveDecade('all')
     setActiveRating('all')
+    setMatchedFromSwipe(false)
     window.clearTimeout(followTimerRef.current)
     setShowFollowDialog(false)
     clearScrapeError()
@@ -424,11 +438,11 @@ export default function App() {
             >
               <button
                 type="button"
-                onClick={handleReset}
+                onClick={matchedFromSwipe ? handleBackToSwipe : handleReset}
                 className="retro-outset px-3 py-2 text-xs font-black uppercase tracking-widest text-retro-black bg-retro-gray hover:bg-retro-yellow"
-                aria-label="Go back to the watchlist input"
+                aria-label={matchedFromSwipe ? 'Back to swipe deck' : 'Go back to the watchlist input'}
               >
-                &larr; BACK
+                {matchedFromSwipe ? <>&larr; BACK TO SWIPE</> : <>&larr; BACK</>}
               </button>
 
               <div className="retro-outset bg-retro-panelYellow border-2 px-2 py-2 sm:px-3 sm:py-2 flex flex-wrap items-center justify-between gap-1.5 font-mono">
