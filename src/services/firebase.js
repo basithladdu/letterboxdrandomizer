@@ -15,8 +15,10 @@ const db = getFirestore(app);
 
 // Bump when the scraper changes in a way that makes old cached data suspect.
 // v1 caches were written by the scraper that silently truncated long
-// watchlists, so they must never be served again.
-const CACHE_VERSION = 2;
+// watchlists, so they must never be served again. v2 caches predate the
+// poster-resolution fixes (a.ltrbxd.com CDN mapping + empty-poster
+// filtering) and can carry baked-in broken posterUrl values.
+const CACHE_VERSION = 3;
 
 // Re-scrape watchlists older than this so new films show up.
 const CACHE_TTL_MS = 7 * 24 * 60 * 60 * 1000;

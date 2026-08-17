@@ -304,9 +304,11 @@ export default function App() {
     if (!chosen || chosen.overview || !chosen.letterboxdSlug) return
 
     let cancelled = false
-    fetchFilmMetadata(chosen.letterboxdSlug).then((meta) => {
+    fetchFilmMetadata(chosen.letterboxdSlug, chosen.posterUrl).then((meta) => {
       if (cancelled || !meta) return
-      setChosen((prev) => (prev && prev.letterboxdSlug === chosen.letterboxdSlug ? { ...prev, ...meta } : prev))
+      setChosen((prev) => (prev && prev.letterboxdSlug === chosen.letterboxdSlug
+        ? { ...prev, ...meta, posterUrl: meta.posterUrl || prev.posterUrl }
+        : prev))
     })
 
     return () => {

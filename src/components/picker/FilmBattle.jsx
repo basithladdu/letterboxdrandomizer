@@ -1,24 +1,25 @@
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { fetchPoster } from '../../services/omdbService.js'
-import { fetchFilmMetadata } from '../../services/letterboxdScraper.js'
+import { fetchFilmMetadata, isValidPoster } from '../../services/letterboxdScraper.js'
 import { BiTrophy, BiCheckCircle } from 'react-icons/bi'
 
 function FilmFighterCard({ film, onSelect, hotkey, isWinner }) {
-  const [source, setSource] = useState(film?.posterUrl || null)
+  const validPosterUrl = isValidPoster(film?.posterUrl) ? film.posterUrl : null
+  const [source, setSource] = useState(validPosterUrl)
   const [fallbackTried, setFallbackTried] = useState(false)
   const [failed, setFailed] = useState(false)
 
   useEffect(() => {
     let cancelled = false
-    if (film?.posterUrl) {
-      setSource(film.posterUrl)
+    if (validPosterUrl) {
+      setSource(validPosterUrl)
       setFailed(false)
     }
 
-    if (!film?.posterUrl) {
+    if (!validPosterUrl) {
       if (film?.letterboxdSlug) {
-        fetchFilmMetadata(film.letterboxdSlug).then((meta) => {
+        fetchFilmMetadata(film.letterboxdSlug, validPosterUrl).then((meta) => {
           if (cancelled) return
           if (meta?.posterUrl) {
             setSource(meta.posterUrl)

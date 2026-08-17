@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { motion } from 'framer-motion'
 import { BiPlayCircle, BiLinkExternal } from 'react-icons/bi'
 import { fetchPoster } from '../../services/omdbService.js'
-import { fetchFilmMetadata } from '../../services/letterboxdScraper.js'
+import { fetchFilmMetadata, isValidPoster } from '../../services/letterboxdScraper.js'
 
 function StarRating({ rating }) {
   if (!rating) return null
@@ -93,20 +93,21 @@ export function ViewOnLetterboxd({ film }) {
 }
 
 function PosterArtwork({ film }) {
-  const [source, setSource] = useState(film.posterUrl || null)
+  const validPosterUrl = isValidPoster(film.posterUrl) ? film.posterUrl : null
+  const [source, setSource] = useState(validPosterUrl)
   const [fallbackTried, setFallbackTried] = useState(false)
   const [failed, setFailed] = useState(false)
 
   useEffect(() => {
     let cancelled = false
-    setSource(film.posterUrl || null)
+    setSource(validPosterUrl)
     setFallbackTried(false)
     setFailed(false)
 
     // If posterUrl is missing, resolve via metadata or OMDb
-    if (!film.posterUrl) {
+    if (!validPosterUrl) {
       if (film.letterboxdSlug) {
-        fetchFilmMetadata(film.letterboxdSlug).then((meta) => {
+        fetchFilmMetadata(film.letterboxdSlug, validPosterUrl).then((meta) => {
           if (cancelled) return
           if (meta?.posterUrl) {
             setSource(meta.posterUrl)

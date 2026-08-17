@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { motion, useMotionValue, useTransform, AnimatePresence } from 'framer-motion'
 import { fetchPoster } from '../../services/omdbService.js'
-import { fetchFilmMetadata } from '../../services/letterboxdScraper.js'
+import { fetchFilmMetadata, isValidPoster } from '../../services/letterboxdScraper.js'
 import { BiHeart, BiX, BiUndo, BiCameraMovie } from 'react-icons/bi'
 
 // Web Audio API Audio synthesizer for swipe sound effects
@@ -95,18 +95,19 @@ function SwipeCard({ film, onSwipe, isTop }) {
   const likeOpacity = useTransform(x, [20, 100], [0, 1])
   const nopeOpacity = useTransform(x, [-20, -100], [0, 1])
 
-  const [poster, setPoster] = useState(film?.posterUrl || null)
+  const validPosterUrl = isValidPoster(film?.posterUrl) ? film.posterUrl : null
+  const [poster, setPoster] = useState(validPosterUrl)
   const [metadata, setMetadata] = useState({ rating: film?.rating, year: film?.year })
 
   useEffect(() => {
     let cancelled = false
-    if (film?.posterUrl) {
-      setPoster(film.posterUrl)
+    if (validPosterUrl) {
+      setPoster(validPosterUrl)
     }
 
-    if (!film?.posterUrl) {
+    if (!validPosterUrl) {
       if (film?.letterboxdSlug) {
-        fetchFilmMetadata(film.letterboxdSlug).then((meta) => {
+        fetchFilmMetadata(film.letterboxdSlug, validPosterUrl).then((meta) => {
           if (cancelled) return
           if (meta?.posterUrl) {
             setPoster(meta.posterUrl)

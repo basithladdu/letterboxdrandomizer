@@ -16,6 +16,12 @@ function parseDocument(html) {
   return new DOMParser().parseFromString(html, 'text/html')
 }
 
+// Guards components from rendering a raw Letterboxd placeholder graphic as
+// if it were real poster art (can happen with stale pre-fix cached data).
+export function isValidPoster(url) {
+  return typeof url === 'string' && url.length > 0 && !url.includes('empty-poster') && !url.includes('blank.gif')
+}
+
 export function toAssetUrl(path) {
   if (!path || typeof path !== 'string') return null
   const trimmed = path.trim()
@@ -117,13 +123,13 @@ function parseFilms(doc) {
   return films
 }
 
-export function fetchFilmMetadata(slug) {
+export function fetchFilmMetadata(slug, fallbackPosterUrl) {
   const normalizedSlug = String(slug || '').trim().replace(/^\/+|\/+$/g, '')
   if (!normalizedSlug) return Promise.resolve({})
   if (filmMetadataCache.has(normalizedSlug)) return filmMetadataCache.get(normalizedSlug)
 
   const request = (async () => {
-    const defaultPoster = posterUrlForSlug(normalizedSlug)
+    const defaultPoster = toAssetUrl(fallbackPosterUrl) || fallbackPosterUrl || null
 
     try {
       const res = await proxyFetch(`${LB_BASE}/film/${encodeURIComponent(normalizedSlug)}/`)
