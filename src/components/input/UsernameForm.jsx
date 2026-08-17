@@ -8,7 +8,7 @@ const MAX_GROUP_USERS = 6
 const MIN_GROUP_USERS = 3
 
 export default function UsernameForm({ onSubmit, loading, mode = 'solo' }) {
-  const [usernames, setUsernames] = useState(['', '', ''])
+  const [usernames, setUsernames] = useState([''])
   const [groupStrategy, setGroupStrategy] = useState('majority') // 'intersection' | 'majority'
   const [validationError, setValidationError] = useState(null)
   const [showHelp, setShowHelp] = useState(false)
@@ -17,7 +17,10 @@ export default function UsernameForm({ onSubmit, loading, mode = 'solo' }) {
   // Reset or adjust username input count when tab mode changes
   useEffect(() => {
     setValidationError(null)
-    if (mode === 'solo' || mode === 'match' || mode === 'battle') {
+    if (mode === 'solo') {
+      setUsernames((prev) => [prev[0] || ''])
+    } else if (mode === 'swipe') {
+      // Starts with 1 username, but allows adding more
       setUsernames((prev) => [prev[0] || ''])
     } else if (mode === 'compare') {
       setUsernames((prev) => [prev[0] || '', prev[1] || ''])
@@ -37,11 +40,11 @@ export default function UsernameForm({ onSubmit, loading, mode = 'solo' }) {
   function handleSubmit(e) {
     if (e) e.preventDefault()
 
-    const targetUsernames = (mode === 'solo' || mode === 'match' || mode === 'battle')
+    const targetUsernames = (mode === 'solo')
       ? [usernames[0]]
       : mode === 'compare'
       ? usernames.slice(0, 2)
-      : usernames
+      : usernames // For swipe and group: all active username slots
 
     const trimmed = targetUsernames.map(normalizeLetterboxdUsername)
 
@@ -50,6 +53,8 @@ export default function UsernameForm({ onSubmit, loading, mode = 'solo' }) {
         setValidationError(`ENTER ALL ${targetUsernames.length} USERNAMES OR LETTERBOXD LINKS`)
       } else if (mode === 'compare') {
         setValidationError('ENTER TWO USERNAMES OR LETTERBOXD LINKS')
+      } else if (mode === 'swipe' && targetUsernames.length > 1) {
+        setValidationError(`ENTER ALL ${targetUsernames.length} USERNAMES OR LETTERBOXD LINKS`)
       } else {
         setValidationError('ENTER A USERNAME OR LETTERBOXD LINK')
       }
@@ -66,8 +71,12 @@ export default function UsernameForm({ onSubmit, loading, mode = 'solo' }) {
     setValidationError(null)
     if (mode === 'solo') {
       onSubmit(trimmed[0], { mode: 'solo' })
-    } else if (mode === 'match' || mode === 'battle') {
-      onSubmit(trimmed[0], { mode: 'match', isMatch: true })
+    } else if (mode === 'swipe') {
+      if (trimmed.length === 1) {
+        onSubmit(trimmed[0], { mode: 'swipe', isSwipe: true })
+      } else {
+        onSubmit(trimmed, { mode: 'swipe', isSwipe: true, groupMode: groupStrategy })
+      }
     } else if (mode === 'compare') {
       onSubmit(trimmed, { mode: 'compare' })
     } else {
@@ -95,7 +104,8 @@ export default function UsernameForm({ onSubmit, loading, mode = 'solo' }) {
   }
 
   function removeFriendSlot(index) {
-    if (usernames.length <= MIN_GROUP_USERS) return
+    const minSlots = (mode === 'swipe') ? 1 : (mode === 'group') ? MIN_GROUP_USERS : 2
+    if (usernames.length <= minSlots) return
     setUsernames((current) => current.filter((_, itemIndex) => itemIndex !== index))
   }
 
@@ -115,10 +125,14 @@ export default function UsernameForm({ onSubmit, loading, mode = 'solo' }) {
     'cinema_lover',
   ]
 
+  const allowAddMore = (mode === 'group' || mode === 'swipe') && usernames.length < MAX_GROUP_USERS
+  const allowRemove = (mode === 'swipe' && usernames.length > 1) || (mode === 'group' && usernames.length > MIN_GROUP_USERS)
+
   return (
     <div className="space-y-4">
       <form onSubmit={handleSubmit} className="space-y-2 sm:space-y-3">
-        {mode === 'group' && (
+        {/* Match Strategy toggle when 3+ users are present in Group or Swipe */}
+        {(mode === 'group' || (mode === 'swipe' && usernames.length >= 3)) && (
           <div className="retro-outset bg-retro-gray p-2 border-2 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
             <span className="text-[10px] sm:text-xs font-black text-retro-black uppercase">
               MATCH STRATEGY:
@@ -156,18 +170,20 @@ export default function UsernameForm({ onSubmit, loading, mode = 'solo' }) {
               <span className="font-bold text-xs sm:text-sm">
                 {mode === 'group'
                   ? `FRIEND #${index + 1} LETTERBOXD`
+                  : mode === 'swipe'
+                  ? (usernames.length > 1 ? `USER #${index + 1} LETTERBOXD` : 'LETTERBOXD USERNAME')
                   : mode === 'compare'
                   ? `USER ${String(index + 1).padStart(2, '0')} WATCHLIST`
                   : 'LETTERBOXD USERNAME'}
               </span>
 
-              {mode === 'group' && usernames.length > MIN_GROUP_USERS && (
+              {allowRemove && (
                 <button
                   type="button"
                   onClick={() => removeFriendSlot(index)}
                   className="retro-outset bg-retro-red text-retro-white px-1.5 py-0.5 text-[9px] font-black hover:bg-red-700 flex items-center gap-0.5"
-                  title="Remove friend slot"
-                  aria-label={`Remove friend ${index + 1}`}
+                  title="Remove user slot"
+                  aria-label={`Remove user ${index + 1}`}
                 >
                   <BiTrash size={12} /> REMOVE
                 </button>
@@ -202,13 +218,13 @@ export default function UsernameForm({ onSubmit, loading, mode = 'solo' }) {
           </div>
         ))}
 
-        {mode === 'group' && usernames.length < MAX_GROUP_USERS && (
+        {allowAddMore && (
           <button
             type="button"
             onClick={addFriendSlot}
             className="w-full py-2 bg-retro-gray border-2 border-dashed border-retro-black font-black text-xs uppercase hover:bg-retro-yellow flex items-center justify-center gap-1.5 text-retro-black"
           >
-            <BiUserPlus size={16} /> + ADD ANOTHER FRIEND ({usernames.length}/{MAX_GROUP_USERS})
+            <BiUserPlus size={16} /> + ADD ANOTHER USER ({usernames.length}/{MAX_GROUP_USERS})
           </button>
         )}
 
@@ -254,23 +270,23 @@ export default function UsernameForm({ onSubmit, loading, mode = 'solo' }) {
             <>
               <LoadingSpinner size={18} />
               <span>
-                {mode === 'group'
+                {mode === 'group' || (mode === 'swipe' && usernames.length > 1)
                   ? `FETCHING ${usernames.length} PUBLIC WATCHLISTS...`
                   : mode === 'compare'
                   ? 'FETCHING BOTH WATCHLISTS...'
-                  : mode === 'swipe' || mode === 'match' || mode === 'battle'
+                  : mode === 'swipe'
                   ? 'LOADING SWIPE DECK...'
                   : 'FETCHING WATCHLIST...'}
               </span>
             </>
           ) : (
-            mode === 'swipe' || mode === 'match' || mode === 'battle'
-              ? <>START SWIPE DECK</>
+            mode === 'swipe'
+              ? (usernames.length > 1 ? `START SWIPE DECK (${usernames.length} USERS)` : 'START SWIPE DECK')
               : mode === 'group'
-              ? <>SPIN GROUP MOVIE NIGHT</>
+              ? 'SPIN GROUP MOVIE NIGHT'
               : mode === 'compare'
-              ? <>FIND COMMON FILMS</>
-              : <>FETCH WATCHLIST</>
+              ? 'FIND COMMON FILMS'
+              : 'FETCH WATCHLIST'
           )}
         </button>
       </form>
@@ -290,9 +306,9 @@ export default function UsernameForm({ onSubmit, loading, mode = 'solo' }) {
         </div>
         <div className="p-2 sm:p-4 retro-inset bg-retro-panelYellow">
           <p className="text-[10px] sm:text-xs font-bold text-retro-black uppercase">
-            {mode === 'group'
+            {mode === 'group' || (mode === 'swipe' && usernames.length > 2)
               ? <>All {usernames.length} Letterboxd watchlists must be set to <span className="badge-new">PUBLIC</span></>
-              : mode === 'compare'
+              : mode === 'compare' || (mode === 'swipe' && usernames.length === 2)
               ? <>Both watchlists must be set to <span className="badge-new">PUBLIC</span></>
               : <>Your watchlist must be set to <span className="badge-new">PUBLIC</span></>}
           </p>

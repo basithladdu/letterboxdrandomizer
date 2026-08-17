@@ -129,13 +129,40 @@ export default function App() {
       normalizedUsernames.forEach((username) => logUserSearch(username))
 
       // 0. Swipe / Tinder Dating Deck Mode
-      if (options.mode === 'swipe' || options.isMatch || options.mode === 'match' || options.isBattle) {
-        const userFilms = watchlistsWithOwners[0].films
-        if (userFilms.length < 2) {
-          throw new Error(`Watchlist for "${normalizedUsernames[0]}" needs at least 2 films to start Swipe deck.`)
+      if (options.mode === 'swipe' || options.isSwipe || options.isMatch || options.mode === 'match' || options.isBattle) {
+        let poolFilms = []
+        if (normalizedUsernames.length === 1) {
+          poolFilms = watchlistsWithOwners[0].films
+        } else if (normalizedUsernames.length === 2) {
+          poolFilms = findSharedFilms(
+            watchlistsWithOwners[0].films,
+            watchlistsWithOwners[1].films,
+            normalizedUsernames
+          )
+          if (poolFilms.length === 0) {
+            throw new Error(
+              `No common films found between ${normalizedUsernames[0]} and ${normalizedUsernames[1]} for Swipe mode.`
+            )
+          }
+        } else {
+          const groupMode = options.groupMode || 'majority'
+          poolFilms = findGroupSharedFilms(watchlistsWithOwners, { mode: groupMode, minOverlap: 2 })
+          if (poolFilms.length === 0 && groupMode === 'intersection') {
+            poolFilms = findGroupSharedFilms(watchlistsWithOwners, { mode: 'majority', minOverlap: 2 })
+          }
+          if (poolFilms.length === 0) {
+            throw new Error(
+              `No matching films found across the ${normalizedUsernames.length} watchlists for Swipe mode.`
+            )
+          }
         }
+
+        if (poolFilms.length < 1) {
+          throw new Error('No films found to start Swipe deck.')
+        }
+
         setWatchlistOwners(normalizedUsernames)
-        setFilms(userFilms)
+        setFilms(poolFilms)
         window.clearTimeout(followTimerRef.current)
         setShowFollowDialog(false)
         setView('swipe')
@@ -304,6 +331,7 @@ export default function App() {
 
               <TinderSwipe
                 films={films}
+                watchlistOwners={watchlistOwners}
                 onMatch={handleSwipeMatch}
                 onReset={handleReset}
               />

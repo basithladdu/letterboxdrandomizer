@@ -118,7 +118,7 @@ function SwipeCard({ film, onSwipe, isTop }) {
   )
 }
 
-export default function TinderSwipe({ films = [], onMatch, onReset }) {
+export default function TinderSwipe({ films = [], watchlistOwners = [], onMatch, onReset }) {
   const [deck, setDeck] = useState([])
   const [history, setHistory] = useState([])
   const [matchedFilm, setMatchedFilm] = useState(null)
@@ -176,11 +176,15 @@ export default function TinderSwipe({ films = [], onMatch, onReset }) {
     return () => window.removeEventListener('keydown', handleKeyDown)
   }, [currentFilm, history, showMatchModal])
 
+  const isMulti = watchlistOwners.length > 1
+
   return (
     <div className="retro-outset-deep bg-retro-gray border-4 overflow-hidden space-y-0 max-w-lg mx-auto font-mono">
       {/* Retro Titlebar */}
       <div className="retro-titlebar px-3 py-1.5 flex items-center justify-between">
-        <span className="text-xs sm:text-sm font-bold uppercase">SWIPE_DECK.EXE</span>
+        <span className="text-xs sm:text-sm font-bold uppercase">
+          SWIPE_DECK.EXE {isMulti ? `(${watchlistOwners.length} USERS)` : ''}
+        </span>
         <div className="flex gap-1">
           <div className="w-3 h-3 bg-retro-yellow border border-retro-black" />
           <div className="w-3 h-3 bg-retro-red border border-retro-black" />
@@ -193,7 +197,7 @@ export default function TinderSwipe({ films = [], onMatch, onReset }) {
             SWIPE RIGHT ON MOVIES YOU WANT TO WATCH
           </h2>
           <p className="text-[10px] sm:text-xs text-retro-muted uppercase">
-            {deck.length} FILMS IN QUEUE &bull; DRAG OR USE ARROW KEYS (LEFT / RIGHT)
+            {deck.length} FILMS IN QUEUE {isMulti ? `(${watchlistOwners.join(' + ')})` : ''} &bull; DRAG OR USE ARROW KEYS (LEFT / RIGHT)
           </p>
         </div>
 
