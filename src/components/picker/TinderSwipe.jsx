@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { motion, useMotionValue, useTransform, AnimatePresence } from 'framer-motion'
 import { fetchPoster } from '../../services/omdbService.js'
 import { fetchFilmMetadata } from '../../services/letterboxdScraper.js'
-import { BiHeart, BiX, BiStar, BiUndo, BiCameraMovie } from 'react-icons/bi'
+import { BiHeart, BiX, BiUndo, BiCameraMovie } from 'react-icons/bi'
 
 // Web Audio API Audio synthesizer for swipe sound effects
 function playSwipeSound(type) {
@@ -14,7 +14,7 @@ function playSwipeSound(type) {
       ctx.resume()
     }
 
-    if (type === 'pass') {
+    if (type === 'pass' || type === 'nope') {
       // Subtle downward swoosh / pass click
       const osc = ctx.createOscillator()
       const gain = ctx.createGain()
@@ -44,25 +44,6 @@ function playSwipeSound(type) {
       gain.connect(ctx.destination)
       osc.start()
       osc.stop(ctx.currentTime + 0.11)
-    } else if (type === 'superlike') {
-      // High ascending arpeggio for Super Like
-      const notes = [440, 554.37, 659.25, 880]
-      notes.forEach((freq, idx) => {
-        const osc = ctx.createOscillator()
-        const gain = ctx.createGain()
-        osc.type = 'triangle'
-        osc.frequency.setValueAtTime(freq, ctx.currentTime + idx * 0.06)
-
-        gain.gain.setValueAtTime(0, ctx.currentTime + idx * 0.06)
-        gain.gain.linearRampToValueAtTime(0.2, ctx.currentTime + idx * 0.06 + 0.02)
-        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + idx * 0.06 + 0.25)
-
-        osc.connect(gain)
-        gain.connect(ctx.destination)
-
-        osc.start(ctx.currentTime + idx * 0.06)
-        osc.stop(ctx.currentTime + idx * 0.06 + 0.28)
-      })
     } else if (type === 'match' || type === 'like') {
       // High energy dating match chord fanfare (C5 -> E5 -> G5 -> C6)
       const notes = [523.25, 659.25, 783.99, 1046.50]
@@ -94,8 +75,6 @@ function triggerHaptic(type) {
     if (typeof window !== 'undefined' && 'vibrate' in navigator) {
       if (type === 'like' || type === 'match') {
         navigator.vibrate([20, 30, 20])
-      } else if (type === 'superlike') {
-        navigator.vibrate([30, 40, 30, 40])
       } else if (type === 'pass' || type === 'nope') {
         navigator.vibrate(25)
       } else if (type === 'undo') {
@@ -271,9 +250,9 @@ export default function TinderSwipe({ films = [], watchlistOwners = [], onMatch,
     setHistory((prev) => [{ film, direction }, ...prev])
     setDeck((prev) => prev.slice(1))
 
-    if (direction === 'like' || direction === 'superlike') {
-      playSwipeSound(direction === 'superlike' ? 'superlike' : 'match')
-      triggerHaptic(direction === 'superlike' ? 'superlike' : 'like')
+    if (direction === 'like') {
+      playSwipeSound('match')
+      triggerHaptic('like')
       setMatchedFilm(film)
       setShowMatchModal(true)
     } else if (direction === 'nope') {
@@ -291,7 +270,7 @@ export default function TinderSwipe({ films = [], watchlistOwners = [], onMatch,
     setDeck((prev) => [last.film, ...prev])
   }
 
-  // Keyboard navigation (Left = Nope, Right = Like, Up = Superlike, Z = Undo)
+  // Keyboard navigation (Left = Nope, Right = Like, Z = Undo)
   useEffect(() => {
     const handleKeyDown = (e) => {
       if (showMatchModal) return
@@ -300,8 +279,6 @@ export default function TinderSwipe({ films = [], watchlistOwners = [], onMatch,
         if (currentFilm) handleSwipe('nope', currentFilm)
       } else if (e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') {
         if (currentFilm) handleSwipe('like', currentFilm)
-      } else if (e.key === 'ArrowUp' || e.key === 'w' || e.key === 'W') {
-        if (currentFilm) handleSwipe('superlike', currentFilm)
       } else if (e.key === 'z' || e.key === 'Z') {
         handleUndo()
       }
@@ -375,18 +352,18 @@ export default function TinderSwipe({ films = [], watchlistOwners = [], onMatch,
           )}
         </div>
 
-        {/* Floating Controls Bar */}
-        <div className="flex items-center justify-center gap-3 sm:gap-4 pt-2">
+        {/* Floating Controls Bar (Undo, Pass, Like) */}
+        <div className="flex items-center justify-center gap-4 sm:gap-6 pt-2">
           {/* Undo */}
           <button
             type="button"
             onClick={handleUndo}
             disabled={history.length === 0}
-            className="w-11 h-11 rounded-full retro-outset bg-retro-gray flex items-center justify-center text-retro-black hover:bg-retro-panelYellow disabled:opacity-40"
+            className="w-12 h-12 rounded-full retro-outset bg-retro-gray flex items-center justify-center text-retro-black hover:bg-retro-panelYellow disabled:opacity-40"
             title="Undo swipe (Z)"
             aria-label="Undo last swipe"
           >
-            <BiUndo size={22} />
+            <BiUndo size={24} />
           </button>
 
           {/* Pass / Nope */}
@@ -394,23 +371,11 @@ export default function TinderSwipe({ films = [], watchlistOwners = [], onMatch,
             type="button"
             onClick={() => currentFilm && handleSwipe('nope', currentFilm)}
             disabled={!currentFilm}
-            className="w-14 h-14 rounded-full border-4 border-retro-red bg-retro-white text-retro-red flex items-center justify-center font-black shadow-[3px_3px_0_#111] hover:scale-105 active:scale-95 transition-transform"
-            title="Pass (Left Arrow)"
+            className="w-16 h-16 rounded-full border-4 border-retro-red bg-retro-white text-retro-red flex items-center justify-center font-black shadow-[3px_3px_0_#111] hover:scale-105 active:scale-95 transition-transform"
+            title="Pass (Left Arrow / A)"
             aria-label="Pass"
           >
-            <BiX size={32} />
-          </button>
-
-          {/* Super Like */}
-          <button
-            type="button"
-            onClick={() => currentFilm && handleSwipe('superlike', currentFilm)}
-            disabled={!currentFilm}
-            className="w-11 h-11 rounded-full border-4 border-retro-blue bg-retro-white text-retro-blue flex items-center justify-center font-black shadow-[3px_3px_0_#111] hover:scale-105 active:scale-95 transition-transform"
-            title="Super Like (Up Arrow)"
-            aria-label="Super like"
-          >
-            <BiStar size={22} />
+            <BiX size={36} />
           </button>
 
           {/* Match / Like */}
@@ -418,11 +383,11 @@ export default function TinderSwipe({ films = [], watchlistOwners = [], onMatch,
             type="button"
             onClick={() => currentFilm && handleSwipe('like', currentFilm)}
             disabled={!currentFilm}
-            className="w-14 h-14 rounded-full border-4 border-[#00AA00] bg-retro-white text-[#00AA00] flex items-center justify-center font-black shadow-[3px_3px_0_#111] hover:scale-105 active:scale-95 transition-transform"
-            title="Match (Right Arrow)"
+            className="w-16 h-16 rounded-full border-4 border-[#00AA00] bg-retro-white text-[#00AA00] flex items-center justify-center font-black shadow-[3px_3px_0_#111] hover:scale-105 active:scale-95 transition-transform"
+            title="Match (Right Arrow / D)"
             aria-label="Like"
           >
-            <BiHeart size={30} />
+            <BiHeart size={34} />
           </button>
         </div>
       </div>
