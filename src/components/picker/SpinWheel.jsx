@@ -5,7 +5,46 @@ import { playSpinSound, preloadSpinSound, stopSpinSound, SLOT_SOUND_DURATION } f
 
 const ITEM_HEIGHT = 72
 
+let confettiAudioContext = null
+
+function playConfettiSound() {
+  try {
+    const AudioContextClass = window.AudioContext || window.webkitAudioContext
+    if (!AudioContextClass) return
+    confettiAudioContext ||= new AudioContextClass()
+    const ctx = confettiAudioContext
+    if (ctx.state === 'suspended') ctx.resume()
+
+    const now = ctx.currentTime
+    // Bright ascending arpeggio - a quick "ta-da" chime for the win moment.
+    const notes = [523.25, 659.25, 783.99, 1046.5]
+
+    notes.forEach((freq, idx) => {
+      const startTime = now + idx * 0.08
+      const duration = 0.35
+
+      const osc = ctx.createOscillator()
+      osc.type = 'square'
+      osc.frequency.setValueAtTime(freq, startTime)
+
+      const gain = ctx.createGain()
+      gain.gain.setValueAtTime(0.001, startTime)
+      gain.gain.linearRampToValueAtTime(0.18, startTime + 0.02)
+      gain.gain.exponentialRampToValueAtTime(0.001, startTime + duration)
+
+      osc.connect(gain)
+      gain.connect(ctx.destination)
+
+      osc.start(startTime)
+      osc.stop(startTime + duration)
+    })
+  } catch (err) {
+    console.warn('Could not play confetti sound:', err?.message || err)
+  }
+}
+
 function createConfetti() {
+  playConfettiSound()
   const colors = ['#FF0000', '#0000FF', '#FFFF00', '#FF00FF', '#00FFFF', '#00FF00']
   for (let i = 0; i < 30; i++) {
     const confetti = document.createElement('div')

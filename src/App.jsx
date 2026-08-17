@@ -450,15 +450,6 @@ export default function App() {
               {/* Watchlist Roaster & Quick Stats Diagnostic */}
               <WatchlistRoaster films={films} watchlistOwners={watchlistOwners} />
 
-              {/* Cinephile Filters */}
-              <FilterBar
-                films={filteredFilms}
-                activeDecade={activeDecade}
-                onDecadeChange={setActiveDecade}
-                activeRating={activeRating}
-                onRatingChange={setActiveRating}
-              />
-
               <div className="retro-hr" />
 
               {spinning ? (
@@ -512,6 +503,15 @@ export default function App() {
               {(isGroup || isPair) && (
                 <SharedFilmsList films={films} watchlistOwners={watchlistOwners} />
               )}
+
+              {/* Cinephile Filters */}
+              <FilterBar
+                films={filteredFilms}
+                activeDecade={activeDecade}
+                onDecadeChange={setActiveDecade}
+                activeRating={activeRating}
+                onRatingChange={setActiveRating}
+              />
 
             </motion.div>
           )}
