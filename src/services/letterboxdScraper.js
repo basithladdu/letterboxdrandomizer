@@ -16,29 +16,40 @@ function parseDocument(html) {
   return new DOMParser().parseFromString(html, 'text/html')
 }
 
-function toAssetUrl(path) {
-  if (!path || path.includes('empty-poster') || path.startsWith('data:image')) return null
+export function toAssetUrl(path) {
+  if (!path || typeof path !== 'string') return null
+  const trimmed = path.trim()
+  if (
+    !trimmed ||
+    trimmed.includes('empty-poster') ||
+    trimmed.startsWith('data:image') ||
+    trimmed.includes('blank.gif')
+  ) {
+    return null
+  }
 
   // Direct CDN URLs (e.g. a.ltrbxd.com) can be rendered directly by browsers
-  if (path.startsWith('http://') || path.startsWith('https://')) {
-    return path
+  if (trimmed.startsWith('http://') || trimmed.startsWith('https://')) {
+    if (trimmed.includes('letterboxd.com/resized/')) {
+      return trimmed.replace('letterboxd.com/resized/', 'a.ltrbxd.com/resized/')
+    }
+    return trimmed
   }
 
   // Letterboxd resized poster paths live on a.ltrbxd.com
-  if (path.startsWith('/resized/') || path.startsWith('resized/')) {
-    const cleanPath = path.startsWith('/') ? path : `/${path}`
+  if (trimmed.startsWith('/resized/') || trimmed.startsWith('resized/')) {
+    const cleanPath = trimmed.startsWith('/') ? trimmed : `/${trimmed}`
     return `https://a.ltrbxd.com${cleanPath}`
   }
 
-  const absoluteUrl = `${LB_BASE}${path.startsWith('/') ? path : `/${path}`}`
-  return import.meta.env.DEV
-    ? absoluteUrl.replace(LB_BASE, '/lb-proxy')
-    : `/api/lb?url=${encodeURIComponent(absoluteUrl)}`
+  const clean = trimmed.replace(/^\/+/, '')
+  return `https://a.ltrbxd.com/${clean}`
 }
 
 function posterUrlForSlug(slug, posterPath) {
-  if (posterPath && !posterPath.includes('empty-poster') && !posterPath.startsWith('data:image')) {
-    return toAssetUrl(posterPath)
+  if (posterPath) {
+    const asset = toAssetUrl(posterPath)
+    if (asset) return asset
   }
   return null
 }
@@ -82,10 +93,11 @@ function parseFilms(doc) {
     const title = name.replace(/\s*\(\d{4}\)\s*$/, '').trim()
 
     const img = entry.querySelector('img.image') || entry.querySelector('img')
-    const posterPath = (
+    const rawPosterPath = (
+      entry.getAttribute('data-poster-url') ||
       img?.getAttribute('src') ||
       img?.getAttribute('data-src') ||
-      entry.getAttribute('data-poster-url') ||
+      entry.getAttribute('data-src') ||
       ''
     )
 
@@ -97,7 +109,7 @@ function parseFilms(doc) {
         letterboxdUri: `${LB_BASE}/film/${slug}/`,
         letterboxdSlug: slug,
         rating: null,
-        posterUrl: posterUrlForSlug(slug, posterPath),
+        posterUrl: posterUrlForSlug(slug, rawPosterPath),
       })
     }
   })
@@ -111,19 +123,31 @@ export function fetchFilmMetadata(slug) {
   if (filmMetadataCache.has(normalizedSlug)) return filmMetadataCache.get(normalizedSlug)
 
   const request = (async () => {
-    const posterUrl = posterUrlForSlug(normalizedSlug)
+    const defaultPoster = posterUrlForSlug(normalizedSlug)
 
     try {
       const res = await proxyFetch(`${LB_BASE}/film/${encodeURIComponent(normalizedSlug)}/`)
-      if (!res.ok) return { posterUrl }
+      if (!res.ok) return { posterUrl: defaultPoster }
 
       const doc = parseDocument(await res.text())
-      let detailPosterUrl = posterUrl
+      let detailPosterUrl = defaultPoster
       const jsonLd = [...doc.querySelectorAll('script[type="application/ld+json"]')]
         .map(parseJsonLdScript)
         .find((data) => data?.image)
 
-      if (typeof jsonLd?.image === 'string') detailPosterUrl = jsonLd.image
+      const ogImage = doc.querySelector('meta[property="og:image"]')?.getAttribute('content')
+      const twitterImage = doc.querySelector('meta[name="twitter:image"]')?.getAttribute('content')
+      const posterImg = doc.querySelector('.poster.film-poster img, .really-lazy-load.poster img')?.getAttribute('src')
+
+      if (typeof jsonLd?.image === 'string' && jsonLd.image && !jsonLd.image.includes('empty-poster')) {
+        detailPosterUrl = toAssetUrl(jsonLd.image) || jsonLd.image
+      } else if (ogImage && !ogImage.includes('empty-poster') && !ogImage.includes('letterboxd-decal')) {
+        detailPosterUrl = toAssetUrl(ogImage) || ogImage
+      } else if (twitterImage && !twitterImage.includes('empty-poster')) {
+        detailPosterUrl = toAssetUrl(twitterImage) || twitterImage
+      } else if (posterImg && !posterImg.includes('empty-poster')) {
+        detailPosterUrl = toAssetUrl(posterImg) || posterImg
+      }
 
       const ratingNode = doc.querySelector('.averagerating')
       const ratingTitle = ratingNode?.getAttribute('data-original-title') || ''
@@ -139,7 +163,7 @@ export function fetchFilmMetadata(slug) {
         rating: ratingMatch?.[1] || ratingMatch?.[0] || null,
       }
     } catch {
-      return { posterUrl }
+      return { posterUrl: defaultPoster }
     }
   })()
 

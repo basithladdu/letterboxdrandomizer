@@ -1,18 +1,49 @@
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { fetchPoster } from '../../services/omdbService.js'
+import { fetchFilmMetadata } from '../../services/letterboxdScraper.js'
 import { BiTrophy, BiCheckCircle } from 'react-icons/bi'
 
 function FilmFighterCard({ film, onSelect, hotkey, isWinner }) {
-  const [source, setSource] = useState(film.posterUrl || null)
+  const [source, setSource] = useState(film?.posterUrl || null)
   const [fallbackTried, setFallbackTried] = useState(false)
-  const [failed, setFailed] = useState(!film.posterUrl)
+  const [failed, setFailed] = useState(false)
 
   useEffect(() => {
-    setSource(film.posterUrl || null)
-    setFallbackTried(false)
-    setFailed(!film.posterUrl)
-  }, [film.letterboxdSlug, film.posterUrl])
+    let cancelled = false
+    if (film?.posterUrl) {
+      setSource(film.posterUrl)
+      setFailed(false)
+    }
+
+    if (!film?.posterUrl) {
+      if (film?.letterboxdSlug) {
+        fetchFilmMetadata(film.letterboxdSlug).then((meta) => {
+          if (cancelled) return
+          if (meta?.posterUrl) {
+            setSource(meta.posterUrl)
+            setFailed(false)
+          } else {
+            fetchPoster(film.title, film.year).then((p) => {
+              if (cancelled) return
+              if (p) setSource(p)
+              else setFailed(true)
+            })
+          }
+        })
+      } else {
+        fetchPoster(film?.title, film?.year).then((p) => {
+          if (cancelled) return
+          if (p) setSource(p)
+          else setFailed(true)
+        })
+      }
+    }
+
+    return () => {
+      cancelled = true
+    }
+  }, [film?.letterboxdSlug, film?.posterUrl, film?.title, film?.year])
 
   async function handleError() {
     if (fallbackTried) {
@@ -21,7 +52,7 @@ function FilmFighterCard({ film, onSelect, hotkey, isWinner }) {
     }
 
     setFallbackTried(true)
-    const fallbackPoster = await fetchPoster(film.title, film.year)
+    const fallbackPoster = await fetchPoster(film?.title, film?.year)
     if (fallbackPoster) {
       setSource(fallbackPoster)
       setFailed(false)
