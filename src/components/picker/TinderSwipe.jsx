@@ -4,12 +4,17 @@ import { fetchPoster } from '../../services/omdbService.js'
 import { fetchFilmMetadata, isValidPoster } from '../../services/letterboxdScraper.js'
 import { BiHeart, BiX, BiUndo, BiCameraMovie } from 'react-icons/bi'
 
-// Web Audio API Audio synthesizer for swipe sound effects
+// Web Audio API Audio synthesizer for swipe sound effects. Reuses a single
+// shared AudioContext - Chrome hard-caps unclosed contexts at 6, so creating
+// a fresh one per swipe silently killed sound after half a dozen swipes.
+let swipeAudioContext = null
+
 function playSwipeSound(type) {
   try {
-    const AudioContext = window.AudioContext || window.webkitAudioContext
-    if (!AudioContext) return
-    const ctx = new AudioContext()
+    const AudioContextClass = window.AudioContext || window.webkitAudioContext
+    if (!AudioContextClass) return
+    swipeAudioContext ||= new AudioContextClass()
+    const ctx = swipeAudioContext
     if (ctx.state === 'suspended') {
       ctx.resume()
     }

@@ -53,7 +53,10 @@ export default function App() {
     clearError: clearScrapeError,
   } = useWatchlistScraper()
 
-  // Keep route and tab in sync on browser back/forward
+  // Keep route and tab in sync on browser back/forward. Mirrors handleReset's
+  // cleanup (minus the pushState, since the URL already changed) so a native
+  // back/forward doesn't leave the follow dialog, spin flag, or old owners
+  // lingering behind the freshly-shown input screen.
   useEffect(() => {
     const handlePopState = () => {
       const tab = getInitialTab()
@@ -61,6 +64,15 @@ export default function App() {
       setView('input')
       setFilms([])
       setChosen(null)
+      setSpinning(false)
+      setWatchlistOwners([])
+      setWatchlistError(null)
+      setActiveDecade('all')
+      setActiveRating('all')
+      setMatchedFromSwipe(false)
+      window.clearTimeout(followTimerRef.current)
+      setShowFollowDialog(false)
+      clearScrapeError()
     }
     window.addEventListener('popstate', handlePopState)
     return () => window.removeEventListener('popstate', handlePopState)
