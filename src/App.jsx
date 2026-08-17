@@ -11,7 +11,6 @@ import FollowDialog from './components/picker/FollowDialog.jsx'
 import WatchlistRoaster from './components/picker/WatchlistRoaster.jsx'
 import CinemaTicket from './components/picker/CinemaTicket.jsx'
 import ShareBar from './components/picker/ShareBar.jsx'
-import FilmBattle from './components/picker/FilmBattle.jsx'
 import TinderSwipe from './components/picker/TinderSwipe.jsx'
 import FilterBar from './components/picker/FilterBar.jsx'
 import { useWatchlistScraper } from './hooks/useWatchlistScraper.js'
@@ -52,6 +51,19 @@ export default function App() {
     error: scrapeError,
     clearError: clearScrapeError,
   } = useWatchlistScraper()
+
+  // Keep route and tab in sync on browser back/forward
+  useEffect(() => {
+    const handlePopState = () => {
+      const tab = getInitialTab()
+      setCurrentTab(tab)
+      setView('input')
+      setFilms([])
+      setChosen(null)
+    }
+    window.addEventListener('popstate', handlePopState)
+    return () => window.removeEventListener('popstate', handlePopState)
+  }, [])
 
   // Filtered films pool based on cinephile filter pills
   const filteredFilms = useMemo(() => {
@@ -145,7 +157,7 @@ export default function App() {
             )
           }
         } else {
-          const groupMode = options.groupMode || 'majority'
+          const groupMode = options.groupMode || 'intersection'
           poolFilms = findGroupSharedFilms(watchlistsWithOwners, { mode: groupMode, minOverlap: 2 })
           if (poolFilms.length === 0 && groupMode === 'intersection') {
             poolFilms = findGroupSharedFilms(watchlistsWithOwners, { mode: 'majority', minOverlap: 2 })
@@ -199,7 +211,7 @@ export default function App() {
       }
 
       // 3. Group Movie Night (3-6 Users)
-      const groupMode = options.groupMode || 'majority'
+      const groupMode = options.groupMode || 'intersection'
       let matchingFilms = findGroupSharedFilms(watchlistsWithOwners, { mode: groupMode, minOverlap: 2 })
 
       // Graceful fallback if 100% intersection yielded 0
@@ -266,12 +278,23 @@ export default function App() {
     window.clearTimeout(followTimerRef.current)
     setShowFollowDialog(false)
     clearScrapeError()
+
+    const pathMap = {
+      solo: '/',
+      compare: '/compare',
+      group: '/group',
+      swipe: '/swipe',
+    }
+    const target = pathMap[currentTab] || '/'
+    if (typeof window !== 'undefined' && window.location.pathname !== target) {
+      window.history.pushState({ tab: currentTab }, '', target)
+    }
   }
 
   function handleHome() {
     handleReset()
-    if (typeof window !== 'undefined' && window.location.pathname !== '/') {
-      window.history.pushState({}, '', '/')
+    if (typeof window !== 'undefined') {
+      window.history.pushState({ tab: 'solo' }, '', '/')
       setCurrentTab('solo')
     }
   }
@@ -295,13 +318,20 @@ export default function App() {
   const isGroup = watchlistOwners.length >= 3
   const inputError = watchlistError || scrapeError
 
+  // Fallback guards to prevent any blank screen states
+  const activeView = (view === 'swipe' && films.length === 0)
+    ? 'input'
+    : (view === 'picker' && !chosen && !spinning)
+    ? 'input'
+    : view
+
   return (
     <div className="flex flex-col min-h-screen bg-retro-gray text-retro-black font-sans">
       <Header onHome={handleHome} />
 
       <main className="flex-1 px-3 sm:px-4 py-4 sm:py-6 max-w-4xl w-full mx-auto">
         <AnimatePresence mode="wait">
-          {view === 'admin' ? (
+          {activeView === 'admin' ? (
             <motion.div
               key="admin"
               initial={{ opacity: 0, scale: 0.95 }}
@@ -311,7 +341,7 @@ export default function App() {
             >
               <AdminView />
             </motion.div>
-          ) : view === 'swipe' ? (
+          ) : activeView === 'swipe' ? (
             <motion.div
               key="swipe"
               initial={{ opacity: 0, y: 16 }}
@@ -336,7 +366,7 @@ export default function App() {
                 onReset={handleReset}
               />
             </motion.div>
-          ) : view === 'input' ? (
+          ) : activeView === 'input' ? (
             <motion.div
               key="input"
               initial={{ opacity: 0, y: 16 }}

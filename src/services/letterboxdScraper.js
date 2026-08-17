@@ -17,21 +17,27 @@ function parseDocument(html) {
 }
 
 function toAssetUrl(path) {
-  if (!path) return null
+  if (!path || path.includes('empty-poster') || path.startsWith('data:image')) return null
 
   // Direct CDN URLs (e.g. a.ltrbxd.com) can be rendered directly by browsers
   if (path.startsWith('http://') || path.startsWith('https://')) {
     return path
   }
 
-  const absoluteUrl = `${LB_BASE}${path}`
+  // Letterboxd resized poster paths live on a.ltrbxd.com
+  if (path.startsWith('/resized/') || path.startsWith('resized/')) {
+    const cleanPath = path.startsWith('/') ? path : `/${path}`
+    return `https://a.ltrbxd.com${cleanPath}`
+  }
+
+  const absoluteUrl = `${LB_BASE}${path.startsWith('/') ? path : `/${path}`}`
   return import.meta.env.DEV
     ? absoluteUrl.replace(LB_BASE, '/lb-proxy')
     : `/api/lb?url=${encodeURIComponent(absoluteUrl)}`
 }
 
 function posterUrlForSlug(slug, posterPath) {
-  if (posterPath && !posterPath.includes('empty-poster')) {
+  if (posterPath && !posterPath.includes('empty-poster') && !posterPath.startsWith('data:image')) {
     return toAssetUrl(posterPath)
   }
   return null

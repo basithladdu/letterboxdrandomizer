@@ -4,8 +4,8 @@ import { fetchPoster } from '../../services/omdbService.js'
 import { fetchFilmMetadata } from '../../services/letterboxdScraper.js'
 import { BiHeart, BiX, BiStar, BiUndo, BiCameraMovie } from 'react-icons/bi'
 
-// Web Audio API Match sound effect
-function playMatchSound() {
+// Web Audio API Audio synthesizer for swipe sound effects
+function playSwipeSound(type) {
   try {
     const AudioContext = window.AudioContext || window.webkitAudioContext
     if (!AudioContext) return
@@ -13,26 +13,97 @@ function playMatchSound() {
     if (ctx.state === 'suspended') {
       ctx.resume()
     }
-    // High energy match chord arpeggio (C5 -> E5 -> G5 -> C6)
-    const notes = [523.25, 659.25, 783.99, 1046.50]
-    notes.forEach((freq, index) => {
+
+    if (type === 'pass') {
+      // Subtle downward swoosh / pass click
       const osc = ctx.createOscillator()
       const gain = ctx.createGain()
-      osc.type = 'triangle'
-      osc.frequency.setValueAtTime(freq, ctx.currentTime + index * 0.07)
+      osc.type = 'sine'
+      osc.frequency.setValueAtTime(240, ctx.currentTime)
+      osc.frequency.exponentialRampToValueAtTime(110, ctx.currentTime + 0.12)
 
-      gain.gain.setValueAtTime(0, ctx.currentTime + index * 0.07)
-      gain.gain.linearRampToValueAtTime(0.25, ctx.currentTime + index * 0.07 + 0.02)
-      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + index * 0.07 + 0.38)
+      gain.gain.setValueAtTime(0.18, ctx.currentTime)
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.12)
 
       osc.connect(gain)
       gain.connect(ctx.destination)
+      osc.start()
+      osc.stop(ctx.currentTime + 0.13)
+    } else if (type === 'undo') {
+      // Upward rewind chirp
+      const osc = ctx.createOscillator()
+      const gain = ctx.createGain()
+      osc.type = 'triangle'
+      osc.frequency.setValueAtTime(320, ctx.currentTime)
+      osc.frequency.linearRampToValueAtTime(580, ctx.currentTime + 0.1)
 
-      osc.start(ctx.currentTime + index * 0.07)
-      osc.stop(ctx.currentTime + index * 0.07 + 0.42)
-    })
+      gain.gain.setValueAtTime(0.18, ctx.currentTime)
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.1)
+
+      osc.connect(gain)
+      gain.connect(ctx.destination)
+      osc.start()
+      osc.stop(ctx.currentTime + 0.11)
+    } else if (type === 'superlike') {
+      // High ascending arpeggio for Super Like
+      const notes = [440, 554.37, 659.25, 880]
+      notes.forEach((freq, idx) => {
+        const osc = ctx.createOscillator()
+        const gain = ctx.createGain()
+        osc.type = 'triangle'
+        osc.frequency.setValueAtTime(freq, ctx.currentTime + idx * 0.06)
+
+        gain.gain.setValueAtTime(0, ctx.currentTime + idx * 0.06)
+        gain.gain.linearRampToValueAtTime(0.2, ctx.currentTime + idx * 0.06 + 0.02)
+        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + idx * 0.06 + 0.25)
+
+        osc.connect(gain)
+        gain.connect(ctx.destination)
+
+        osc.start(ctx.currentTime + idx * 0.06)
+        osc.stop(ctx.currentTime + idx * 0.06 + 0.28)
+      })
+    } else if (type === 'match' || type === 'like') {
+      // High energy dating match chord fanfare (C5 -> E5 -> G5 -> C6)
+      const notes = [523.25, 659.25, 783.99, 1046.50]
+      notes.forEach((freq, index) => {
+        const osc = ctx.createOscillator()
+        const gain = ctx.createGain()
+        osc.type = 'triangle'
+        osc.frequency.setValueAtTime(freq, ctx.currentTime + index * 0.07)
+
+        gain.gain.setValueAtTime(0, ctx.currentTime + index * 0.07)
+        gain.gain.linearRampToValueAtTime(0.25, ctx.currentTime + index * 0.07 + 0.02)
+        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + index * 0.07 + 0.38)
+
+        osc.connect(gain)
+        gain.connect(ctx.destination)
+
+        osc.start(ctx.currentTime + index * 0.07)
+        osc.stop(ctx.currentTime + index * 0.07 + 0.42)
+      })
+    }
   } catch {
     // Audio fallback
+  }
+}
+
+// Haptic vibration feedback for mobile & touch devices
+function triggerHaptic(type) {
+  try {
+    if (typeof window !== 'undefined' && 'vibrate' in navigator) {
+      if (type === 'like' || type === 'match') {
+        navigator.vibrate([20, 30, 20])
+      } else if (type === 'superlike') {
+        navigator.vibrate([30, 40, 30, 40])
+      } else if (type === 'pass' || type === 'nope') {
+        navigator.vibrate(25)
+      } else if (type === 'undo') {
+        navigator.vibrate(15)
+      }
+    }
+  } catch {
+    // Haptics fallback
   }
 }
 
@@ -97,10 +168,10 @@ function SwipeCard({ film, onSwipe, isTop }) {
   }
 
   const handleDragEnd = (event, info) => {
-    const swipeThreshold = 80
-    if (info.offset.x > swipeThreshold || info.velocity.x > 450) {
+    const swipeThreshold = 75
+    if (info.offset.x > swipeThreshold || info.velocity.x > 400) {
       onSwipe('like', film)
-    } else if (info.offset.x < -swipeThreshold || info.velocity.x < -450) {
+    } else if (info.offset.x < -swipeThreshold || info.velocity.x < -400) {
       onSwipe('nope', film)
     }
   }
@@ -201,15 +272,21 @@ export default function TinderSwipe({ films = [], watchlistOwners = [], onMatch,
     setDeck((prev) => prev.slice(1))
 
     if (direction === 'like' || direction === 'superlike') {
-      playMatchSound()
+      playSwipeSound(direction === 'superlike' ? 'superlike' : 'match')
+      triggerHaptic(direction === 'superlike' ? 'superlike' : 'like')
       setMatchedFilm(film)
       setShowMatchModal(true)
+    } else if (direction === 'nope') {
+      playSwipeSound('pass')
+      triggerHaptic('pass')
     }
   }
 
   const handleUndo = () => {
     if (history.length === 0) return
     const last = history[0]
+    playSwipeSound('undo')
+    triggerHaptic('undo')
     setHistory((prev) => prev.slice(1))
     setDeck((prev) => [last.film, ...prev])
   }
