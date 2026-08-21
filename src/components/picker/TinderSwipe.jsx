@@ -1,34 +1,44 @@
 import { useState, useEffect } from 'react'
 import { motion, useMotionValue, useTransform, AnimatePresence } from 'framer-motion'
 import { fetchPoster } from '../../services/omdbService.js'
-import { fetchFilmMetadata } from '../../services/letterboxdScraper.js'
+import { fetchFilmMetadata, isValidPoster } from '../../services/letterboxdScraper.js'
 import { BiHeart, BiX, BiUndo, BiCameraMovie } from 'react-icons/bi'
 
-// Web Audio API Audio synthesizer for swipe sound effects
+// Web Audio API Audio synthesizer for swipe sound effects. Reuses a single
+// shared AudioContext - Chrome hard-caps unclosed contexts at 6, so creating
+// a fresh one per swipe silently killed sound after half a dozen swipes.
+let swipeAudioContext = null
+
 function playSwipeSound(type) {
   try {
-    const AudioContext = window.AudioContext || window.webkitAudioContext
-    if (!AudioContext) return
-    const ctx = new AudioContext()
+    const AudioContextClass = window.AudioContext || window.webkitAudioContext
+    if (!AudioContextClass) return
+    swipeAudioContext ||= new AudioContextClass()
+    const ctx = swipeAudioContext
     if (ctx.state === 'suspended') {
       ctx.resume()
     }
 
     if (type === 'pass' || type === 'nope') {
-      // Subtle downward swoosh / pass click
-      const osc = ctx.createOscillator()
-      const gain = ctx.createGain()
-      osc.type = 'sine'
-      osc.frequency.setValueAtTime(240, ctx.currentTime)
-      osc.frequency.exponentialRampToValueAtTime(110, ctx.currentTime + 0.12)
+      // Clear "reject" buzz - two-note descending square-wave blip
+      const notes = [220, 165]
+      notes.forEach((freq, index) => {
+        const startTime = ctx.currentTime + index * 0.09
+        const osc = ctx.createOscillator()
+        const gain = ctx.createGain()
+        osc.type = 'square'
+        osc.frequency.setValueAtTime(freq, startTime)
+        osc.frequency.exponentialRampToValueAtTime(freq * 0.85, startTime + 0.1)
 
-      gain.gain.setValueAtTime(0.18, ctx.currentTime)
-      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.12)
+        gain.gain.setValueAtTime(0.001, startTime)
+        gain.gain.linearRampToValueAtTime(0.22, startTime + 0.015)
+        gain.gain.exponentialRampToValueAtTime(0.001, startTime + 0.14)
 
-      osc.connect(gain)
-      gain.connect(ctx.destination)
-      osc.start()
-      osc.stop(ctx.currentTime + 0.13)
+        osc.connect(gain)
+        gain.connect(ctx.destination)
+        osc.start(startTime)
+        osc.stop(startTime + 0.15)
+      })
     } else if (type === 'undo') {
       // Upward rewind chirp
       const osc = ctx.createOscillator()
@@ -95,18 +105,19 @@ function SwipeCard({ film, onSwipe, isTop }) {
   const likeOpacity = useTransform(x, [20, 100], [0, 1])
   const nopeOpacity = useTransform(x, [-20, -100], [0, 1])
 
-  const [poster, setPoster] = useState(film?.posterUrl || null)
+  const validPosterUrl = isValidPoster(film?.posterUrl) ? film.posterUrl : null
+  const [poster, setPoster] = useState(validPosterUrl)
   const [metadata, setMetadata] = useState({ rating: film?.rating, year: film?.year })
 
   useEffect(() => {
     let cancelled = false
-    if (film?.posterUrl) {
-      setPoster(film.posterUrl)
+    if (validPosterUrl) {
+      setPoster(validPosterUrl)
     }
 
-    if (!film?.posterUrl) {
+    if (!validPosterUrl) {
       if (film?.letterboxdSlug) {
-        fetchFilmMetadata(film.letterboxdSlug).then((meta) => {
+        fetchFilmMetadata(film.letterboxdSlug, validPosterUrl).then((meta) => {
           if (cancelled) return
           if (meta?.posterUrl) {
             setPoster(meta.posterUrl)
@@ -246,11 +257,11 @@ export default function TinderSwipe({ films = [], watchlistOwners = [], onMatch,
     if (deck.length > 1) {
       const upcoming = deck.slice(1, 4)
       upcoming.forEach((film) => {
-        if (film?.posterUrl) {
+        if (isValidPoster(film?.posterUrl)) {
           const img = new Image()
           img.src = film.posterUrl
         } else if (film?.letterboxdSlug) {
-          fetchFilmMetadata(film.letterboxdSlug).then((meta) => {
+          fetchFilmMetadata(film.letterboxdSlug, film?.posterUrl).then((meta) => {
             if (meta?.posterUrl) {
               const img = new Image()
               img.src = meta.posterUrl

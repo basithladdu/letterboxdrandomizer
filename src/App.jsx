@@ -8,7 +8,6 @@ import PickerControls from './components/picker/PickerControls.jsx'
 import SharedFilmsList from './components/picker/SharedFilmsList.jsx'
 import CreatorLinks from './components/picker/CreatorLinks.jsx'
 import FollowDialog from './components/picker/FollowDialog.jsx'
-import WatchlistRoaster from './components/picker/WatchlistRoaster.jsx'
 import CinemaTicket from './components/picker/CinemaTicket.jsx'
 import ShareBar from './components/picker/ShareBar.jsx'
 import TinderSwipe from './components/picker/TinderSwipe.jsx'
@@ -336,6 +335,20 @@ export default function App() {
     }
   }
 
+  // Jumping into the swipe deck from a regular picker result should keep the
+  // URL and tab in sync, same as every other view transition, so browser
+  // back/forward behaves correctly afterwards.
+  function handleGoToSwipe() {
+    window.clearTimeout(followTimerRef.current)
+    setShowFollowDialog(false)
+    setMatchedFromSwipe(false)
+    setCurrentTab('swipe')
+    setView('swipe')
+    if (typeof window !== 'undefined' && window.location.pathname !== '/swipe') {
+      window.history.pushState({ tab: 'swipe' }, '', '/swipe')
+    }
+  }
+
   function handleHome() {
     handleReset()
     if (typeof window !== 'undefined') {
@@ -467,35 +480,33 @@ export default function App() {
               transition={{ duration: 0.25 }}
               className="mx-auto max-w-2xl space-y-3 sm:space-y-6"
             >
-              <button
-                type="button"
-                onClick={matchedFromSwipe ? handleBackToSwipe : handleReset}
-                className="retro-outset px-3 py-2 text-xs font-black uppercase tracking-widest text-retro-black bg-retro-gray hover:bg-retro-yellow"
-                aria-label={matchedFromSwipe ? 'Back to swipe deck' : 'Go back to the watchlist input'}
-              >
-                {matchedFromSwipe ? <>&larr; BACK TO SWIPE</> : <>&larr; BACK</>}
-              </button>
+              <div className="flex flex-wrap items-center gap-2">
+                <button
+                  type="button"
+                  onClick={matchedFromSwipe ? handleBackToSwipe : handleReset}
+                  className="shrink-0 retro-outset px-3 py-2 text-xs font-black uppercase tracking-widest text-retro-black bg-retro-gray hover:bg-retro-yellow"
+                  aria-label={matchedFromSwipe ? 'Back to swipe deck' : 'Go back to the watchlist input'}
+                >
+                  {matchedFromSwipe ? <>&larr; SWIPE</> : <>&larr; BACK</>}
+                </button>
 
-              <div className="retro-outset bg-retro-panelYellow border-2 px-2 py-2 sm:px-3 sm:py-2 flex flex-wrap items-center justify-between gap-1.5 font-mono">
-                <p className="text-[10px] sm:text-xs font-black uppercase tracking-widest text-retro-black">
-                  {isGroup
-                    ? `GROUP MOVIE NIGHT (${watchlistOwners.length} FRIENDS)`
-                    : isPair
-                    ? 'COMMON FILMS'
-                    : 'WATCHLIST PICKER'}
-                </p>
-                <p className="text-[10px] sm:text-xs font-mono text-retro-black break-words text-right">
-                  {watchlistOwners.join(' + ')} &mdash; {films.length}{' '}
-                  {isGroup || isPair
-                    ? `MATCHING FILM${films.length === 1 ? '' : 'S'}`
-                    : `FILM${films.length === 1 ? '' : 'S'}`}
-                </p>
+                <div className="flex-1 min-w-0 retro-outset bg-retro-panelYellow border-2 px-2 py-2 sm:px-3 sm:py-2 flex items-center justify-between gap-1.5 font-mono">
+                  <p className="text-[10px] sm:text-xs font-black uppercase tracking-widest text-retro-black truncate">
+                    {isGroup ? 'GROUP NIGHT' : isPair ? 'COMMON FILMS' : 'WATCHLIST'}
+                  </p>
+                  <p className="text-[10px] sm:text-xs font-mono text-retro-black shrink-0">
+                    {films.length} {isGroup || isPair ? 'MATCH' : 'FILM'}{films.length === 1 ? '' : (isGroup || isPair ? 'ES' : 'S')}
+                  </p>
+                </div>
               </div>
 
-              {/* Watchlist Roaster & Quick Stats Diagnostic */}
-              <WatchlistRoaster films={films} watchlistOwners={watchlistOwners} />
-
-              <div className="retro-hr" />
+              <PickerControls
+                onSpin={handleSpinAgain}
+                onSwipeDeck={handleGoToSwipe}
+                onReset={handleReset}
+                spinning={spinning}
+                filmsCount={filteredFilms.length || films.length}
+              />
 
               {spinning ? (
                 <>
@@ -530,14 +541,6 @@ export default function App() {
                   )}
                 </AnimatePresence>
               )}
-
-              <PickerControls
-                onSpin={handleSpinAgain}
-                onSwipeDeck={() => setView('swipe')}
-                onReset={handleReset}
-                spinning={spinning}
-                filmsCount={filteredFilms.length || films.length}
-              />
 
               {!spinning && chosen && <ViewOnLetterboxd film={chosen} />}
 
