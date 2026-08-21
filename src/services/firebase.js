@@ -17,8 +17,12 @@ const db = getFirestore(app);
 // v1 caches were written by the scraper that silently truncated long
 // watchlists, so they must never be served again. v2 caches predate the
 // poster-resolution fixes (a.ltrbxd.com CDN mapping + empty-poster
-// filtering) and can carry baked-in broken posterUrl values.
-const CACHE_VERSION = 3;
+// filtering) and can carry baked-in broken posterUrl values. v3 caches
+// still trusted Letterboxd's data-poster-url grid attribute, which is
+// actually a client-side-JS-only lazy-load resolver endpoint ("/film/
+// slug/image-150/") that 403s as a direct image - so v3 posterUrl values
+// can be silently broken images too.
+const CACHE_VERSION = 4;
 
 // Re-scrape watchlists older than this so new films show up.
 const CACHE_TTL_MS = 7 * 24 * 60 * 60 * 1000;

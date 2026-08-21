@@ -16,10 +16,21 @@ function parseDocument(html) {
   return new DOMParser().parseFromString(html, 'text/html')
 }
 
-// Guards components from rendering a raw Letterboxd placeholder graphic as
-// if it were real poster art (can happen with stale pre-fix cached data).
+// Letterboxd's watchlist/list grid markup exposes a lazy-load resolver path
+// like "/film/some-slug/image-150/" that looks like an image URL but is
+// actually a client-side-JS-only endpoint - it 403s as a direct <img src>.
+const LAZY_LOAD_RESOLVER_RE = /\/film\/[^/]+\/image-\d+\/?$/
+
+// Guards components from rendering a raw Letterboxd placeholder graphic, or
+// the lazy-load resolver path above, as if it were real poster art.
 export function isValidPoster(url) {
-  return typeof url === 'string' && url.length > 0 && !url.includes('empty-poster') && !url.includes('blank.gif')
+  return (
+    typeof url === 'string' &&
+    url.length > 0 &&
+    !url.includes('empty-poster') &&
+    !url.includes('blank.gif') &&
+    !LAZY_LOAD_RESOLVER_RE.test(url)
+  )
 }
 
 export function toAssetUrl(path) {
@@ -29,7 +40,8 @@ export function toAssetUrl(path) {
     !trimmed ||
     trimmed.includes('empty-poster') ||
     trimmed.startsWith('data:image') ||
-    trimmed.includes('blank.gif')
+    trimmed.includes('blank.gif') ||
+    LAZY_LOAD_RESOLVER_RE.test(trimmed)
   ) {
     return null
   }
@@ -98,9 +110,14 @@ function parseFilms(doc) {
     const year = yearMatch ? yearMatch[1] : (entry.getAttribute('data-film-release-year') || '')
     const title = name.replace(/\s*\(\d{4}\)\s*$/, '').trim()
 
+    // NOTE: data-poster-url is NOT an image - it's a lazy-load resolver
+    // endpoint ("/film/<slug>/image-150/") that Letterboxd's own JS calls
+    // client-side to fetch the real poster. Since we never run their JS, it
+    // 403s if used directly as an <img src>, so it's deliberately excluded
+    // here. The real poster comes from the per-film enrichment fetch
+    // (fetchFilmMetadata) once this film is actually shown.
     const img = entry.querySelector('img.image') || entry.querySelector('img')
     const rawPosterPath = (
-      entry.getAttribute('data-poster-url') ||
       img?.getAttribute('src') ||
       img?.getAttribute('data-src') ||
       entry.getAttribute('data-src') ||

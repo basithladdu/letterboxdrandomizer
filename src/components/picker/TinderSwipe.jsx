@@ -107,10 +107,12 @@ function SwipeCard({ film, onSwipe, isTop }) {
 
   const validPosterUrl = isValidPoster(film?.posterUrl) ? film.posterUrl : null
   const [poster, setPoster] = useState(validPosterUrl)
+  const [fallbackTried, setFallbackTried] = useState(false)
   const [metadata, setMetadata] = useState({ rating: film?.rating, year: film?.year })
 
   useEffect(() => {
     let cancelled = false
+    setFallbackTried(false)
     if (validPosterUrl) {
       setPoster(validPosterUrl)
     }
@@ -149,12 +151,13 @@ function SwipeCard({ film, onSwipe, isTop }) {
   }, [film?.letterboxdSlug, film?.posterUrl, film?.title, film?.year])
 
   const handleImageError = async () => {
-    const fallback = await fetchPoster(film?.title, film?.year)
-    if (fallback) {
-      setPoster(fallback)
-    } else {
+    if (fallbackTried) {
       setPoster(null)
+      return
     }
+    setFallbackTried(true)
+    const fallback = await fetchPoster(film?.title, film?.year)
+    setPoster(fallback || null)
   }
 
   const handleDragEnd = (event, info) => {

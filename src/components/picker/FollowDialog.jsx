@@ -97,6 +97,9 @@ export default function FollowDialog({ onClose }) {
 
           <div className="retro-hr" />
 
+          <p className="text-center text-[9px] sm:text-[10px] font-black text-retro-muted uppercase tracking-wide">
+            SHAMELESS PLUG
+          </p>
           <a
             href="https://wedevit.in"
             target="_blank"
@@ -104,7 +107,7 @@ export default function FollowDialog({ onClose }) {
             className="retro-outset flex min-h-[44px] items-center justify-center gap-2 px-2 py-2 text-[10px] sm:text-xs font-black text-retro-black no-underline hover:bg-retro-yellow transition-colors touch-manipulation text-center"
           >
             <BiRocket size={16} aria-hidden="true" />
-            <span>WANT US TO BUILD YOUR SOFTWARE? WEDEVIT.IN</span>
+            <span>WE'RE A SOFTWARE DEV AGENCY &amp; STARTUP STUDIO &mdash; WANT US TO BUILD YOUR SOFTWARE? WEDEVIT.IN</span>
           </a>
         </div>
       </section>

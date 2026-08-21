@@ -1,9 +1,17 @@
 import { BiBullseye, BiSmile, BiVolumeFull } from 'react-icons/bi'
+import SupportButton from '../shared/SupportButton.jsx'
 
 export default function Footer() {
   return (
     <footer className="mt-auto overflow-hidden border-t-4 border-retro-muted py-4 sm:py-6 px-3 sm:px-4 bg-retro-gray space-y-4 sm:space-y-6">
       <div className="retro-hr" />
+
+      <div className="flex justify-center">
+        <SupportButton
+          className="retro-outset flex items-center justify-center gap-2 px-4 py-2 text-[10px] sm:text-xs font-black uppercase text-retro-black bg-retro-yellow hover:bg-[#FFE033] transition-colors touch-manipulation"
+          iconSize={14}
+        />
+      </div>
 
       {/* Disclaimer */}
       <div className="space-y-1">

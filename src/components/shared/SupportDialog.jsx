@@ -12,13 +12,6 @@ const FOCUSABLE_SELECTOR = [
 
 const paymentMethods = [
   {
-    label: 'KO-FI ($ / EUR / GLOBAL)',
-    value: 'https://ko-fi.com/basithladoo',
-    display: 'ko-fi.com/basithladoo',
-    href: 'https://ko-fi.com/basithladoo',
-    badge: '$',
-  },
-  {
     label: 'PAYPAL (USD / GLOBAL)',
     value: 'https://paypal.me/basithladdu',
     display: 'paypal.me/basithladdu',
