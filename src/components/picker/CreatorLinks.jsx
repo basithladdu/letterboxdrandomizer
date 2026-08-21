@@ -21,7 +21,7 @@ export default function CreatorLinks() {
             rel="noopener noreferrer"
             className="retro-outset flex items-center justify-center gap-2 px-2 py-2 text-[10px] sm:text-xs font-black text-retro-black no-underline hover:bg-retro-yellow transition-colors"
           >
-            <SiInstagram size={15} aria-hidden="true" />
+            <SiInstagram size={15} aria-hidden="true" style={{ color: '#E1306C' }} />
             INSTAGRAM
           </a>
           <a

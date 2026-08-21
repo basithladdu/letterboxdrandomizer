@@ -91,7 +91,7 @@ export default function FollowDialog({ onClose }) {
             rel="noopener noreferrer"
             className="retro-outset flex min-h-[44px] items-center justify-center gap-2 px-2 py-2 text-xs sm:text-sm font-black text-retro-black no-underline hover:bg-retro-yellow transition-colors touch-manipulation"
           >
-            <SiInstagram size={16} aria-hidden="true" />
+            <SiInstagram size={16} aria-hidden="true" style={{ color: '#E1306C' }} />
             <span>INSTAGRAM</span>
           </a>
 
@@ -107,7 +107,7 @@ export default function FollowDialog({ onClose }) {
             className="retro-outset flex min-h-[44px] items-center justify-center gap-2 px-2 py-2 text-[10px] sm:text-xs font-black text-retro-black no-underline hover:bg-retro-yellow transition-colors touch-manipulation text-center"
           >
             <BiRocket size={16} aria-hidden="true" />
-            <span>WE'RE A SOFTWARE DEV AGENCY &amp; STARTUP STUDIO &mdash; WANT US TO BUILD YOUR SOFTWARE? WEDEVIT.IN</span>
+            <span>WE'RE A SOFTWARE DEV AGENCY &mdash; WANT US TO BUILD YOUR SOFTWARE? WEDEVIT.IN</span>
           </a>
         </div>
       </section>

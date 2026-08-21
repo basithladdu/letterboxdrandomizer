@@ -1,6 +1,5 @@
 import { useState, useEffect, useCallback } from 'react'
 import { BiDownload, BiCopy, BiCheck } from 'react-icons/bi'
-import { SiWhatsapp, SiX } from 'react-icons/si'
 
 export default function CinemaTicket({ film, watchlistOwners = [] }) {
   const [downloading, setDownloading] = useState(false)
@@ -273,9 +272,6 @@ export default function CinemaTicket({ film, watchlistOwners = [] }) {
     }
   }
 
-  const shareText = `The wheel picked "${film?.title}"${film?.year ? ` (${film.year})` : ''} on Letterboxd Watchlist Mixer! Spin yours:`
-  const shareUrl = typeof window !== 'undefined' ? window.location.origin : 'https://letterboxdrandomizer.wedevit.in'
-
   return (
     <div className="retro-outset-deep bg-retro-gray border-4 overflow-hidden space-y-0">
       <div className="retro-titlebar px-3 py-1.5 flex items-center justify-between">
@@ -404,26 +400,6 @@ export default function CinemaTicket({ film, watchlistOwners = [] }) {
             {copiedImage ? <BiCheck size={16} className="text-green-700" /> : <BiCopy size={16} />}
             {copiedImage ? 'COPIED TO CLIPBOARD!' : 'COPY TICKET IMAGE'}
           </button>
-        </div>
-
-        {/* Quick Social Share links */}
-        <div className="flex items-center justify-center gap-2 pt-1 font-sans">
-          <a
-            href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(shareUrl)}`}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="retro-outset flex items-center gap-1.5 px-2.5 py-1.5 text-[10px] font-black uppercase bg-retro-black text-retro-white hover:bg-neutral-800"
-          >
-            <SiX size={12} /> SHARE ON X
-          </a>
-          <a
-            href={`https://wa.me/?text=${encodeURIComponent(`${shareText} ${shareUrl}`)}`}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="retro-outset flex items-center gap-1.5 px-2.5 py-1.5 text-[10px] font-black uppercase bg-[#25D366] text-retro-white hover:bg-[#1EBE5D]"
-          >
-            <SiWhatsapp size={12} /> WHATSAPP
-          </a>
         </div>
       </div>
     </div>
